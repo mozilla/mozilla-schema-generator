@@ -1,6 +1,4 @@
-=============================
-Mozilla Schema Creator
-=============================
+# Mozilla Schema Creator
 
 .. image:: https://badge.fury.io/py/mozilla-schema-creator.png
     :target: http://badge.fury.io/py/mozilla-schema-creator
