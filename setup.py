@@ -14,12 +14,6 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 readme = open('README.md').read()
-doclink = """
-Documentation
--------------
-
-The full documentation is at http://mozilla-schema-creator.rtfd.org."""
-history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='mozilla-schema-creator',

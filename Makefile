@@ -1,4 +1,4 @@
-.PHONY: help clean clean-pyc clean-build list test test-all coverage docs release sdist
+.PHONY: help clean clean-pyc clean-build list test coverage release
 
 help:
 	@echo "clean-build - remove build artifacts"
@@ -34,19 +34,7 @@ coverage:
 	coverage html
 	open htmlcov/index.html
 
-docs:
-	rm -f docs/mozilla-schema-creator.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ mozilla-schema-creator
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	open docs/_build/html/index.html
-
 release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
 
-sdist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel upload
-	ls -l dist
