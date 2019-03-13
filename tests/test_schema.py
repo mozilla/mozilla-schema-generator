@@ -1,0 +1,32 @@
+from mozilla_schema_creator.schema import Schema
+
+class TestSchema(object):
+
+    def test_delete_group_from_schema(self):
+        schema = Schema({"properties": {"a": {"properties": {"b": {"type": "string"}}}, "b": {"type": "string"}}})
+        schema._delete_group_from_schema(("properties", "a", "properties", "b"))
+        assert schema.schema == {"properties": {"b": {"type": "string"}}}
+
+        schema._delete_group_from_schema(("properties", "b"))
+
+    def test_schema_size(self):
+        str_obj = {"type": "string"}
+        assert Schema._get_schema_size(str_obj) == 1
+
+        num_obj = {"type": "number"}
+        assert Schema._get_schema_size(num_obj) == 1
+
+        map_obj = {"type": "object"}
+        assert Schema._get_schema_size(map_obj) == 2
+
+        defined_obj = {"type": "object", "properties": {"str": {"type": "string"}}}
+        assert Schema._get_schema_size(defined_obj) == 1
+
+        arr = {"type": "array", "items": {"type": "string"}}
+        assert Schema._get_schema_size(arr) == 1
+
+        nested = {"type": "array", "items": {"type": "object", "properties": {"a": {"type": "string"}}}}
+        assert Schema._get_schema_size(nested) == 1
+
+        _tuple = {"type": "array", "items": [{"type": "string"}, {"type": "string"}]}
+        assert Schema._get_schema_size(_tuple) == 2
