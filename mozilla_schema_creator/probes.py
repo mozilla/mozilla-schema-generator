@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from .schema import Schema
+from . import schema
 from typing import Any
 from .utils import _get
+
 
 class Probe(object):
 
@@ -26,7 +27,7 @@ class Probe(object):
     def get_first_added(self) -> datetime:
         raise NotImplementedError("First added is not available on generic probe")
 
-    def get_schema(self) -> Schema:
+    def get_schema(self) -> schema.Schema:
         raise NotImplementedError("Get Schema is not available on generic probe")
 
     def get(self, *k) -> Any:
@@ -46,39 +47,37 @@ class MainProbe(Probe):
     # TODO: Do we use log_sum_*, sum_squares_*?
     histogram_schema = {
         "type": "object",
-        "properties":{
-            "bucket_count":{
-                "minimum":0,
-                "type":"integer"
+        "properties": {
+            "bucket_count": {
+                "minimum": 0,
+                "type": "integer"
             },
-            "histogram_type":{
-                "minimum":0,
-                "type":"integer"
+            "histogram_type": {
+                "minimum": 0,
+                "type": "integer"
             },
-            "range":{
-                "items":{
-                    "type":"integer"
+            "range": {
+                "items": {
+                    "type": "integer"
                 },
-                "type":"array"
+                "type": "array"
             },
-            "sum":{
-                "minimum":0,
-                "type":"integer"
+            "sum": {
+                "minimum": 0,
+                "type": "integer"
             },
-            "values":{
+            "values": {
                 "additionalProperties": False,
-                "patternProperties":{
-                    "^[0-9]+$":{
-                        "minimum":0,
-                        "type":"integer"
+                "patternProperties": {
+                    "^[0-9]+$": {
+                        "minimum": 0,
+                        "type": "integer"
                     }
                 },
-                "type":"object"
+                "type": "object"
             }
         }
     }
-
-
 
     def __init__(self, identifier: str, definition: dict):
         self._set_first_added(definition[self.first_added_key])
@@ -91,7 +90,7 @@ class MainProbe(Probe):
     def get_first_added(self) -> datetime:
         return self.first_added
 
-    def get_schema(self) -> Schema:
+    def get_schema(self) -> schema.Schema:
         # Get the schema based on the probe type
         if self.get_type() == "scalar":
             ptype = self.get("details", "kind")
@@ -103,7 +102,7 @@ class MainProbe(Probe):
                 pschema = {"type": "integer"}
             else:
                 raise Exception("Unknown scalar type " + ptype)
-        elif self.get_type() == "histogram": 
+        elif self.get_type() == "histogram":
             pschema = self.histogram_schema
 
         # Add nested level if keyed
@@ -112,4 +111,4 @@ class MainProbe(Probe):
         else:
             final_schema = pschema
 
-        return Schema(final_schema)
+        return schema.Schema(final_schema)

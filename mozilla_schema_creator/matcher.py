@@ -2,6 +2,7 @@
 from .probes import Probe
 from typing import Any
 
+
 class Matcher(object):
 
     table_group_key = "table_group"

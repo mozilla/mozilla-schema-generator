@@ -2,17 +2,22 @@ from __future__ import annotations
 
 from typing import Any, List, Tuple
 from .utils import _get
+from .probes import Probe
+from .config import Config
 from json import JSONEncoder
 import copy
 
+
 class SchemaException(Exception):
     pass
+
 
 class SchemaEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Schema):
             return obj.schema
         return obj
+
 
 # TODO: s/Schema/JSONSchema
 class Schema(object):
@@ -38,7 +43,8 @@ class Schema(object):
     def clone(self) -> Schema:
         return Schema(copy.deepcopy(self.schema))
 
-    def make_schemas(self, env: Schema, probes: List[Probe], config: Config, split: bool, max_size: int) -> List[Schema]:
+    def make_schemas(self, env: Schema, probes: List[Probe], config: Config,
+                     split: bool, max_size: int) -> List[Schema]:
         """
         Fill in probes based on the config, and keep only the env
         parts of the schema. Throw away everything else.
@@ -55,8 +61,12 @@ class Schema(object):
                 schemas.append(final_schema)
                 final_schema = env.clone()
 
-            final_schema.set_schema_elem(schema_key + ("properties", probe.name), probe_schema.schema)
-            final_schema.set_schema_elem(schema_key + ("additionalProperties",), False)
+            final_schema.set_schema_elem(
+                schema_key + ("properties", probe.name),
+                probe_schema.schema)
+            final_schema.set_schema_elem(
+                schema_key + ("additionalProperties",),
+                False)
 
         return schemas + [final_schema]
 
@@ -78,7 +88,7 @@ class Schema(object):
                 continue
 
             elem = _get(self.schema, subkey)
-            if not elem["properties"] and elem.get("additionalProperties", False) == False:
+            if not elem["properties"] and not elem.get("additionalProperties", False):
                 self._delete_key(subkey)
 
     def make_extra_schema(self, probes: List[Probe], configs: List[Config]):
@@ -86,7 +96,7 @@ class Schema(object):
         Given the list of probes and the configuration,
         return the schema that has everything but those sections that we
         filled in already.
-    
+
         TODO: Split the extra schema, when needed (e.g. extra.0.schema.json, extra.1.schema.json)
         """
 
@@ -102,7 +112,7 @@ class Schema(object):
             self._delete_group_from_schema(schema_key)
 
     @staticmethod
-    def _get_schema_size(schema: dict, key=None) -> int: 
+    def _get_schema_size(schema: dict, key=None) -> int:
         if key is None:
             key = tuple()
 
@@ -120,12 +130,15 @@ class Schema(object):
                 max_size = max(max_size, Schema._get_schema_size(s, key))
             return max_size
 
-        # TODO: Tests and finalize the different types available (allOf, anyOf, etc.) and how they map to BQ
+        # TODO: Tests and finalize the different types available and how they map to BQ
+        # e.g. (allOf, anyOf, etc.)
         if schema["type"] == "object":
             # Sometimes the "properties" field is empty...
             if "properties" in schema and schema["properties"]:
                 # A ROW type with a known set of fields
-                return sum((Schema._get_schema_size(p, key=key + (n,)) for n, p in schema["properties"].items()))
+                return sum((
+                    Schema._get_schema_size(p, key=key + (n,))
+                    for n, p in schema["properties"].items()))
 
             # A MAP type with key and value groups
             return 2
@@ -138,4 +151,3 @@ class Schema(object):
 
         # Otherwise, assume a scalar value
         return 1
-

@@ -5,7 +5,6 @@ help:
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests on every Python version with tox"
 	@echo "coverage - check code coverage quickly with the default Python"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "release - package and upload a release"
@@ -24,13 +23,10 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 mozilla-schema-creator test
+	flake8 mozilla_schema_creator tests --max-line-length 100
 
 test:
 	py.test
-
-test-all:
-	tox
 
 coverage:
 	coverage run --source mozilla-schema-creator setup.py test

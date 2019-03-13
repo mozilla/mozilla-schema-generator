@@ -11,6 +11,7 @@ import pprint
 *******************
 """
 
+
 @pytest.fixture
 def schema():
     return {
@@ -39,6 +40,7 @@ def schema():
         }
     }
 
+
 @pytest.fixture
 def env():
     return {
@@ -49,6 +51,7 @@ def env():
             }
         }
     }
+
 
 @pytest.fixture
 def probes():
@@ -90,6 +93,7 @@ def probes():
 ******************
 """
 
+
 class LocalMainPing(GenericPing):
 
     def __init__(self, schema, env, probes):
@@ -110,11 +114,13 @@ class LocalMainPing(GenericPing):
         schemas = super().generate_schema(config, **kwargs)
         return {k: [s.schema for s in schema_list] for k, schema_list in schemas.items()}
 
+
 """
 ********************
   Shared Functions
 ********************
 """
+
 
 def get_differences(a, b, path="", sep=" / "):
     res = []

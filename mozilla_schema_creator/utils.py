@@ -2,6 +2,7 @@ from typing import Any, Tuple
 
 from itertools import chain
 
+
 def _get(_dict: dict, key: Tuple[str]) -> Any:
     """
     Retrieved the nested `key` from a dict

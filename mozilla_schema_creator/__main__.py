@@ -1,6 +1,5 @@
 from . import main_ping
 
-import os
 import click
 import sys
 import yaml
@@ -9,6 +8,7 @@ from pathlib import Path
 
 from .config import Config
 from .schema import SchemaEncoder
+
 
 @click.command()
 @click.argument(
@@ -54,9 +54,6 @@ def generate_main_ping(config, out_dir, split, pretty):
     config = Config(config_data)
     schemas = schema_generator.generate_schema(config, split=split)
 
-#    for schema_type, schema_obj in schemas.items():
-#        schemas[schema_type] = schema_obj.schema
-
     json_dump_args = {'cls': SchemaEncoder}
     if pretty:
         json_dump_args['indent'] = 4
@@ -86,4 +83,4 @@ main.add_command(generate_main_ping)
 
 
 if __name__ == "__main__":
-    sys.exit(main()) # pragma: no cover
+    sys.exit(main())

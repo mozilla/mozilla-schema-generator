@@ -1,6 +1,7 @@
 from mozilla_schema_creator.probes import MainProbe
 from mozilla_schema_creator.matcher import Matcher
 
+
 class TestMatcher(object):
 
     def test_matches(self):

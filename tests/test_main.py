@@ -3,9 +3,11 @@ import pytest
 from mozilla_schema_creator import main_ping
 from mozilla_schema_creator.config import Config
 
+
 @pytest.fixture
 def main():
     return main_ping.MainPing()
+
 
 @pytest.fixture
 def config():
@@ -28,7 +30,8 @@ class TestMainPing(object):
     def test_split_schema(self, main, config):
         schema = main.generate_schema(config, split=True)
 
-        assert set(schema.keys()) == {"histograms", "scalars", "keyed_histograms", "keyed_scalars", "extra"}
+        expected = {"histograms", "scalars", "keyed_histograms", "keyed_scalars", "extra"}
+        assert set(schema.keys()) == expected
 
         for k, schemas in schema.items():
             for s in schemas:

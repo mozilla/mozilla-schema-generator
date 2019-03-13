@@ -1,9 +1,20 @@
 from mozilla_schema_creator.schema import Schema
 
+
 class TestSchema(object):
 
     def test_delete_group_from_schema(self):
-        schema = Schema({"properties": {"a": {"properties": {"b": {"type": "string"}}}, "b": {"type": "string"}}})
+        schema = Schema({
+            "properties": {
+                "a": {
+                    "properties": {
+                        "b": {"type": "string"}
+                    }
+                },
+                "b": {"type": "string"}
+            }
+        })
+
         schema._delete_group_from_schema(("properties", "a", "properties", "b"))
         assert schema.schema == {"properties": {"b": {"type": "string"}}}
 
@@ -25,7 +36,7 @@ class TestSchema(object):
         arr = {"type": "array", "items": {"type": "string"}}
         assert Schema._get_schema_size(arr) == 1
 
-        nested = {"type": "array", "items": {"type": "object", "properties": {"a": {"type": "string"}}}}
+        nested = {"type": "array", "items": {"type": "object", "properties": {"a": {"type": "string"}}}} # noqa E501
         assert Schema._get_schema_size(nested) == 1
 
         _tuple = {"type": "array", "items": [{"type": "string"}, {"type": "string"}]}

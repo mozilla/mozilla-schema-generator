@@ -6,12 +6,11 @@ from .probes import Probe
 from .config import Config
 from typing import Dict, List
 
-import requests
 
 class GenericPing(object):
 
     default_encoding = 'utf-8'
-    default_max_size = 9000 #10k col limit in BQ
+    default_max_size = 9000  # 10k col limit in BQ
     extra_schema_key = "extra"
 
     def __init__(self, schema_url, env_url, probes_url):
@@ -28,7 +27,8 @@ class GenericPing(object):
     def get_probes(self) -> List[Probe]:
         return [Probe(_id, defn) for _id, defn in self._get_json(self.probes_url).items()]
 
-    def generate_schema(self, config: Config, *, split: bool=None, max_size:int=None) -> Dict[str, List[Schema]]:
+    def generate_schema(self, config: Config, *, split: bool = None, max_size: int = None) \
+            -> Dict[str, List[Schema]]:
         schema = self.get_schema()
         env = self.get_env()
         probes = self.get_probes()
@@ -64,14 +64,12 @@ class GenericPing(object):
 
     @staticmethod
     def _get_json_str(url: str) -> dict:
-        local_filename = url.split('/')[-1]
         r = requests.get(url, stream=True)
         final_json = ""
 
-        with open(local_filename, 'wb') as f:
-          for chunk in r.iter_content(chunk_size=1024): 
+        for chunk in r.iter_content(chunk_size=1024):
             if chunk:
-              final_json += chunk.decode(r.encoding or GenericPing.default_encoding)
+                final_json += chunk.decode(r.encoding or GenericPing.default_encoding)
 
         return final_json
 

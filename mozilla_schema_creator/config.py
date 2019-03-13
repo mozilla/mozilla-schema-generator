@@ -56,7 +56,6 @@ class Config(object):
             splits[matcher.get_table_group()][key] = matcher
 
         return splits
-        
 
     def split(self) -> List[Config]:
         """
