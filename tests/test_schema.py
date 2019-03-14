@@ -1,4 +1,4 @@
-from mozilla_schema_creator.schema import Schema
+from mozilla_schema_generator.schema import Schema
 
 
 class TestSchema(object):

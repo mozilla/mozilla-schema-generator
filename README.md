@@ -61,15 +61,15 @@ be more correct, since they include explicit definitions of every metric and pro
 Create the Full Main Ping schema:
 
 ```
-mozilla-schema-creator generate-main-ping
+mozilla-schema-generator generate-main-ping
 ```
 
 Create the Main Ping schema divided among tables (for BigQuery):
 ```
-mozilla-schema-creator generate-main-ping --split --out-dir main-ping
+mozilla-schema-generator generate-main-ping --split --out-dir main-ping
 ```
 
-To see a full list of options, run `mozilla-schema-creator generate-main-ping --help`.
+To see a full list of options, run `mozilla-schema-generator generate-main-ping --help`.
 
 
 ### Glean

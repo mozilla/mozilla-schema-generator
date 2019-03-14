@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/fbertsch/mozilla-schema-creator/issues.
+Report bugs at https://github.com/fbertsch/mozilla-schema-generator/issues.
 
 If you are reporting a bug, please include:
 
@@ -43,7 +43,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/fbertsch/mozilla-schema-creator/issues.
+The best way to send feedback is to file an issue at https://github.com/fbertsch/mozilla-schema-generator/issues.
 
 If you are proposing a feature:
 
@@ -55,13 +55,13 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `mozilla-schema-creator` for
+Ready to contribute? Here's how to set up `mozilla-schema-generator` for
 local development.
 
-1. Fork_ the `mozilla-schema-creator` repo on GitHub.
+1. Fork_ the `mozilla-schema-generator` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/mozilla-schema-creator.git
+    $ git clone git@github.com:your_name_here/mozilla-schema-generator.git
 
 3. Create a branch for local development::
 
@@ -70,11 +70,9 @@ local development.
 Now you can make your changes locally.
 
 4. When you're done making changes, check that your changes pass style and unit
-   tests, including testing other Python versions with tox::
+   tests::
 
-    $ tox
-
-To get tox, just pip install it.
+    $ make test
 
 5. Commit your changes and push your branch to GitHub::
 
@@ -84,7 +82,7 @@ To get tox, just pip install it.
 
 6. Submit a pull request through the GitHub website.
 
-.. _Fork: https://github.com/fbertsch/mozilla-schema-creator/fork
+.. _Fork: https://github.com/fbertsch/mozilla-schema-generator/fork
 
 Pull Request Guidelines
 -----------------------
@@ -95,10 +93,9 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, and 3.3, and for PyPy.
-   Check https://travis-ci.org/fbertsch/mozilla-schema-creator 
-   under pull requests for active pull requests or run the ``tox`` command and
-   make sure that the tests pass for all supported Python versions.
+3. The pull request should work for Python 3.7, and for PyPy.
+   Check https://travis-ci.org/fbertsch/mozilla-schema-generator 
+   under pull requests for active pull requests.
 
 
 Tips
@@ -106,4 +103,4 @@ Tips
 
 To run a subset of tests::
 
-	 $ py.test test/test_mozilla-schema-creator.py
+	 $ py.test tests/test_schema.py

@@ -75,7 +75,7 @@ def generate_main_ping(config, out_dir, split, pretty):
 
 @click.group()
 def main(args=None):
-    """Command line utility for mozilla-schema-creator."""
+    """Command line utility for mozilla-schema-generator."""
     pass
 
 

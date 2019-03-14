@@ -1,7 +1,7 @@
 import pytest
-from mozilla_schema_creator.generic_ping import GenericPing
-from mozilla_schema_creator.probes import MainProbe
-from mozilla_schema_creator.schema import Schema
+from mozilla_schema_generator.generic_ping import GenericPing
+from mozilla_schema_generator.probes import MainProbe
+from mozilla_schema_generator.schema import Schema
 
 import pprint
 

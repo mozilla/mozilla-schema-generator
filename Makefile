@@ -22,13 +22,13 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 mozilla_schema_creator tests --max-line-length 100
+	flake8 mozilla_schema_generator tests --max-line-length 100
 
 test:
 	py.test
 
 coverage:
-	pytest tests/ --cov=mozilla_schema_creator
+	pytest tests/ --cov=mozilla_schema_generator
 	coverage report -m
 	coverage html
 	open htmlcov/index.html

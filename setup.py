@@ -16,20 +16,20 @@ if sys.argv[-1] == 'publish':
 readme = open('README.md').read()
 
 setup(
-    name='mozilla-schema-creator',
+    name='mozilla-schema-generator',
     version='0.1.0',
     description='Create full representations of schemas using the probe info service.',
     long_description=readme,
     author='Frank Bertsch',
     author_email='frank@mozilla.com',
-    url='https://github.com/fbertsch/mozilla-schema-creator',
+    url='https://github.com/fbertsch/mozilla-schema-generator',
     packages=[
-        'mozilla-schema-creator',
+        'mozilla-schema-generator',
     ],
-    package_dir={'mozilla-schema-creator': 'mozilla_schema_creator'},
+    package_dir={'mozilla-schema-generator': 'mozilla_schema_generator'},
     entry_points={
         'console_scripts': [
-            'mozilla-schema-creator=mozilla_schema_creator.__main__:main',
+            'mozilla-schema-generator=mozilla_schema_generator.__main__:main',
         ],
     },
     include_package_data=True,
@@ -40,7 +40,7 @@ setup(
     ],
     license='MIT',
     zip_safe=False,
-    keywords='mozilla-schema-creator',
+    keywords='mozilla-schema-generator',
     classifiers=[
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',

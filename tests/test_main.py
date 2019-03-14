@@ -1,7 +1,7 @@
 import yaml
 import pytest
-from mozilla_schema_creator import main_ping
-from mozilla_schema_creator.config import Config
+from mozilla_schema_generator import main_ping
+from mozilla_schema_generator.config import Config
 
 
 @pytest.fixture

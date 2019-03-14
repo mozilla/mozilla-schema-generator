@@ -1,5 +1,5 @@
-from mozilla_schema_creator.probes import MainProbe
-from mozilla_schema_creator.matcher import Matcher
+from mozilla_schema_generator.probes import MainProbe
+from mozilla_schema_generator.matcher import Matcher
 
 
 class TestMatcher(object):

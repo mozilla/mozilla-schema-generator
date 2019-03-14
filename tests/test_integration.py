@@ -1,10 +1,10 @@
 """
-Tests for `mozilla-schema-creator` module.
+Tests for `mozilla-schema-generator` module.
 """
 
 from .test_utils import LocalMainPing, env, print_and_test, probes, schema  # noqa F401
-from mozilla_schema_creator.config import Config
-from mozilla_schema_creator.probes import MainProbe
+from mozilla_schema_generator.config import Config
+from mozilla_schema_generator.probes import MainProbe
 
 
 class TestIntegration(object):

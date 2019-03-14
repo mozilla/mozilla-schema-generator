@@ -1,8 +1,8 @@
 import pytest
 
 from .test_utils import LocalMainPing, env, probes, schema  # noqa F401
-from mozilla_schema_creator.schema import SchemaException
-from mozilla_schema_creator.config import Config
+from mozilla_schema_generator.schema import SchemaException
+from mozilla_schema_generator.config import Config
 
 
 class TestPing(object):
