@@ -1,6 +1,6 @@
-# Mozilla Schema Creator
+# Mozilla Schema Generator
 
-A library for creating full representations of Mozilla telemetry pings.
+A library for generating full representations of Mozilla telemetry pings.
 
 See [Mozilla Pipeline Schemas](https://www.github.com/mozilla-services/mozilla-pipeline-services)
 for the more generic structure of pings. This library takes those generic structures and fills in
@@ -21,7 +21,7 @@ This library takes the information for what should be in those pings from the [P
 
 The primary use of the schemas is for integration with the
 [Schema Transpiler](https://www.github.com/mozilla/jsonschema-transpiler). 
-The schemas that this repository creates can be transpiled into Avro and Bigquery. They define
+The schemas that this repository generates can be transpiled into Avro and Bigquery. They define
 the schema of the Avro and BigQuery tables that the [BQ Sink](https://www.github.com/mozilla/gcp-ingestion)
 writes to.
 
@@ -37,7 +37,7 @@ To decide on a table split, we include the `table_group` configuration in the co
 file. For example, `payload/histograms` has `table_group: histograms`; this indicates that
 there will be a table outputted with just histograms.
 
-Currently, creates tables for:
+Currently, generates tables for:
 - Histograms
 - Keyed Histograms
 - Scalars
@@ -58,13 +58,13 @@ be more correct, since they include explicit definitions of every metric and pro
 
 ### Main Ping
 
-Create the Full Main Ping schema:
+Generate the Full Main Ping schema:
 
 ```
 mozilla-schema-generator generate-main-ping
 ```
 
-Create the Main Ping schema divided among tables (for BigQuery):
+Generate the Main Ping schema divided among tables (for BigQuery):
 ```
 mozilla-schema-generator generate-main-ping --split --out-dir main-ping
 ```
