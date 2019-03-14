@@ -6,9 +6,8 @@ help:
 	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
 	@echo "coverage - check code coverage quickly with the default Python"
-	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "release - package and upload a release"
-	@echo "sdist - package"
+	@echo "install-requirements - install the requirements for development"
 
 clean: clean-build clean-pyc
 
@@ -29,7 +28,7 @@ test:
 	py.test
 
 coverage:
-	coverage run --source mozilla-schema-creator setup.py test
+	pytest tests/ --cov=mozilla_schema_creator
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
@@ -38,3 +37,6 @@ release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
 
+install-requirements:
+	pip install -r requirements/requirements.txt
+	pip install -r requirements/test_requirements.txt

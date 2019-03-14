@@ -16,7 +16,11 @@ class SchemaEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Schema):
             return obj.schema
-        return obj
+        if isinstance(obj, dict):
+            return {k: self.default(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self.default(v) for v in obj]
+        return JSONEncoder.default(self, obj)
 
 
 # TODO: s/Schema/JSONSchema

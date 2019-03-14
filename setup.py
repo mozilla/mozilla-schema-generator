@@ -19,7 +19,7 @@ setup(
     name='mozilla-schema-creator',
     version='0.1.0',
     description='Create full representations of schemas using the probe info service.',
-    long_description=readme + '\n\n' + doclink + '\n\n' + history,
+    long_description=readme,
     author='Frank Bertsch',
     author_email='frank@mozilla.com',
     url='https://github.com/fbertsch/mozilla-schema-creator',

@@ -52,8 +52,8 @@ class GenericPing(object):
             env = schema
 
         schemas = {
-            _config.name: schema.make_schemas(env, probes, _config, split, max_size)
-            for _config in configs
+            c.name: schema.make_schemas(env, probes, c, split, max_size)
+            for c in configs
         }
 
         if split:

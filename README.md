@@ -1,11 +1,5 @@
 # Mozilla Schema Creator
 
-.. image:: https://badge.fury.io/py/mozilla-schema-creator.png
-    :target: http://badge.fury.io/py/mozilla-schema-creator
-
-.. image:: https://travis-ci.org/fbertsch/mozilla-schema-creator.png?branch=master
-    :target: https://travis-ci.org/fbertsch/mozilla-schema-creator
-
 A library for creating full representations of Mozilla telemetry pings.
 
 See [Mozilla Pipeline Schemas](https://www.github.com/mozilla-services/mozilla-pipeline-services)
@@ -83,6 +77,11 @@ To see a full list of options, run `mozilla-schema-creator generate-main-ping --
 TODO
 
 ## Development and Testing
+
+Install requirements:
+```
+make install-requirements
+```
 
 Run tests:
 ```

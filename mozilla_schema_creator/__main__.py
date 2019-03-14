@@ -1,4 +1,3 @@
-from . import main_ping
 
 import click
 import sys
@@ -6,6 +5,7 @@ import yaml
 import json
 from pathlib import Path
 
+from .main_ping import MainPing
 from .config import Config
 from .schema import SchemaEncoder
 
@@ -46,7 +46,7 @@ from .schema import SchemaEncoder
           "the schemas will be on one line."),
 )
 def generate_main_ping(config, out_dir, split, pretty):
-    schema_generator = main_ping.MainPing()
+    schema_generator = MainPing()
 
     with open(config, 'r') as f:
         config_data = yaml.load(f)
@@ -60,7 +60,7 @@ def generate_main_ping(config, out_dir, split, pretty):
         json_dump_args['separators'] = (',', ':')
 
     if not out_dir:
-        print(json.dumps(schemas), **json_dump_args)
+        print(json.dumps(schemas, **json_dump_args))
 
     else:
         out_dir = Path(out_dir)
