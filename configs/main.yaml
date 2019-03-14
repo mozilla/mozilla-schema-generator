@@ -1,0 +1,101 @@
+payload:
+  keyedHistograms:
+    match:
+      table_group: keyed_histograms
+      type: histogram
+      details:
+        keyed: true
+        record_in_processes:
+          contains: main
+  histograms:
+    match:
+      table_group: histograms
+      type: histogram
+      details:
+        keyed: false
+        record_in_processes:
+          contains: main
+  processes:
+    parent:
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: main
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: main
+    content:
+      histograms:
+        match:
+          table_group: histograms
+          type: histogram
+          details:
+            keyed: false 
+            record_in_processes:
+              contains: content
+      keyedHistograms:
+        match:
+          table_group: keyed_histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: content
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: content
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: content
+    gpu:
+      histograms:
+        match:
+          table_group: histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: gpu
+      keyedHistograms:
+        match:
+          table_group: keyed_histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: gpu
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: gpu
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: gpu

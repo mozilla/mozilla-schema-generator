@@ -1,0 +1,49 @@
+####################
+# CircleCI configuration reference:
+#   https://circleci.com/docs/2.0/configuration-reference
+####################
+
+version: 2
+
+#####################################################
+# Jobs: see https://circleci.com/docs/2.0/jobs-steps/
+#####################################################
+
+jobs:
+  test:
+    docker: # run the steps with Docker
+      - image: circleci/python:3.7.2
+    steps:
+      - checkout
+      - run:
+          name: Install requirements
+          command: make install-requirements
+      - run:
+          name: Run tests
+          command: make test
+      - run:
+          name: Lint
+          command: make lint
+      - run:
+          name: Coverage
+          command: make coverage
+
+#########################################################
+# Workflows: see https://circleci.com/docs/2.0/workflows/
+#########################################################
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - test
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - test

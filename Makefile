@@ -1,15 +1,13 @@
-.PHONY: help clean clean-pyc clean-build list test test-all coverage docs release sdist
+.PHONY: help clean clean-pyc clean-build list test coverage release
 
 help:
 	@echo "clean-build - remove build artifacts"
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests on every Python version with tox"
 	@echo "coverage - check code coverage quickly with the default Python"
-	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "release - package and upload a release"
-	@echo "sdist - package"
+	@echo "install-requirements - install the requirements for development"
 
 clean: clean-build clean-pyc
 
@@ -24,33 +22,21 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 lint:
-	flake8 mozilla-schema-creator test
+	flake8 mozilla_schema_generator tests --max-line-length 100
 
 test:
 	py.test
 
-test-all:
-	tox
-
 coverage:
-	coverage run --source mozilla-schema-creator setup.py test
+	pytest tests/ --cov=mozilla_schema_generator
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
-
-docs:
-	rm -f docs/mozilla-schema-creator.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ mozilla-schema-creator
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	open docs/_build/html/index.html
 
 release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
 
-sdist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel upload
-	ls -l dist
+install-requirements:
+	pip install -r requirements/requirements.txt
+	pip install -r requirements/test_requirements.txt
