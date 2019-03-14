@@ -8,9 +8,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from . import schema
 from typing import Any
 from .utils import _get
+from .schema import Schema, SchemaException
 
 
 class Probe(object):
@@ -34,7 +34,7 @@ class Probe(object):
     def get_first_added(self) -> datetime:
         raise NotImplementedError("First added is not available on generic probe")
 
-    def get_schema(self) -> schema.Schema:
+    def get_schema(self, addtlProps: Any) -> Any:
         raise NotImplementedError("Get Schema is not available on generic probe")
 
     def get(self, *k) -> Any:
@@ -97,7 +97,7 @@ class MainProbe(Probe):
     def get_first_added(self) -> datetime:
         return self.first_added
 
-    def get_schema(self) -> schema.Schema:
+    def get_schema(self, addtlProps: Any) -> Any:
         # Get the schema based on the probe type
         if self.get_type() == "scalar":
             ptype = self.get("details", "kind")
@@ -118,4 +118,29 @@ class MainProbe(Probe):
         else:
             final_schema = pschema
 
-        return schema.Schema(final_schema)
+        return final_schema
+
+
+class GleanProbe(Probe):
+
+    first_added_key = "first_added"
+
+    def __init__(self, identifier: str, definition: dict):
+        self._set_first_added(definition)
+        super().__init__(identifier, definition)
+
+    def _set_first_added(self, definition: dict):
+        vals = [
+            datetime.fromisoformat(d["dates"]["first"])
+            for d in definition[self.history_key]
+        ]
+
+        self.first_added = min(vals)
+
+    def get_first_added(self) -> datetime:
+        return self.first_added
+
+    def get_schema(self, addtlProps: Any) -> Any:
+        if addtlProps is None:
+            raise SchemaException("Additional Properties cannot be missing for Glean probes")
+        return addtlProps

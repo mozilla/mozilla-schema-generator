@@ -21,10 +21,10 @@ class TestSchema(object):
             }
         })
 
-        schema._delete_group_from_schema(("properties", "a", "properties", "b"))
+        schema.delete_group_from_schema(("properties", "a", "properties", "b"))
         assert schema.schema == {"properties": {"b": {"type": "string"}}}
 
-        schema._delete_group_from_schema(("properties", "b"))
+        schema.delete_group_from_schema(("properties", "b"))
 
     def test_schema_size(self):
         str_obj = {"type": "string"}

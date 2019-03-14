@@ -23,7 +23,7 @@ class Matcher(object):
         except for `contains` which checks that that value
         is in the associated array.
         """
-        self.table_group = match_obj[self.table_group_key]
+        self.table_group = match_obj.get(self.table_group_key)
         self.type = match_obj.get(self.type_key)
 
         self.matcher = {k: v for k, v in match_obj.items() if k not in
