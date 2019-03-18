@@ -5,7 +5,8 @@ help:
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "lint - check style with flake8"
 	@echo "test - run tests quickly with the default Python"
-	@echo "coverage - check code coverage quickly with the default Python"
+	@echo "coverage - check code coverage quickly"
+	@echo "coverage-report - open the coverage report in your browser"
 	@echo "release - package and upload a release"
 	@echo "install-requirements - install the requirements for development"
 
@@ -30,6 +31,8 @@ test:
 coverage:
 	pytest tests/ --cov=mozilla_schema_generator
 	coverage report -m
+
+coverage-report: coverage
 	coverage html
 	open htmlcov/index.html
 

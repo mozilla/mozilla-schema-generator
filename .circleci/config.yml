@@ -16,7 +16,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install requirements
+          name: Run tests
           command: |
             python3 -m virtualenv venv
             . venv/bin/activate
