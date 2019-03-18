@@ -76,6 +76,51 @@ To see a full list of options, run `mozilla-schema-generator generate-main-ping 
 
 TODO
 
+## Configuration Files
+
+Configuration files are default found in `/config`. You can also specify your own when running the generator.
+
+Configuration files match certain parts of a ping to certain types of probes or metrics. The nesting
+of the config file matches the ping it is filling in. For example, Glean stores probe types under
+the `metrics` key, so the nesting looks like this:
+```
+{
+    "metrics": {
+        "string": {
+            <METRIC_ID>: {...}
+        }
+    }
+}
+```
+
+While the generic schema doesn't include information about the specific `<METRIC_ID>`s being included,
+the schema-generator does. To include the correct metrics that we would find in that section of the ping,
+we would organize the `config.yaml` file like this:
+
+```
+metrics:
+    string:
+        match:
+            type: string
+```
+
+The `match` key indicates that we should fill-in this section of the ping schema with metrics,
+and the `type: string` makes sure we only put string metrics in there. You can do an exact
+match on any field available in the ping info from the [probe-info-service](https://probeinfo.telemetry.mozilla.org/glean/glean/metrics),
+which also contains the [Desktop probes](https://probeinfo.telemetry.mozilla.org/firefox/all/main/all_probes).
+
+There are a few additional keywords allowable under any field:
+* `contains` - e.g. `process: contains: main`, indicates that the `process` field is an array
+  and it should only match those that include the entry `main`.
+* `not` - e.g. `send_in_pings: not: glean_ping_info`, indicates that we should match
+  any field for `send_in_pings` _except_ `glean_ping_info`.
+
+### `table_group` Key
+
+This specific field is for indicating which table group that section of the ping should be included in when
+splitting the schema. Currently we do not split the Glean ping, only the Main. See the section on [BigQuery
+Limitations and Splitting](#bigquery-limitations-and-splitting) for more info.
+
 ## Development and Testing
 
 Install requirements:

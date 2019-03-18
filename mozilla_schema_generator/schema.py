@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 from .utils import _get
 from json import JSONEncoder
 import copy

@@ -13,6 +13,7 @@ class Matcher(object):
     table_group_key = "table_group"
     type_key = "type"
     contains_key = "contains"
+    not_key = "not"
 
     def __init__(self, match_obj: dict):
         """
@@ -44,7 +45,7 @@ class Matcher(object):
                 return False
 
             # Definitions are nested, check sub-fields (e.g. details)
-            if isinstance(v, dict) and not v.keys() == {self.contains_key}:
+            if isinstance(v, dict) and not (v.keys() & {self.contains_key, self.not_key}):
                 for sub_k, sub_v in v.items():
                     if not self._matches(sub_v, probe_value[sub_k]):
                         return False
@@ -69,6 +70,11 @@ class Matcher(object):
         elif isinstance(match_v, dict):
             if Matcher.contains_key in match_v:
                 if match_v[Matcher.contains_key] not in probe_v:
+                    return False
+
+            # Not a match if matches the "not" value
+            if Matcher.not_key in match_v:
+                if match_v[Matcher.not_key] == probe_v:
                     return False
 
         return True

@@ -4,18 +4,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
-import requests
-
 from .probes import GleanProbe
 from .generic_ping import GenericPing
 from .schema import Schema
-from typing import Dict, List
+from typing import List
 
 
 class GleanPing(GenericPing):
 
-    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/schemas/glean/baseline/baseline.1.schema.json"
+    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/schemas/glean/baseline/baseline.1.schema.json" # noqa E501
     probes_url = "https://probeinfo.telemetry.mozilla.org/glean/glean/metrics"
 
     def __init__(self):  # TODO: Make env-url optional
@@ -29,9 +26,24 @@ class GleanPing(GenericPing):
 
     def _get_schema(self) -> Schema:
         schema = super().get_schema()
-        schema.set_schema_elem(("properties", "$schema", "type"), "string")
-        schema.set_schema_elem(("properties", "metrics", "type"), "object")
-        schema.set_schema_elem(("properties", "ping_info", "properties", "experiments", "type"), "object")
+
+        # 1. Set the $schema to a string type
+        schema.set_schema_elem(
+            ("properties", "$schema", "type"),
+            "string"
+        )
+
+        # 2. Set the metrics to an object type
+        schema.set_schema_elem(
+            ("properties", "metrics", "type"),
+            "object"
+        )
+
+        # 3. Set the experiments to an object type
+        schema.set_schema_elem(
+            ("properties", "ping_info", "properties", "experiments", "type"),
+            "object"
+        )
 
         return schema
 

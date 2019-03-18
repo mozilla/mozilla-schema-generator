@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 from .utils import _get
-from .schema import Schema, SchemaException
+from .schema import SchemaException
 
 
 class Probe(object):

@@ -97,11 +97,13 @@ class GenericPing(object):
             final_schema.set_schema_elem(
                 schema_key + ("additionalProperties",),
                 False)
+            final_schema.delete_group_from_schema(schema_key + ("propertyNames",))
 
         return schemas + [final_schema]
 
     @staticmethod
-    def make_extra_schema(schema: Schema, probes: List[Probe], configs: List[Config]) -> List[Schema]:
+    def make_extra_schema(schema: Schema, probes: List[Probe],
+                          configs: List[Config]) -> List[Schema]:
         """
         Given the list of probes and the configuration,
         return the schema that has everything but those sections that we

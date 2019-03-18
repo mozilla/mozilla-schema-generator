@@ -8,6 +8,7 @@ import yaml
 import pytest
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
+from mozilla_schema_generator.utils import _get, prepend_properties
 
 
 @pytest.fixture
@@ -30,5 +31,14 @@ class TestGleanPing(object):
     def test_single_schema(self, glean, config):
         schema = glean.generate_schema(config)["full"][0].schema
 
+        # A few parts of the generic structure
         assert "metrics" in schema["properties"]
         assert "ping_info" in schema["properties"]
+
+        # Client id should not be included, since it's in the ping_info
+        uuids = _get(schema, prepend_properties(("metrics", "uuid")))
+        assert "client_id" not in uuids.get("properties", {})
+
+        # Device should be included, since it's a standard metric
+        strings = _get(schema, prepend_properties(("metrics", "string")))
+        assert "glean.baseline.device_manufacturer" in strings["properties"]
