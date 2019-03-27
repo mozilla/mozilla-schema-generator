@@ -97,18 +97,36 @@ def generate_main_ping(config, out_dir, split, pretty):
           "schemas that are outputted. Otherwise "
           "the schemas will be on one line."),
 )
-def generate_glean_ping(config, out_dir, split, pretty):
+@click.option(
+    '--repo',
+    help=("The repository id to write the schemas of. "
+          "If not specified, writes the schemas of all "
+          "repositories."),
+    required=False,
+    type=str
+)
+def generate_glean_ping(config, out_dir, split, pretty, repo):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
 
-    schema_generator = GleanPing()
+    if repo is not None:
+        repos = [repo]
+    else:
+        repos = GleanPing.get_repos()
 
     with open(config, 'r') as f:
         config_data = yaml.load(f)
 
     config = Config(config_data)
-    schemas = schema_generator.generate_schema(config, split=split)
-    dump_schema(schemas, out_dir, "glean", pretty)
+
+    for r in repos:
+        write_schema(r, config, out_dir, split, pretty)
+
+
+def write_schema(repo, config, out_dir, split, pretty):
+    schema_generator = GleanPing(repo)
+    schemas = schema_generator.generate_schema(config, split=False)
+    dump_schema(schemas, out_dir, repo, pretty)
 
 
 def dump_schema(schemas, out_dir, filename_prefix, pretty):

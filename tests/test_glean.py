@@ -13,7 +13,7 @@ from mozilla_schema_generator.utils import _get, prepend_properties
 
 @pytest.fixture
 def glean():
-    return glean_ping.GleanPing()
+    return glean_ping.GleanPing("glean")
 
 
 @pytest.fixture
@@ -29,16 +29,26 @@ class TestGleanPing(object):
         assert glean.get_env().get_size() > 0
 
     def test_single_schema(self, glean, config):
-        schema = glean.generate_schema(config)["full"][0].schema
+        schemas = glean.generate_schema(config, split=False)
 
-        # A few parts of the generic structure
-        assert "metrics" in schema["properties"]
-        assert "ping_info" in schema["properties"]
+        assert schemas.keys() == {"baseline", "event", "metrics"}
 
-        # Client id should not be included, since it's in the ping_info
-        uuids = _get(schema, prepend_properties(("metrics", "uuid")))
-        assert "client_id" not in uuids.get("properties", {})
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            # A few parts of the generic structure
+            assert "metrics" in schema["properties"]
+            assert "ping_info" in schema["properties"]
 
-        # Device should be included, since it's a standard metric
-        strings = _get(schema, prepend_properties(("metrics", "string")))
-        assert "glean.baseline.device_manufacturer" in strings["properties"]
+            # Client id should not be included, since it's in the ping_info
+            uuids = _get(schema, prepend_properties(("metrics", "uuid")))
+            assert "client_id" not in uuids.get("properties", {})
+
+            if name == "baseline":
+                # Device should be included, since it's a standard metric
+                strings = _get(schema, prepend_properties(("metrics", "string")))
+                assert "glean.baseline.locale" in strings["properties"]
+
+    def test_get_repos(self):
+        repos = glean_ping.GleanPing.get_repos()
+
+        assert "glean" in repos
