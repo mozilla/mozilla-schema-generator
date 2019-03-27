@@ -7,7 +7,6 @@
 from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
-from .schema import Schema
 from typing import List
 
 
@@ -23,35 +22,6 @@ class GleanPing(GenericPing):
 
     def __init__(self, repo):  # TODO: Make env-url optional
         super().__init__(self.schema_url, self.schema_url, self.probes_url.format(repo))
-
-    def get_schema(self) -> Schema:
-        return self._get_schema()
-
-    def get_env(self) -> Schema:
-        return self._get_schema()
-
-    def _get_schema(self) -> Schema:
-        schema = super().get_schema()
-
-        # 1. Set the $schema to a string type
-        schema.set_schema_elem(
-            ("properties", "$schema", "type"),
-            "string"
-        )
-
-        # 2. Set the metrics to an object type
-        schema.set_schema_elem(
-            ("properties", "metrics", "type"),
-            "object"
-        )
-
-        # 3. Set the experiments to an object type
-        schema.set_schema_elem(
-            ("properties", "ping_info", "properties", "experiments", "type"),
-            "object"
-        )
-
-        return schema
 
     def get_probes(self) -> List[GleanProbe]:
         probes = self._get_json(self.probes_url)
