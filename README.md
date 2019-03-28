@@ -74,7 +74,20 @@ To see a full list of options, run `mozilla-schema-generator generate-main-ping 
 
 ### Glean
 
-TODO
+Generate all Glean ping schemas - one for each application, for each ping
+that application sends:
+
+```
+mozilla-schema-generator generate-glean-ping
+```
+
+Write schemas to a directory:
+```
+mozilla-schema-generator generate-main-ping --out-dir main-ping
+```
+
+To see a full list of options, run `mozilla-schema-generator generate-glean-ping --help`.
+
 
 ## Configuration Files
 
