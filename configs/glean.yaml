@@ -1,0 +1,183 @@
+metrics:
+  boolean:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: boolean
+      labeled: false
+  counter:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: counter
+      labeled: false
+  datetime:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: datetime
+      labeled: false
+  enumeration:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: enumeration
+      labeled: false
+  number:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: number
+      labeled: false
+  rate:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: rate
+      labeled: false
+  string:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: string
+      labeled: false
+  string_list:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: string_list
+      labeled: false
+  timespan:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: timespan
+      labeled: false
+  timing_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: timing_distribution
+      labeled: false
+  usage:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: usage
+      labeled: false
+  use_counter:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: use_counter
+      labeled: false
+  uuid:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: uuid
+      labeled: false
+  labeled_boolean:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: boolean
+      labeled: true
+  labeled_counter:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: counter
+      labeled: true
+  labeled_datetime:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: datetime
+      labeled: true
+  labeled_enumeration:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: enumeration
+      labeled: true
+  labeled_number:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: number
+      labeled: true
+  labeled_rate:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: rate
+      labeled: true
+  labeled_string:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: string
+      labeled: true
+  labeled_string_list:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: string_list
+      labeled: true
+  labeled_timespan:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: timespan
+      labeled: true
+  labeled_timing_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: timing_distribution
+      labeled: true
+  labeled_usage:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: usage
+      labeled: true
+  labeled_use_counter:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: use_counter
+      labeled: true
+  labeled_uuid:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: uuid
+      labeled: true

@@ -19,13 +19,14 @@ from typing import Dict, List, Tuple
 class Config(object):
 
     match_key = "match"
+    default_schema_name = "full"
 
     def __init__(self, *args, **kwargs):
         if "matchers" in kwargs:
             self.name = args[0]
             self.matchers = kwargs["matchers"]
         else:
-            self.name = "full"
+            self.name = self.default_schema_name
             self._set_matchers(args[0])
 
     def _set_matchers(self, config: dict) -> Dict[Tuple[str], Matcher]:

@@ -16,17 +16,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install requirements
-          command: make install-requirements
-      - run:
           name: Run tests
-          command: make test
-      - run:
-          name: Lint
-          command: make lint
-      - run:
-          name: Coverage
-          command: make coverage
+          command: |
+            python3 -m virtualenv venv
+            . venv/bin/activate
+            make install-requirements
+            make test
+            make lint
+            make coverage
 
 #########################################################
 # Workflows: see https://circleci.com/docs/2.0/workflows/

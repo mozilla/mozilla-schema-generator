@@ -8,6 +8,7 @@ import json
 from .generic_ping import GenericPing
 from .schema import Schema
 from .probes import MainProbe
+from typing import List
 
 
 class MainPing(GenericPing):
@@ -76,7 +77,7 @@ class MainPing(GenericPing):
 
         return self._update_env(Schema(env))
 
-    def get_probes(self) -> MainProbe:
+    def get_probes(self) -> List[MainProbe]:
         probes = self._get_json(self.probes_url)
 
         for name, defn in probes.items():
@@ -89,4 +90,4 @@ class MainPing(GenericPing):
             if "nightly" in pdef["first_added"]
         }
 
-        return {MainProbe(_id, defn) for _id, defn in filtered.items()}
+        return [MainProbe(_id, defn) for _id, defn in filtered.items()]

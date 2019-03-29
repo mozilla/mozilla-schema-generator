@@ -7,10 +7,8 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 from .utils import _get
-from .probes import Probe
-from .config import Config
 from json import JSONEncoder
 import copy
 
@@ -48,38 +46,14 @@ class Schema(object):
 
         new_elem[key[-1]] = elem
 
+    def get(self, key: Tuple[str]) -> Any:
+        return _get(self.schema, key)
+
     def get_size(self) -> int:
         return self._get_schema_size(self.schema)
 
     def clone(self) -> Schema:
         return Schema(copy.deepcopy(self.schema))
-
-    def make_schemas(self, env: Schema, probes: List[Probe], config: Config,
-                     split: bool, max_size: int) -> List[Schema]:
-        """
-        Fill in probes based on the config, and keep only the env
-        parts of the schema. Throw away everything else.
-        """
-        schema_elements = sorted(config.get_schema_elements(probes), key=lambda x: x[1])
-        schemas = []
-
-        # TODO: Should env be checked to be a subset of schema?
-        final_schema = env.clone()
-        for schema_key, probe in schema_elements:
-            probe_schema = probe.get_schema()
-
-            if split and final_schema.get_size() + probe_schema.get_size() > max_size:
-                schemas.append(final_schema)
-                final_schema = env.clone()
-
-            final_schema.set_schema_elem(
-                schema_key + ("properties", probe.name),
-                probe_schema.schema)
-            final_schema.set_schema_elem(
-                schema_key + ("additionalProperties",),
-                False)
-
-        return schemas + [final_schema]
 
     def _delete_key(self, key: Tuple[str]):
         try:
@@ -88,7 +62,7 @@ class Schema(object):
         except KeyError:
             return
 
-    def _delete_group_from_schema(self, key: Tuple[str]):
+    def delete_group_from_schema(self, key: Tuple[str]):
         self._delete_key(key)
 
         # Now check, moving backwards, if that was the only available property
@@ -101,26 +75,6 @@ class Schema(object):
             elem = _get(self.schema, subkey)
             if not elem["properties"] and not elem.get("additionalProperties", False):
                 self._delete_key(subkey)
-
-    def make_extra_schema(self, probes: List[Probe], configs: List[Config]):
-        """
-        Given the list of probes and the configuration,
-        return the schema that has everything but those sections that we
-        filled in already.
-
-        TODO: Split the extra schema, when needed (e.g. extra.0.schema.json, extra.1.schema.json)
-        """
-
-        # Get the schema elements we already filled in for the other tables
-        schema_elements = [
-            schema_key
-            for _config in configs
-            for schema_key, _ in _config.get_schema_elements(probes)
-        ]
-
-        # Delete those from the schema
-        for schema_key in schema_elements:
-            self._delete_group_from_schema(schema_key)
 
     @staticmethod
     def _get_schema_size(schema: dict, key=None) -> int:
