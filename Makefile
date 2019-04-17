@@ -36,9 +36,13 @@ coverage-report: coverage
 	coverage html
 	open htmlcov/index.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+release: dist
+	twine upload dist/*
+
+dist: clean ## builds source and wheel package
+	python setup.py sdist
+	python setup.py bdist_wheel
+	ls -l dist
 
 install-requirements:
 	pip install -r requirements/requirements.txt
