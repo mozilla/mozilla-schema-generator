@@ -18,6 +18,7 @@ from .schema import SchemaEncoder
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
 
+
 @click.command()
 @click.argument(
     'config',
