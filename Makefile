@@ -10,12 +10,12 @@ help:
 	@echo "  release - package and upload a release"
 	@echo "  install-requirements - install the requirements for development"
 	@echo "  build       Builds the docker images for the docker-compose setup"
-	@echo "  clean       Stops and removes all docker containers"
+	@echo "  docker-rm       Stops and removes all docker containers"
 	@echo "  run         Run a command. Can run scripts, e.g. make run COMMAND=\"./scripts/schema_generator.sh\""
 	@echo "  test-script Run a local script. e.g. make test-script SCRIPT=\"a-local-script.sh\""
 	@echo "  shell       Opens a Bash shell"
 
-clean: clean-build clean-pyc
+clean: clean-build clean-pyc docker-rm
 
 clean-build:
 	rm -fr build/
@@ -56,7 +56,7 @@ install-requirements:
 build:
 	docker-compose build
 
-clean: stop
+docker-rm: stop
 	docker-compose rm -f
 
 shell:
