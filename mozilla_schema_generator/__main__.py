@@ -15,6 +15,9 @@ from .glean_ping import GleanPing
 from .config import Config
 from .schema import SchemaEncoder
 
+ROOT_DIR = Path(__file__).parent
+CONFIGS_DIR = ROOT_DIR / "configs"
+
 
 @click.command()
 @click.argument(
@@ -25,7 +28,7 @@ from .schema import SchemaEncoder
         writable=False,
         exists=True,
     ),
-    default="configs/main.yaml",
+    default=CONFIGS_DIR / "main.yaml",
 )
 @click.option(
     '--out-dir',
@@ -71,7 +74,7 @@ def generate_main_ping(config, out_dir, split, pretty):
         writable=False,
         exists=True,
     ),
-    default="configs/glean.yaml",
+    default=CONFIGS_DIR / "glean.yaml",
 )
 @click.option(
     '--out-dir',

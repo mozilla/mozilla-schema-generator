@@ -18,7 +18,7 @@ def glean():
 
 @pytest.fixture
 def config():
-    config_file = "./configs/glean.yaml"
+    config_file = "./mozilla_schema_generator/configs/glean.yaml"
     with open(config_file) as f:
         return Config(yaml.load(f))
 

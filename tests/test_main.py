@@ -17,7 +17,7 @@ def main():
 
 @pytest.fixture
 def config():
-    config_file = "./configs/main.yaml"
+    config_file = "./mozilla_schema_generator/configs/main.yaml"
     with open(config_file) as f:
         return Config(yaml.load(f))
 

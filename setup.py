@@ -9,10 +9,7 @@
 import os
 import sys
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 if sys.argv[-1] == 'publish':
@@ -23,15 +20,13 @@ readme = open('README.md').read()
 
 setup(
     name='mozilla-schema-generator',
-    version='0.1.0',
+    version='0.1.2',
     description='Create full representations of schemas using the probe info service.',
     long_description=readme,
     author='Frank Bertsch',
     author_email='frank@mozilla.com',
-    url='https://github.com/fbertsch/mozilla-schema-generator',
-    packages=[
-        'mozilla-schema-generator',
-    ],
+    url='https://github.com/mozilla/mozilla-schema-generator',
+    packages=find_packages(include=['mozilla_schema_generator']),
     package_dir={'mozilla-schema-generator': 'mozilla_schema_generator'},
     entry_points={
         'console_scripts': [
