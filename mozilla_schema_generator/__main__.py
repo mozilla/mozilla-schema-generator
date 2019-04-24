@@ -64,7 +64,7 @@ def generate_main_ping(config, out_dir, split, pretty):
 
     config = Config(config_data)
     schemas = schema_generator.generate_schema(config, split=split)
-    dump_schema(schemas, out_dir.joinpath("main"), pretty)
+    dump_schema(schemas, out_dir, pretty)
 
 
 @click.command()
@@ -147,11 +147,12 @@ def dump_schema(schemas, out_dir, pretty):
         print(json.dumps(schemas, **json_dump_args))
 
     else:
-        if not out_dir.exists():
-            out_dir.mkdir(parents=True)
         for name, _schemas in schemas.items():
+            ping_out_dir = out_dir.joinpath(name)
+            if not ping_out_dir.exists():
+                ping_out_dir.mkdir(parents=True)
             for i, schema in enumerate(_schemas):
-                fname = out_dir.joinpath("{}.{}.schema.json".format(name, i))
+                fname = ping_out_dir.joinpath("{}.{}.schema.json".format(name, i+1))
                 with open(fname, 'w') as f:
                     f.write(json.dumps(schema, **json_dump_args))
 
