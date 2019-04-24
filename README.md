@@ -69,6 +69,8 @@ Generate the Main Ping schema divided among tables (for BigQuery):
 mozilla-schema-generator generate-main-ping --split --out-dir main-ping
 ```
 
+The `out-dir` parameter will be the namespace for the pings.
+
 To see a full list of options, run `mozilla-schema-generator generate-main-ping --help`.
 
 

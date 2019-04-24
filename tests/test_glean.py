@@ -51,4 +51,4 @@ class TestGleanPing(object):
     def test_get_repos(self):
         repos = glean_ping.GleanPing.get_repos()
 
-        assert "glean" in repos
+        assert ("glean", "glean") in repos

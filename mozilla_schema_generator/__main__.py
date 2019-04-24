@@ -56,13 +56,15 @@ CONFIGS_DIR = ROOT_DIR / "configs"
 )
 def generate_main_ping(config, out_dir, split, pretty):
     schema_generator = MainPing()
+    if out_dir:
+        out_dir = Path(out_dir)
 
     with open(config, 'r') as f:
         config_data = yaml.load(f)
 
     config = Config(config_data)
     schemas = schema_generator.generate_schema(config, split=split)
-    dump_schema(schemas, out_dir, "main", pretty)
+    dump_schema(schemas, out_dir, pretty)
 
 
 @click.command()
@@ -112,6 +114,9 @@ def generate_glean_ping(config, out_dir, split, pretty, repo):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
 
+    if out_dir:
+        out_dir = Path(out_dir)
+
     if repo is not None:
         repos = [repo]
     else:
@@ -122,17 +127,17 @@ def generate_glean_ping(config, out_dir, split, pretty, repo):
 
     config = Config(config_data)
 
-    for r in repos:
-        write_schema(r, config, out_dir, split, pretty)
+    for repo_name, repo_id in repos:
+        write_schema(repo_name, repo_id, config, out_dir, split, pretty)
 
 
-def write_schema(repo, config, out_dir, split, pretty):
+def write_schema(repo, repo_id, config, out_dir, split, pretty):
     schema_generator = GleanPing(repo)
     schemas = schema_generator.generate_schema(config, split=False)
-    dump_schema(schemas, out_dir, repo, pretty)
+    dump_schema(schemas, out_dir.joinpath(repo_id), pretty)
 
 
-def dump_schema(schemas, out_dir, filename_prefix, pretty):
+def dump_schema(schemas, out_dir, pretty):
     json_dump_args = {'cls': SchemaEncoder}
     if pretty:
         json_dump_args['indent'] = 4
@@ -142,12 +147,12 @@ def dump_schema(schemas, out_dir, filename_prefix, pretty):
         print(json.dumps(schemas, **json_dump_args))
 
     else:
-        out_dir = Path(out_dir)
-        if not out_dir.exists():
-            out_dir.mkdir()
         for name, _schemas in schemas.items():
+            ping_out_dir = out_dir.joinpath(name)
+            if not ping_out_dir.exists():
+                ping_out_dir.mkdir(parents=True)
             for i, schema in enumerate(_schemas):
-                fname = out_dir.joinpath("{}.{}.{}.schema.json".format(filename_prefix, name, i))
+                fname = ping_out_dir.joinpath("{}.{}.schema.json".format(name, i+1))
                 with open(fname, 'w') as f:
                     f.write(json.dumps(schema, **json_dump_args))
 
