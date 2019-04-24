@@ -56,5 +56,8 @@ class GleanPing(GenericPing):
 
     @staticmethod
     def get_repos():
+        """
+        Retrieve name and app_id for Glean repositories
+        """
         repos = GleanPing._get_json(GleanPing.repos_url)
-        return [repo['name'] for repo in repos]
+        return [(repo['name'], repo['app_id']) for repo in repos]
