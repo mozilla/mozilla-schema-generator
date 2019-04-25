@@ -19,18 +19,31 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     apt-get clean
 
+# Install Google Cloud SDK
+RUN curl -sSL https://sdk.cloud.google.com | bash
+ENV PATH $PATH:$HOME/google-cloud-sdk/bin
+
 # Install Rust and Cargo
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=${RUST_SPEC}
 
 ENV CARGO_INSTALL_ROOT=${HOME}/.cargo
 ENV PATH ${PATH}:${HOME}/.cargo/bin
 
-# Install Google Cloud SDK
-RUN curl -sSL https://sdk.cloud.google.com | bash
-ENV PATH $PATH:$HOME/google-cloud-sdk/bin
+RUN chown -R ${USER_ID}:${USER_ID} ${HOME}/.cargo
+RUN chmod 775 $HOME/.cargo
 
+# Upgrade pip
 RUN pip install --upgrade pip
+RUN pip install virtualenv
 
 WORKDIR ${HOME}
+RUN mkdir ${HOME}/bin
+ADD ./bin ${HOME}/bin
+ENV PATH $PATH:${HOME}/bin
 
 USER ${USER_ID}
+
+RUN git config --global user.name "Generated Schema Creator"
+RUN git config --global user.email "telemetry-alerts@mozilla.com"
+
+ENTRYPOINT ["/app/bin/schema_generator.sh"]
