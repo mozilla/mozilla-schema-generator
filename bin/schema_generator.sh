@@ -5,16 +5,29 @@
 # TODO: Include Main Ping from schema generation
 # TODO: What the heck to do with pioneer-study, a non-nested namespace
 
-if [[ -z $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY ]]; then
+# -1: Setup ssh key and git config
+
+if [[ -z $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY_BASE64_ENCODED ]]; then
     echo "Missing secret key" 1>&2
     exit 1
 fi
 
-mkdir -p /app/.ssh
-echo $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY > /app/.ssh/id_rsa
+if [[ -z $USER_ID ]]; then
+    echo "Missing User ID" 1>&2
+    exit 1
+fi
 
+git config --global user.name "Generated Schema Creator"
+git config --global user.email "dataops+pipeline-schemas@mozilla.com"
+
+mkdir -p /app/.ssh
+
+echo $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY_BASE64_ENCODED | base64 --decode > /app/.ssh/id_ed25519
+ssh-keyscan github.com > /app/.ssh/known_hosts # Makes the future git-push non-interactive
+
+chown -R $USER_ID:$USER_ID ~/.ssh
 chmod 700 "$HOME/.ssh"
-chmod 700 "$HOME/.ssh/id_rsa"
+chmod 700 "$HOME/.ssh/id_ed25519"
 
 DEV_BRANCH="dev" # Branch we'll work on
 MPS_BRANCH="generated-schemas" # Branch we'll push to

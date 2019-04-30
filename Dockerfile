@@ -41,6 +41,7 @@ RUN mkdir ${HOME}/bin
 ADD ./bin ${HOME}/bin
 ENV PATH $PATH:${HOME}/bin
 
+ENV USER_ID ${USER_ID}
 USER ${USER_ID}
 
 RUN git config --global user.name "Generated Schema Creator"
