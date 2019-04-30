@@ -61,7 +61,7 @@ find . -not -name "*.schema.json" -type f | xargs rm
 mozilla-schema-generator generate-glean-ping --out-dir . --pretty
 mozilla-schema-generator generate-main-ping --out-dir ./main-ping --pretty --split
 
-# 3a. Keep only whitelisted schemas
+# 3a. Keep only allowed schemas
 
 # Pioneer-study is not nested, remove it
 rm -rf pioneer-study
@@ -71,7 +71,7 @@ rm -rf pioneer-study
 # Replace backticks with "\|" (can't do that with tr): sed
 # Find directories that don't match any of the regex expressions: find
 # Remove them: rm
-cat /app/bin/whitelist | tr '\n' '`' | rev | cut -c 2- | rev | sed -e 's/`/\\\\|/g' | xargs -I % find . -type d -regextype sed -not -regex '.*/\(%\|metadata/.*\)' -mindepth 2 | xargs rm -rf
+cat /app/bin/allowlist | tr '\n' '`' | rev | cut -c 2- | rev | sed -e 's/`/\\\\|/g' | xargs -I % find . -type d -regextype sed -not -regex '.*/\(%\|metadata/.*\)' -mindepth 2 | xargs rm -rf
 
 # Some namespace are now empty, remove them
 find . -type d -empty -delete
