@@ -29,7 +29,7 @@ chown -R $USER_ID:$USER_ID ~/.ssh
 chmod 700 "$HOME/.ssh"
 chmod 700 "$HOME/.ssh/id_ed25519"
 
-DEV_BRANCH="dev" # Branch we'll work on
+DEV_BRANCH="dev" # Branch we'll work on - this should have the most up-to-date schemas
 MPS_BRANCH="generated-schemas" # Branch we'll push to
 
 # 0. Install dependencies
@@ -59,7 +59,7 @@ find . -not -name "*.schema.json" -type f | xargs rm
 # 3. Generate new schemas
 
 mozilla-schema-generator generate-glean-ping --out-dir . --pretty
-mozilla-schema-generator generate-main-ping --out-dir ./telemetry --pretty --split
+mozilla-schema-generator generate-main-ping --out-dir ./main-ping --pretty --split
 
 # 3a. Keep only whitelisted schemas
 
@@ -101,15 +101,15 @@ done
 
 cd ../
 
-rm -rf templates tests validation
-
 find . -name "*.bq" -type f | xargs git add
-git commit -a -m "Auto-push from schema generation"
+git commit -a -m "Interim Commit"
 
 git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
 
-# Disallowing empty commits forces no-op on unchanged schemas
-git cherry-pick --strategy-option theirs $DEV_BRANCH
+# Keep only the schemas dir
+find .  -mindepth 1 -maxdepth 1 -not -name .git | xargs rm -rf
+git checkout $DEV_BRANCH -- schemas
+git commit -a -m "Auto-push from schema generation"
 
 git remote set-url origin git@github.com:mozilla-services/mozilla-pipeline-schemas.git
 git push --force
