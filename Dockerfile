@@ -15,7 +15,7 @@ RUN mkdir ${HOME} && \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        file gcc libwww-perl && \
+        file gcc libwww-perl jq && \
     apt-get autoremove -y && \
     apt-get clean
 

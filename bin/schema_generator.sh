@@ -91,7 +91,7 @@ rm -rf $metadata_dir
 
 find . -type f|while read fname; do
     BQ_OUT=${fname/schema.json/bq}
-    jsonschema-transpiler --type bigquery $fname> $BQ_OUT
+    jsonschema-transpiler --type bigquery $fname | jq '.fields' > $BQ_OUT
 done
 
 # 6. Push to branch of MPS
