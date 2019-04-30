@@ -2,9 +2,22 @@
 
 # TODO: Update schema mapping for validation
 # TODO: Handle overwriting glean schemas
+# TODO: Include Main Ping from schema generation
+# TODO: What the heck to do with pioneer-study, a non-nested namespace
 
-GCS_BUCKET="mozilla-generated-schemas"
-MPS_BRANCH="generated-schemas"
+if [[ -z $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY ]]; then
+    echo "Missing secret key" 1>&2
+    exit 1
+fi
+
+mkdir -p /app/.ssh
+echo $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY > /app/.ssh/id_rsa
+
+chmod 700 "$HOME/.ssh"
+chmod 700 "$HOME/.ssh/id_rsa"
+
+DEV_BRANCH="ping-metadata" # Branch we'll work on
+MPS_BRANCH="generated-schemas" # Branch we'll push to
 
 # 0. Install dependencies
 
@@ -17,15 +30,14 @@ pip install -U mozilla-schema-generator
 # 1. Pull in all schemas from MPS
 
 SCHEMAS_DIR="schemas"
-BASE_DIR="/Users/frankbertsch/repos/sandbox"
+BASE_DIR="/app"
 
-cp metadata_merge.py $BASE_DIR
 cd $BASE_DIR
 rm -rf mozilla-pipeline-schemas
 
-git clone https://www.github.com/mozilla-services/mozilla-pipeline-schemas
+git clone https://www.github.com/mozilla-services/mozilla-pipeline-schemas.git
 cd mozilla-pipeline-schemas/$SCHEMAS_DIR
-git checkout ping-metadata
+git checkout $DEV_BRANCH
 
 # 2. Remove all non-json schemas (e.g. parquet)
 
@@ -71,11 +83,7 @@ find . -type f|while read fname; do
     jsonschema-transpiler --type bigquery $fname> $BQ_OUT
 done
 
-# 6. Upload to GCS
-
-gsutil -m cp -r $SCHEMA_DIR gs://$GCS_BUCKET/
-
-# 7. Push to branch of MPS
+# 6. Push to branch of MPS
 # Note: This method will keep a changelog of releases.
 # If we delete and newly checkout branches everytime,
 # that will contain a changelog of changes.
@@ -83,8 +91,15 @@ gsutil -m cp -r $SCHEMA_DIR gs://$GCS_BUCKET/
 cd ../
 
 rm -rf templates tests validation
-find . -not -name "*.schema.json" -type f | xargs git add
-git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
+
+find . -name "*.bq" -type f | xargs git add
+find . -name "*.avro" -type f | xargs git add
 git commit -a -m "Auto-push from schema generation"
 
-git push --repo https://name:password@bitbucket.org/name/repo.git
+git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
+
+# Disallowing empty commits forces no-op on unchanged schemas
+git cherry-pick --strategy-option theirs $DEV_BRANCH
+
+git remote set-url origin git@github.com:mozilla-services/mozilla-pipeline-schemas.git
+git push --force

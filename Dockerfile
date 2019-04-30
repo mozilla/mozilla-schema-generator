@@ -44,6 +44,6 @@ ENV PATH $PATH:${HOME}/bin
 USER ${USER_ID}
 
 RUN git config --global user.name "Generated Schema Creator"
-RUN git config --global user.email "telemetry-alerts@mozilla.com"
+RUN git config --global user.email "dataops+pipeline-schemas@mozilla.com"
 
 ENTRYPOINT ["/app/bin/schema_generator.sh"]
