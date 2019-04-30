@@ -74,12 +74,10 @@ find . -path ./telemetry -prune -o -type f -exec metadata_merge $structured_meta
 
 rm -rf $metadata_dir
 
-# 5. Add transpiled avro and BQ schemas
+# 5. Add transpiled BQ schemas
 
 find . -type f|while read fname; do
-    AVRO_OUT=${fname/schema.json/avro}
     BQ_OUT=${fname/schema.json/bq}
-    jsonschema-transpiler --type avro $fname > $AVRO_OUT
     jsonschema-transpiler --type bigquery $fname> $BQ_OUT
 done
 
@@ -93,7 +91,6 @@ cd ../
 rm -rf templates tests validation
 
 find . -name "*.bq" -type f | xargs git add
-find . -name "*.avro" -type f | xargs git add
 git commit -a -m "Auto-push from schema generation"
 
 git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
