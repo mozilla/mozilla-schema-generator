@@ -16,7 +16,7 @@ echo $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY > /app/.ssh/id_rsa
 chmod 700 "$HOME/.ssh"
 chmod 700 "$HOME/.ssh/id_rsa"
 
-DEV_BRANCH="ping-metadata" # Branch we'll work on
+DEV_BRANCH="dev" # Branch we'll work on
 MPS_BRANCH="generated-schemas" # Branch we'll push to
 
 # 0. Install dependencies
