@@ -1,3 +1,5 @@
 telemetry/core
 org-mozilla-fenix/.*
-glean/.*
+org-mozilla-reference-browser/.*
+activity-stream/.*
+eng-workflow/bmobugs
