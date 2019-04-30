@@ -34,7 +34,7 @@ RUN chmod 775 $HOME/.cargo
 
 # Upgrade pip
 RUN pip install --upgrade pip
-RUN pip install virtualenv
+RUN pip install virtualenv click
 
 WORKDIR ${HOME}
 RUN mkdir ${HOME}/bin

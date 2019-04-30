@@ -46,8 +46,8 @@ def main(metadata, schema):
     schema_contents["required"] += required
 
     json_dump_args = {
-        'indent': 4,
-        'separators': (',', ':')
+        'indent': 2,
+        'separators': (',', ': ')
     }
 
     with open(schema, "w") as f:
