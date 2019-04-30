@@ -21,7 +21,7 @@ MPS_BRANCH="generated-schemas" # Branch we'll push to
 
 # 0. Install dependencies
 
-cargo install --git https://github.com/acmiyaguchi/jsonschema-transpiler --branch 0.2 --force
+cargo install jsonschema-transpiler
 
 virtualenv mgs-venv 
 source mgs-venv/bin/activate
