@@ -1,0 +1,3 @@
+telemetry/core
+org-mozilla-fenix/.*
+glean/.*
