@@ -63,22 +63,7 @@ find . -not -name "*.schema.json" -type f | xargs rm
 # 3. Generate new schemas
 
 mozilla-schema-generator generate-glean-ping --out-dir . --pretty
-mozilla-schema-generator generate-main-ping --out-dir ./main-ping --pretty --split
-
-# 3a. Keep only allowed schemas
-
-# Pioneer-study is not nested, remove it
-rm -rf pioneer-study
-
-# Replace newlines with backticks (hard to do with sed): cat | tr
-# Remove the last backtick; it's the file-ending newline: rev | cut | rev
-# Replace backticks with "\|" (can't do that with tr): sed
-# Find directories that don't match any of the regex expressions: find
-# Remove them: rm
-cat /app/bin/allowlist | tr '\n' '`' | rev | cut -c 2- | rev | sed -e 's/`/\\\\|/g' | xargs -I % find . -type d -regextype sed -not -regex '.*/\(%\|metadata/.*\)' -mindepth 2 | xargs rm -rf
-
-# Some namespace are now empty, remove them
-find . -type d -empty -delete
+#mozilla-schema-generator generate-main-ping --out-dir ./main-ping --pretty --split
 
 # 4. Add metadata to all json schemas, drop metadata schemas
 
@@ -97,6 +82,19 @@ find . -type f|while read fname; do
     BQ_OUT=${fname/schema.json/bq}
     jsonschema-transpiler --type bigquery $fname | jq '.fields' > $BQ_OUT
 done
+
+# 5b. Keep only allowed schemas
+
+# Pioneer-study is not nested, remove it
+rm -rf pioneer-study
+
+# Replace newlines with backticks (hard to do with sed): cat | tr
+# Remove the last backtick; it's the file-ending newline: rev | cut | rev
+# Replace backticks with "\|" (can't do that with tr): sed
+# Find directories that don't match any of the regex expressions: find
+# Remove them: rm
+cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | rev | cut -c 2- | rev | sed -e 's/`/\\\\|/g' | xargs -I % find . -type f -regextype sed -not -regex '.*/\(%\|metadata/\)/.*' | grep ".bq" | xargs rm -rf
+
 
 # 6. Push to branch of MPS
 # Note: This method will keep a changelog of releases.
