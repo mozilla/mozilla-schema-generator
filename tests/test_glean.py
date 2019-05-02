@@ -31,7 +31,7 @@ class TestGleanPing(object):
     def test_single_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False)
 
-        assert schemas.keys() == {"baseline", "event", "metrics"}
+        assert schemas.keys() == {"baseline", "events", "metrics"}
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
