@@ -29,8 +29,14 @@ chown -R $USER_ID:$USER_ID ~/.ssh
 chmod 700 "$HOME/.ssh"
 chmod 700 "$HOME/.ssh/id_ed25519"
 
-DEV_BRANCH="dev" # Branch we'll work on - this should have the most up-to-date schemas
+MASTER_BRANCH="dev" # Branch we'll work on - this should have the most up-to-date schemas
+DEV_BRANCH="generated-schemas-dev" # Branch we'll work on
 MPS_BRANCH="generated-schemas" # Branch we'll push to
+
+SCHEMAS_DIR="schemas"
+BASE_DIR="/app"
+
+cd $BASE_DIR
 
 # 0. Install dependencies
 
@@ -41,16 +47,14 @@ source mgs-venv/bin/activate
 pip install -e ./mozilla-schema-generator
 
 # 1. Pull in all schemas from MPS
-
-SCHEMAS_DIR="schemas"
-BASE_DIR="/app"
-
-cd $BASE_DIR
 rm -rf mozilla-pipeline-schemas
 
 git clone https://www.github.com/mozilla-services/mozilla-pipeline-schemas.git
 cd mozilla-pipeline-schemas/$SCHEMAS_DIR
-git checkout $DEV_BRANCH
+git checkout $MASTER_BRANCH
+
+git branch -D $DEV_BRANCH
+git checkout -b $DEV_BRANCH
 
 # 2. Remove all non-json schemas (e.g. parquet)
 
