@@ -38,7 +38,7 @@ cargo install jsonschema-transpiler
 
 virtualenv mgs-venv 
 source mgs-venv/bin/activate
-pip install -U mozilla-schema-generator
+pip install -e ./mozilla-schema-generator
 
 # 1. Pull in all schemas from MPS
 

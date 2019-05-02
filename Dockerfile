@@ -36,13 +36,13 @@ RUN chmod 775 $HOME/.cargo
 RUN pip install --upgrade pip
 RUN pip install virtualenv click
 
-WORKDIR ${HOME}
-RUN mkdir ${HOME}/bin
-ADD ./bin ${HOME}/bin
-ENV PATH $PATH:${HOME}/bin
-
 ENV USER_ID ${USER_ID}
 USER ${USER_ID}
 
+WORKDIR ${HOME}
+RUN mkdir ${HOME}/mozilla-schema-generator
+RUN chown ${USER_ID}:${USER_ID} mozilla-schema-generator
+ADD --chown=10001:10001 . ${HOME}/mozilla-schema-generator
+ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
 
 ENTRYPOINT ["/app/bin/schema_generator.sh"]
