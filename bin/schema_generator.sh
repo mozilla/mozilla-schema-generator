@@ -104,7 +104,8 @@ cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | rev | cut -c 2- 
 cd ../
 
 find . -name "*.bq" -type f | xargs git add
-git commit -a -m "Interim Commit"
+git commit -m "Interim Commit"
+git stash
 
 git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
 
