@@ -78,7 +78,7 @@ rm -rf $metadata_dir
 
 # 5. Add transpiled BQ schemas
 
-find . -type f|while read fname; do
+find . -type f -name "*.schema.json"|while read fname; do
     BQ_OUT=${fname/schema.json/bq}
     jsonschema-transpiler --type bigquery $fname | jq '.fields' > $BQ_OUT
 done
@@ -104,8 +104,8 @@ cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | rev | cut -c 2- 
 cd ../
 
 find . -name "*.bq" -type f | xargs git add
-git commit -m "Interim Commit"
-git stash
+git checkout *.schema.json
+git commit -a -m "Interim Commit"
 
 git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
 
