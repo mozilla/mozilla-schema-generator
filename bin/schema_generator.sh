@@ -40,7 +40,7 @@ cd $BASE_DIR
 
 # 0. Install dependencies
 
-cargo install jsonschema-transpiler
+cargo install jsonschema-transpiler --version 1.0.0
 
 virtualenv mgs-venv 
 source mgs-venv/bin/activate
@@ -80,7 +80,7 @@ rm -rf $metadata_dir
 
 find . -type f -name "*.schema.json"|while read fname; do
     BQ_OUT=${fname/schema.json/bq}
-    jsonschema-transpiler --type bigquery $fname | jq '.fields' > $BQ_OUT
+    jsonschema-transpiler --type bigquery $fname > $BQ_OUT
 done
 
 # 5b. Keep only allowed schemas
