@@ -18,18 +18,18 @@
 # TODO: Include Main Ping from schema generation
 # TODO: What the heck to do with pioneer-study, a non-nested namespace
 
-MASTER_BRANCH="dev" # Branch we'll work on - this should have the most up-to-date schemas
-DEV_BRANCH="generated-schemas-dev" # Branch we'll work on
-MPS_BRANCH="generated-schemas" # Branch we'll push to
+MPS_BRANCH_SOURCE="dev"
+MPS_BRANCH_WORKING="generated-schemas-dev"
+MPS_BRANCH_PUBLISH="generated-schemas"
+MPS_SCHEMAS_DIR="schemas"
 
-SCHEMAS_DIR="schemas"
 BASE_DIR="/app"
 
 
 function setup_git_ssh() {
     # Configure the container for pushing to github
 
-    if [[ -z $MPS_SSH_KEY_BASE64 ]]; then
+    if [[ -z "$MPS_SSH_KEY_BASE64" ]]; then
         echo "Missing secret key" 1>&2
         exit 1
     fi
@@ -39,10 +39,10 @@ function setup_git_ssh() {
 
     mkdir -p /app/.ssh
 
-    echo $MPS_SSH_KEY_BASE64 | base64 --decode > /app/.ssh/id_ed25519
+    echo "$MPS_SSH_KEY_BASE64" | base64 --decode > /app/.ssh/id_ed25519
     ssh-keyscan github.com > /app/.ssh/known_hosts # Makes the future git-push non-interactive
 
-    chown -R $(id -u):$(id -g) ~/.ssh
+    chown -R "$(id -u):$(id -g)" "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
     chmod 700 "$HOME/.ssh/id_ed25519"
 }
@@ -51,6 +51,7 @@ function setup_dependencies() {
     # Installs mozilla-schema-generator in a virtual environment
 
     virtualenv msg-venv
+    # shellcheck disable=SC1091
     source msg-venv/bin/activate
     pip install -e ./mozilla-schema-generator
 }
@@ -62,11 +63,11 @@ function clone_and_configure_mps() {
     rm -rf mozilla-pipeline-schemas
 
     git clone git@github.com:mozilla-services/mozilla-pipeline-schemas.git
-    cd mozilla-pipeline-schemas/$SCHEMAS_DIR
-    git checkout $MASTER_BRANCH
+    cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR || exit
+    git checkout $MPS_BRANCH_SOURCE
 
-    git branch -D $DEV_BRANCH
-    git checkout -b $DEV_BRANCH
+    git branch -D $MPS_BRANCH_WORKING
+    git checkout -b $MPS_BRANCH_WORKING
 }
 
 function prepare_metadata() {
@@ -91,7 +92,7 @@ function filter_schemas() {
     # Replace backticks with "\|" (can't do that with tr): sed
     # Find directories that don't match any of the regex expressions: find
     # Remove them: rm
-    cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | \
+    < /app/mozilla-schema-generator/bin/allowlist tr '\n' '`' | \
         rev | cut -c 2- | rev | \
         sed -e 's/`/\\\\|/g' | \
         xargs -I % find . -type f -regextype sed -not -regex '.*/\(%\|metadata/\)/.*' | grep ".bq" | \
@@ -103,20 +104,20 @@ function commit_schemas() {
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository
 
-    find . -name "*.bq" -type f | xargs git add
-    git checkout *.schema.json
+    find . -name "*.bq" -type f -exec git add {} +
+    git checkout ./*.schema.json
     git commit -a -m "Interim Commit"
 
-    git checkout $MPS_BRANCH || git checkout -b $MPS_BRANCH
+    git checkout $MPS_BRANCH_PUBLISH || git checkout -b $MPS_BRANCH_PUBLISH
 
     # Keep only the schemas dir
-    find .  -mindepth 1 -maxdepth 1 -not -name .git | xargs rm -rf
-    git checkout $DEV_BRANCH -- schemas
+    find .  -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+    git checkout $MPS_BRANCH_WORKING -- schemas
     git commit -a -m "Auto-push from schema generation"
 }
 
 function main() {
-    cd $BASE_DIR
+    cd $BASE_DIR || exit
 
     # -1. Setup ssh key and git config
     setup_git_ssh
@@ -129,7 +130,7 @@ function main() {
     # CWD: /app/mozilla-pipeline-schemas
 
     # 2. Remove all non-json schemas (e.g. parquet)
-    find . -not -name "*.schema.json" -type f | xargs rm
+    find . -not -name "*.schema.json" -type f -exec rm {} +
 
     # 3. Generate new schemas
     mozilla-schema-generator generate-glean-ping --out-dir . --pretty
@@ -138,16 +139,16 @@ function main() {
     prepare_metadata
 
     # 5. Add transpiled BQ schemas
-    find . -type f -name "*.schema.json"|while read fname; do
-        BQ_OUT=${fname/schema.json/bq}
-        jsonschema-transpiler --type bigquery $fname > $BQ_OUT
+    find . -type f -name "*.schema.json"|while read -r fname; do
+        bq_out=${fname/schema.json/bq}
+        jsonschema-transpiler --type bigquery "$fname" > "$bq_out"
     done
 
     # 5b. Keep only allowed schemas
     filter_schemas
 
     # 6. Push to branch of MPS
-    cd ../
+    cd ../ || exit
     commit_schemas
     git push --force
 }
