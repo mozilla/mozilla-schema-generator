@@ -7,3 +7,6 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     command: "true"
+    environment:
+      - MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY_BASE64_ENCODED
+      - USER_ID

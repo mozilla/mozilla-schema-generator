@@ -45,4 +45,4 @@ RUN chown ${USER_ID}:${USER_ID} mozilla-schema-generator
 ADD --chown=10001:10001 . ${HOME}/mozilla-schema-generator
 ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
 
-ENTRYPOINT ["/app/bin/schema_generator.sh"]
+ENTRYPOINT ["schema_generator.sh"]
