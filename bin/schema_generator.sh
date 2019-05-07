@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# A script for generating schemas that are deployed into the pipeline. This
+# script handles preprocessing, filtering, and transpilation of schemas as part
+# of a pre-deployment scheme. The resulting schemas are pushed to a branch of
+# mozilla-pipeline-schemas.
+#
+# Environment variables:
+#   MPS_SSH_KEY_BASE64: A base64-encoded ssh secret key with permissions to push
+#                       to mozilla-pipeline-schemas
+#
+# Example usage:
+#   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
+#   make build && make run
+
 # TODO: Update schema mapping for validation
 # TODO: Handle overwriting glean schemas
 # TODO: Include Main Ping from schema generation
@@ -34,11 +47,8 @@ BASE_DIR="/app"
 cd $BASE_DIR
 
 # 0. Install dependencies
-
-cargo install jsonschema-transpiler --version 1.0.0
-
-virtualenv mgs-venv 
-source mgs-venv/bin/activate
+virtualenv msg-venv
+source msg-venv/bin/activate
 pip install -e ./mozilla-schema-generator
 
 # 1. Pull in all schemas from MPS
@@ -88,8 +98,11 @@ rm -rf pioneer-study
 # Replace backticks with "\|" (can't do that with tr): sed
 # Find directories that don't match any of the regex expressions: find
 # Remove them: rm
-cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | rev | cut -c 2- | rev | sed -e 's/`/\\\\|/g' | xargs -I % find . -type f -regextype sed -not -regex '.*/\(%\|metadata/\)/.*' | grep ".bq" | xargs rm -rf
-
+cat /app/mozilla-schema-generator/bin/allowlist | tr '\n' '`' | \
+    rev | cut -c 2- | rev | \
+    sed -e 's/`/\\\\|/g' | \
+    xargs -I % find . -type f -regextype sed -not -regex '.*/\(%\|metadata/\)/.*' | grep ".bq" | \
+    xargs rm -rf
 
 # 6. Push to branch of MPS
 # Note: This method will keep a changelog of releases.

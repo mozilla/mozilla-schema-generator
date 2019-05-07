@@ -32,6 +32,9 @@ ENV PATH ${PATH}:${HOME}/.cargo/bin
 RUN chown -R ${USER_ID}:${USER_ID} ${HOME}/.cargo
 RUN chmod 775 $HOME/.cargo
 
+# Install a tagged version of jsonschema-transpiler
+RUN cargo install jsonschema-transpiler --version 1.0.0
+
 # Upgrade pip
 RUN pip install --upgrade pip
 RUN pip install virtualenv click
