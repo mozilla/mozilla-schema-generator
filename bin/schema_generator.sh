@@ -7,13 +7,8 @@
 
 # -1: Setup ssh key and git config
 
-if [[ -z $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY_BASE64_ENCODED ]]; then
+if [[ -z $MPS_SSH_KEY_BASE64 ]]; then
     echo "Missing secret key" 1>&2
-    exit 1
-fi
-
-if [[ -z $USER_ID ]]; then
-    echo "Missing User ID" 1>&2
     exit 1
 fi
 
@@ -22,10 +17,10 @@ git config --global user.email "dataops+pipeline-schemas@mozilla.com"
 
 mkdir -p /app/.ssh
 
-echo $MOZILLA_PIPELINE_SCHEMAS_SECRET_GIT_SSHKEY_BASE64_ENCODED | base64 --decode > /app/.ssh/id_ed25519
+echo $MPS_SSH_KEY_BASE64 | base64 --decode > /app/.ssh/id_ed25519
 ssh-keyscan github.com > /app/.ssh/known_hosts # Makes the future git-push non-interactive
 
-chown -R $USER_ID:$USER_ID ~/.ssh
+chown -R $(id -u):$(id -g) ~/.ssh
 chmod 700 "$HOME/.ssh"
 chmod 700 "$HOME/.ssh/id_ed25519"
 
