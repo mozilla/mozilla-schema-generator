@@ -9,8 +9,7 @@ ARG HOME="/app"
 
 ENV HOME=${HOME}
 RUN groupadd --gid ${USER_ID} ${GROUP_ID} && \
-    useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} --home-dir /app ${GROUP_ID} && \
-    chown -R ${USER_ID}:${GROUP_ID} ${HOME}
+    useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} --home-dir /app ${GROUP_ID}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -31,9 +30,12 @@ RUN cargo install jsonschema-transpiler --version 1.0.0
 RUN pip install --upgrade pip
 
 WORKDIR ${HOME}
-USER ${USER_ID}
 
 ADD . ${HOME}/mozilla-schema-generator
 ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
+
+# Drop root and change ownership of the application folder to the user
+RUN chown -R ${USER_ID}:${GROUP_ID} ${HOME}
+USER ${USER_ID}
 
 ENTRYPOINT ["schema_generator.sh"]

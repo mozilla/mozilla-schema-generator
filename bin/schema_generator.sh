@@ -18,6 +18,9 @@
 # TODO: Include Main Ping from schema generation
 # TODO: What the heck to do with pioneer-study, a non-nested namespace
 
+set -exuo pipefail
+
+MPS_REPO_URL="git@github.com:mozilla-services/mozilla-pipeline-schemas.git"
 MPS_BRANCH_SOURCE="dev"
 MPS_BRANCH_WORKING="generated-schemas-dev"
 MPS_BRANCH_PUBLISH="generated-schemas"
@@ -50,7 +53,7 @@ function setup_git_ssh() {
 function setup_dependencies() {
     # Installs mozilla-schema-generator in a virtual environment
 
-    virtualenv msg-venv
+    python3 -m venv msg-venv
     # shellcheck disable=SC1091
     source msg-venv/bin/activate
     pip install -e ./mozilla-schema-generator
@@ -62,11 +65,9 @@ function clone_and_configure_mps() {
 
     rm -rf mozilla-pipeline-schemas
 
-    git clone git@github.com:mozilla-services/mozilla-pipeline-schemas.git
+    git clone $MPS_REPO_URL
     cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR || exit
     git checkout $MPS_BRANCH_SOURCE
-
-    git branch -D $MPS_BRANCH_WORKING
     git checkout -b $MPS_BRANCH_WORKING
 }
 
