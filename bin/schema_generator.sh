@@ -22,7 +22,7 @@ set -exuo pipefail
 
 MPS_REPO_URL="git@github.com:mozilla-services/mozilla-pipeline-schemas.git"
 MPS_BRANCH_SOURCE="dev"
-MPS_BRANCH_WORKING="generated-schemas-dev"
+MPS_BRANCH_WORKING="local-working-branch"
 MPS_BRANCH_PUBLISH="generated-schemas"
 MPS_SCHEMAS_DIR="schemas"
 
@@ -40,10 +40,11 @@ function setup_git_ssh() {
     git config --global user.name "Generated Schema Creator"
     git config --global user.email "dataops+pipeline-schemas@mozilla.com"
 
-    mkdir -p /app/.ssh
+    mkdir -p $BASE_DIR/.ssh
 
     echo "$MPS_SSH_KEY_BASE64" | base64 --decode > /app/.ssh/id_ed25519
-    ssh-keyscan github.com > /app/.ssh/known_hosts # Makes the future git-push non-interactive
+    # Makes the future git-push non-interactive
+    ssh-keyscan github.com > /app/.ssh/known_hosts
 
     chown -R "$(id -u):$(id -g)" "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
@@ -63,7 +64,7 @@ function clone_and_configure_mps() {
     # Checkout mozilla-pipeline-schemas and changes directory to prepare for
     # schema generation.
 
-    rm -rf mozilla-pipeline-schemas
+    [[ -d mozilla-pipeline-schemas ]] && rm -r mozilla-pipeline-schemas
 
     git clone $MPS_REPO_URL
     cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR || exit
@@ -72,13 +73,13 @@ function clone_and_configure_mps() {
 }
 
 function prepare_metadata() {
-    # Assumes that all schemas under the current directory are valid JSON schema.
-
     local telemetry_metadata="metadata/telemetry-ingestion/telemetry-ingestion.1.schema.json"
     local structured_metadata="metadata/structured-ingestion/structured-ingestion.1.schema.json"
 
-    find ./telemetry -type f -exec metadata_merge $telemetry_metadata {} ";"
-    find . -path ./telemetry -prune -o -type f -exec metadata_merge $structured_metadata {} ";"
+    find ./telemetry -name "*.schema.json" -type f \
+        -exec metadata_merge $telemetry_metadata {} ";"
+    find . -path ./telemetry -prune -o -name "*.schema.json" -type f \
+        -exec metadata_merge $structured_metadata {} ";"
 }
 
 function filter_schemas() {
@@ -120,38 +121,38 @@ function commit_schemas() {
 function main() {
     cd $BASE_DIR || exit
 
-    # -1. Setup ssh key and git config
+    # Setup ssh key and git config
     setup_git_ssh
 
-    # 0. Install dependencies
+    # Install dependencies
     setup_dependencies
 
-    # 1. Pull in all schemas from MPS
+    # Pull in all schemas from MPS
     clone_and_configure_mps
     # CWD: /app/mozilla-pipeline-schemas
 
-    # 2. Remove all non-json schemas (e.g. parquet)
+    # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
 
-    # 3. Generate new schemas
+    # Generate new schemas
     mozilla-schema-generator generate-glean-ping --out-dir . --pretty
 
-    # 4. Add metadata to all json schemas, drop metadata schemas
+    # Add metadata to all json schemas, drop metadata schemas
     prepare_metadata
 
-    # 5. Add transpiled BQ schemas
+    # Add transpiled BQ schemas
     find . -type f -name "*.schema.json"|while read -r fname; do
         bq_out=${fname/schema.json/bq}
         jsonschema-transpiler --type bigquery "$fname" > "$bq_out"
     done
 
-    # 5b. Keep only allowed schemas
+    # Keep only allowed schemas
     filter_schemas
 
-    # 6. Push to branch of MPS
+    # Push to branch of MPS
     cd ../ || exit
     commit_schemas
-    git push --force
+    git push
 }
 
 main
