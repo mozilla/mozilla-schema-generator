@@ -41,7 +41,7 @@ function setup_git_ssh() {
     git config --global user.name "Generated Schema Creator"
     git config --global user.email "dataops+pipeline-schemas@mozilla.com"
 
-    mkdir -p $HOME/.ssh
+    mkdir -p "$HOME/.ssh"
 
     echo "$MPS_SSH_KEY_BASE64" | base64 --decode > /app/.ssh/id_ed25519
     # Makes the future git-push non-interactive
@@ -68,7 +68,7 @@ function clone_and_configure_mps() {
     [[ -d mozilla-pipeline-schemas ]] && rm -r mozilla-pipeline-schemas
 
     git clone $MPS_REPO_URL
-    cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR || exit
+    cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR
     git checkout $MPS_BRANCH_SOURCE
     git checkout -b $MPS_BRANCH_WORKING
 }
@@ -112,7 +112,7 @@ function commit_schemas() {
 }
 
 function main() {
-    cd $BASE_DIR || exit
+    cd $BASE_DIR
 
     # Setup ssh key and git config
     setup_git_ssh
@@ -142,7 +142,7 @@ function main() {
     filter_schemas
 
     # Push to branch of MPS
-    cd ../ || exit
+    cd ../
     commit_schemas
     git push
 }
