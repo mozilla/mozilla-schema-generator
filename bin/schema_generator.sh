@@ -41,7 +41,7 @@ function setup_git_ssh() {
     git config --global user.name "Generated Schema Creator"
     git config --global user.email "dataops+pipeline-schemas@mozilla.com"
 
-    mkdir -p $BASE_DIR/.ssh
+    mkdir -p $HOME/.ssh
 
     echo "$MPS_SSH_KEY_BASE64" | base64 --decode > /app/.ssh/id_ed25519
     # Makes the future git-push non-interactive
@@ -108,7 +108,7 @@ function commit_schemas() {
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
-    git commit -a -m "Auto-push from schema generation"
+    git commit -a -m "Auto-push from schema generation" || echo "Nothing to commit"
 }
 
 function main() {
