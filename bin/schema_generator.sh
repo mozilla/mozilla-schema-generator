@@ -27,6 +27,7 @@ MPS_BRANCH_PUBLISH="generated-schemas"
 MPS_SCHEMAS_DIR="schemas"
 
 BASE_DIR="/app"
+ALLOWLIST="$BASE_DIR/mozilla-schema-generator/bin/allowlist"
 
 
 function setup_git_ssh() {
@@ -83,22 +84,14 @@ function prepare_metadata() {
 }
 
 function filter_schemas() {
-    # Remove metadata
+    # Remove metadata schemas
     rm -rf metadata
 
     # Pioneer-study is not nested, remove it
     rm -rf pioneer-study
 
-    # Replace newlines with backticks (hard to do with sed): cat | tr
-    # Remove the last backtick; it's the file-ending newline: rev | cut | rev
-    # Replace backticks with "\|" (can't do that with tr): sed
-    # Find directories that don't match any of the regex expressions: find
-    # Remove them: rm
-    < /app/mozilla-schema-generator/bin/allowlist tr '\n' '`' | \
-        rev | cut -c 2- | rev | \
-        sed -e 's/`/\\\\|/g' | \
-        xargs -I % find . -type f -regextype sed -not -regex '.*/\(%\|metadata/\)/.*' | grep ".bq" | \
-        xargs rm -rf
+    # Remove BigQuery schemas that are not in the allowlist
+    find . -name '*.bq' | grep -v -f $ALLOWLIST | xargs rm -f
 }
 
 function commit_schemas() {
@@ -113,7 +106,7 @@ function commit_schemas() {
     git checkout $MPS_BRANCH_PUBLISH || git checkout -b $MPS_BRANCH_PUBLISH
 
     # Keep only the schemas dir
-    find .  -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+    find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
     git commit -a -m "Auto-push from schema generation"
 }
@@ -127,21 +120,20 @@ function main() {
     # Install dependencies
     setup_dependencies
 
-    # Pull in all schemas from MPS
+    # Pull in all schemas from MPS and change directory
     clone_and_configure_mps
-    # CWD: /app/mozilla-pipeline-schemas
-
-    # Remove all non-json schemas (e.g. parquet)
-    find . -not -name "*.schema.json" -type f -exec rm {} +
 
     # Generate new schemas
     mozilla-schema-generator generate-glean-ping --out-dir . --pretty
+
+    # Remove all non-json schemas (e.g. parquet)
+    find . -not -name "*.schema.json" -type f -exec rm {} +
 
     # Add metadata to all json schemas, drop metadata schemas
     prepare_metadata
 
     # Add transpiled BQ schemas
-    find . -type f -name "*.schema.json"|while read -r fname; do
+    find . -type f -name "*.schema.json" | while read -r fname; do
         bq_out=${fname/schema.json/bq}
         jsonschema-transpiler --type bigquery "$fname" > "$bq_out"
     done
@@ -155,4 +147,4 @@ function main() {
     git push
 }
 
-main
+main "$@"
