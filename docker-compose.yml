@@ -7,3 +7,5 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     command: "true"
+    environment:
+      - MPS_SSH_KEY_BASE64

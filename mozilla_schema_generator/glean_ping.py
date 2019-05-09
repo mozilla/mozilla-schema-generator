@@ -17,7 +17,7 @@ class GleanPing(GenericPing):
     repos_url = "https://probeinfo.telemetry.mozilla.org/glean/repositories"
 
     default_probes_url = probes_url.format("glean")
-    default_pings = {"baseline", "event", "metrics"}
+    default_pings = {"baseline", "events", "metrics"}
     ignore_pings = {"default", "glean_ping_info", "glean_client_info"}
 
     def __init__(self, repo):  # TODO: Make env-url optional

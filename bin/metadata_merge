@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+import click
+import json
+
+@click.command()
+@click.argument(
+    'metadata',
+    type=click.Path(
+        dir_okay=False,
+        file_okay=True,
+        writable=False,
+        exists=True,
+    ),
+    required=True
+)
+@click.argument(
+    'schema',
+    type=click.Path(
+        dir_okay=False,
+        file_okay=True,
+        writable=True,
+        exists=True,
+    ),
+    required=True
+)
+def main(metadata, schema):
+    print("Merging metadata {} and schema {}".format(metadata, schema))
+
+    with open(metadata, "r") as f:
+        metadata_contents = json.load(f)
+
+    with open(schema, "r") as f:
+        schema_contents = json.load(f)
+
+    properties = metadata_contents.get("properties", {})
+    required = metadata_contents.get("required", [])
+
+    if "properties" not in schema_contents:
+        schema_contents["properties"] = {}
+
+    if "required" not in schema_contents:
+        schema_contents["required"] = []
+
+    schema_contents["properties"].update(properties)
+    schema_contents["required"] += required
+
+    json_dump_args = {
+        'indent': 2,
+        'separators': (',', ': ')
+    }
+
+    with open(schema, "w") as f:
+        f.write(json.dumps(schema_contents, **json_dump_args))
+
+if __name__ == "__main__":
+    main()

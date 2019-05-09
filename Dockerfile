@@ -4,14 +4,12 @@ MAINTAINER Frank Bertsch <frank@mozilla.com>
 # Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/master/docs/building-container.md
 ARG RUST_SPEC=stable
 ARG USER_ID="10001"
-ARG GROUP="app"
+ARG GROUP_ID="app"
 ARG HOME="/app"
 
 ENV HOME=${HOME}
-RUN mkdir ${HOME} && \
-    chown ${USER_ID}:${USER_ID} ${HOME} && \
-    groupadd --gid ${USER_ID} ${GROUP} && \
-    useradd --no-create-home --uid 10001 --gid 10001 --home-dir /app ${GROUP}
+RUN groupadd --gid ${USER_ID} ${GROUP_ID} && \
+    useradd --create-home --uid ${USER_ID} --gid ${GROUP_ID} --home-dir /app ${GROUP_ID}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -20,17 +18,24 @@ RUN apt-get update && \
     apt-get clean
 
 # Install Rust and Cargo
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=${RUST_SPEC}
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain=${RUST_SPEC}
 
 ENV CARGO_INSTALL_ROOT=${HOME}/.cargo
 ENV PATH ${PATH}:${HOME}/.cargo/bin
 
-# Install Google Cloud SDK
-RUN curl -sSL https://sdk.cloud.google.com | bash
-ENV PATH $PATH:$HOME/google-cloud-sdk/bin
+# Install a tagged version of jsonschema-transpiler
+RUN cargo install jsonschema-transpiler --version 1.0.0
 
+# Upgrade pip
 RUN pip install --upgrade pip
 
 WORKDIR ${HOME}
 
+ADD . ${HOME}/mozilla-schema-generator
+ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
+
+# Drop root and change ownership of the application folder to the user
+RUN chown -R ${USER_ID}:${GROUP_ID} ${HOME}
 USER ${USER_ID}
+
+ENTRYPOINT ["schema_generator.sh"]
