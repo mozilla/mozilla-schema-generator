@@ -27,7 +27,7 @@ MPS_BRANCH_PUBLISH="generated-schemas"
 MPS_SCHEMAS_DIR="schemas"
 
 BASE_DIR="/app"
-ALLOWLIST="$BASE_DIR/mozilla-schema-generator/bin/allowlist"
+ALLOWLIST="$BASE_DIR/mozilla-schema-generator/allowlist"
 
 
 function setup_git_ssh() {
