@@ -13,20 +13,55 @@ from typing import List
 class GleanPing(GenericPing):
 
     schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/schemas/glean/baseline/baseline.1.schema.json" # noqa E501
-    probes_url = "https://probeinfo.telemetry.mozilla.org/glean/{}/metrics"
+    probes_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/metrics"
     repos_url = "https://probeinfo.telemetry.mozilla.org/glean/repositories"
 
-    default_probes_url = probes_url.format("glean")
+    default_dependencies = ['glean']
     default_pings = {"baseline", "events", "metrics"}
     ignore_pings = {"default", "glean_ping_info", "glean_client_info"}
 
     def __init__(self, repo):  # TODO: Make env-url optional
-        super().__init__(self.schema_url, self.schema_url, self.probes_url.format(repo))
+        self.repo = repo
+        super().__init__(
+            self.schema_url,
+            self.schema_url,
+            self.probes_url_template.format(repo)
+        )
+
+    def get_dependencies(self):
+        # Get all of the library dependencies for the application that
+        # are also known about in the repositories file.
+
+        # The dependencies are specified using library names, but we need to
+        # map those back to the name of the repository in the repository file.
+
+        dependencies = self._get_json(self.dependencies_url.format(self.repo))
+        dependency_library_names = list(dependencies.keys())
+
+        repos = self.get_repos()
+        repos_by_dependency_name = {}
+        for repo in repos:
+            for library_name in repo.get('library_names', []):
+                repos_by_dependency_name[library_name] = repo
+
+        dependencies = []
+        for name in dependency_library_names:
+            if name in repos_by_dependency_name:
+                dependencies.append(repos_by_dependency_name[name])
+
+        if not len(dependencies):
+            return self.default_dependencies
+
+        return dependencies
 
     def get_probes(self) -> List[GleanProbe]:
         probes = self._get_json(self.probes_url)
-        default_probes = self._get_json(self.default_probes_url)
-        items = list(probes.items()) + list(default_probes.items())
+        items = list(probes.items())
+        for dependency in self.get_dependencies():
+            dependency_probes = self._get_json(
+                self.probes_url_template.format(dependency)
+            )
+            items += list(dependency_probes.items())
 
         return [GleanProbe(_id, defn) for _id, defn in items]
 
