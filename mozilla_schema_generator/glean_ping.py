@@ -50,8 +50,10 @@ class GleanPing(GenericPing):
                 dependencies.append(repos_by_dependency_name[name])
 
         if not len(dependencies):
+            print(f"For {self.repo}, using default Glean dependencies")
             return self.default_dependencies
 
+        print(f"For {self.repo}, found Glean dependencies: {dependencies}")
         return dependencies
 
     def get_probes(self) -> List[GleanProbe]:
