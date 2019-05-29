@@ -4,6 +4,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from requests import HTTPError
+
 from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
@@ -35,15 +37,21 @@ class GleanPing(GenericPing):
 
         # The dependencies are specified using library names, but we need to
         # map those back to the name of the repository in the repository file.
+        try:
+            dependencies = self._get_json(
+                self.dependencies_url_template.format(self.repo)
+            )
+        except HTTPError as e:
+            print(f"For {self.repo}, using default Glean dependencies")
+            return self.default_dependencies
 
-        dependencies = self._get_json(self.dependencies_url_template.format(self.repo))
         dependency_library_names = list(dependencies.keys())
 
-        repos = self.get_repos()
+        repos = GleanPing._get_json(GleanPing.repos_url)
         repos_by_dependency_name = {}
         for repo in repos:
             for library_name in repo.get('library_names', []):
-                repos_by_dependency_name[library_name] = repo
+                repos_by_dependency_name[library_name] = repo.name
 
         dependencies = []
         for name in dependency_library_names:
