@@ -85,7 +85,7 @@ mozilla-schema-generator generate-glean-ping
 
 Write schemas to a directory:
 ```
-mozilla-schema-generator generate-glean-ping --out-dir main-ping
+mozilla-schema-generator generate-glean-ping --out-dir glean-ping
 ```
 
 To see a full list of options, run `mozilla-schema-generator generate-glean-ping --help`.
