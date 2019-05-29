@@ -15,6 +15,7 @@ class GleanPing(GenericPing):
     schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/schemas/glean/baseline/baseline.1.schema.json" # noqa E501
     probes_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/metrics"
     repos_url = "https://probeinfo.telemetry.mozilla.org/glean/repositories"
+    dependencies_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/dependencies"
 
     default_dependencies = ['glean']
     default_pings = {"baseline", "events", "metrics"}
@@ -35,7 +36,7 @@ class GleanPing(GenericPing):
         # The dependencies are specified using library names, but we need to
         # map those back to the name of the repository in the repository file.
 
-        dependencies = self._get_json(self.dependencies_url.format(self.repo))
+        dependencies = self._get_json(self.dependencies_url_template.format(self.repo))
         dependency_library_names = list(dependencies.keys())
 
         repos = self.get_repos()
