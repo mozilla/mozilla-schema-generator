@@ -41,7 +41,7 @@ class GleanPing(GenericPing):
             dependencies = self._get_json(
                 self.dependencies_url_template.format(self.repo)
             )
-        except HTTPError as e:
+        except HTTPError:
             print(f"For {self.repo}, using default Glean dependencies")
             return self.default_dependencies
 
