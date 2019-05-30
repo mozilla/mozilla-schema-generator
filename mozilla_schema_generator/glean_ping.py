@@ -51,12 +51,16 @@ class GleanPing(GenericPing):
         repos_by_dependency_name = {}
         for repo in repos:
             for library_name in repo.get('library_names', []):
-                repos_by_dependency_name[library_name] = repo.name
+                repos_by_dependency_name[library_name] = repo['name']
 
         dependencies = []
         for name in dependency_library_names:
             if name in repos_by_dependency_name:
                 dependencies.append(repos_by_dependency_name[name])
+
+        if len(dependencies) == 0:
+            print(f"For {self.repo}, using default Glean dependencies")
+            return self.default_dependencies
 
         print(f"For {self.repo}, found Glean dependencies: {dependencies}")
         return dependencies
