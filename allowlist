@@ -4,3 +4,4 @@ org-mozilla-reference-browser/.*
 activity-stream/.*
 eng-workflow/bmobugs
 mobile/activation
+firefox-installer/.*
