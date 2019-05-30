@@ -129,6 +129,8 @@ class GenericPing(object):
     @staticmethod
     def _get_json_str(url: str) -> dict:
         r = requests.get(url, stream=True)
+        r.raise_for_status()
+
         final_json = ""
 
         for chunk in r.iter_content(chunk_size=1024):
