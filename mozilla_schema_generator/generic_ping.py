@@ -94,12 +94,15 @@ class GenericPing(object):
             final_schema.set_schema_elem(
                 schema_key + ("properties", probe.name),
                 probe_schema.schema)
-            final_schema.set_schema_elem(
-                schema_key + ("additionalProperties",),
-                False)
-            final_schema.delete_group_from_schema(schema_key + ("propertyNames",))
 
-        return schemas + [final_schema]
+        # Remove all additionalProperties (#22)
+        schemas.append(final_schema)
+        for s in schemas:
+            for key in config.get_match_keys():
+                s.delete_group_from_schema(key + ("propertyNames",), propogate=False)
+                s.set_schema_elem(key + ("additionalProperties",), False, propogate=False)
+
+        return schemas
 
     @staticmethod
     def make_extra_schema(schema: Schema, probes: List[Probe],
@@ -127,7 +130,7 @@ class GenericPing(object):
         return [schema]
 
     @staticmethod
-    def _get_json_str(url: str) -> dict:
+    def _get_json_str(url: str) -> str:
         r = requests.get(url, stream=True)
         r.raise_for_status()
 

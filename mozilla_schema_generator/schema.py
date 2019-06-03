@@ -34,11 +34,14 @@ class Schema(object):
     def __init__(self, schema: dict):
         self.schema = schema
 
-    def set_schema_elem(self, key: Tuple[str], elem: Any) -> dict:
+    def set_schema_elem(self, key: Tuple[str], elem: Any, *, propogate=True) -> dict:
         new_elem = self.schema
 
         for k in key[:-1]:
             if k not in new_elem:
+                if not propogate:
+                    return
+
                 new_elem[k] = {}
                 if k == "properties":
                     new_elem["type"] = "object"
@@ -62,19 +65,20 @@ class Schema(object):
         except KeyError:
             return
 
-    def delete_group_from_schema(self, key: Tuple[str]):
+    def delete_group_from_schema(self, key: Tuple[str], *, propogate=True):
         self._delete_key(key)
 
         # Now check, moving backwards, if that was the only available property
         # If it was, and there are no additionalProperties, delete the parent
-        for subkey in reversed([key[:i] for i in range(len(key))]):
-            if not subkey or subkey[-1] == "properties":
-                # we only want to check the actual entry
-                continue
+        if propogate:
+            for subkey in reversed([key[:i] for i in range(len(key))]):
+                if not subkey or subkey[-1] == "properties":
+                    # we only want to check the actual entry
+                    continue
 
-            elem = _get(self.schema, subkey)
-            if not elem["properties"] and not elem.get("additionalProperties", False):
-                self._delete_key(subkey)
+                elem = _get(self.schema, subkey)
+                if not elem.get("properties") and not elem.get("additionalProperties", False):
+                    self._delete_key(subkey)
 
     @staticmethod
     def _get_schema_size(schema: dict, key=None) -> int:
