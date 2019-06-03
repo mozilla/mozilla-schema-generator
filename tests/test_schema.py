@@ -62,8 +62,11 @@ class TestSchema(object):
         res_schema = schema.clone()
 
         # Shouldn't add it if not propogating
-        key = ("properties", "b", "properties", "hello")
-        res_schema.set_schema_elem(key, {"type": "string"}, propogate=False)
+        res_schema.set_schema_elem(
+                ("properties", "b", "properties", "hello"),
+                {"type": "string"},
+                propogate=False)
+
         print_and_test(schema.schema, res_schema.schema)
 
         # should add it if propogating
@@ -84,6 +87,9 @@ class TestSchema(object):
             "type": "object"
         }
 
-        key = ("properties", "b", "properties", "hello")
-        res_schema.set_schema_elem(key, {"type": "string"}, propogate=True)
+        res_schema.set_schema_elem(
+                ("properties", "b", "properties", "hello"),
+                {"type": "string"},
+                propogate=True)
+
         print_and_test(expected, res_schema.schema)
