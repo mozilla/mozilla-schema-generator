@@ -64,6 +64,9 @@ class Config(object):
 
         return splits
 
+    def get_match_keys(self) -> List[Tuple[str]]:
+        return [prepend_properties(key) for key in self.matchers.keys()]
+
     def split(self) -> List[Config]:
         """
         Split this config into multiple configs.

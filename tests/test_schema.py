@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from mozilla_schema_generator.schema import Schema
+from .test_utils import print_and_test
 
 
 class TestSchema(object):
@@ -47,3 +48,42 @@ class TestSchema(object):
 
         _tuple = {"type": "array", "items": [{"type": "string"}, {"type": "string"}]}
         assert Schema._get_schema_size(_tuple) == 2
+
+    def test_set_elem_propogate(self):
+        schema = Schema({
+            "properties": {
+                "a": {
+                    "type": "int"
+                }
+            },
+            "type": "object"
+        })
+
+        res_schema = schema.clone()
+
+        # Shouldn't add it if not propogating
+        key = ("properties", "b", "properties", "hello")
+        res_schema.set_schema_elem(key, {"type": "string"}, propogate=False)
+        print_and_test(schema.schema, res_schema.schema)
+
+        # should add it if propogating
+        expected = {
+            "properties": {
+                "a": {
+                    "type": "int"
+                },
+                "b": {
+                    "properties": {
+                        "hello": {
+                            "type": "string"
+                        },
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        }
+
+        key = ("properties", "b", "properties", "hello")
+        res_schema.set_schema_elem(key, {"type": "string"}, propogate=True)
+        print_and_test(expected, res_schema.schema)
