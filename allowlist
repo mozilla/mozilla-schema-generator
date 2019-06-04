@@ -2,6 +2,13 @@ telemetry/core
 org-mozilla-fenix/.*
 org-mozilla-reference-browser/.*
 activity-stream/.*
-eng-workflow/bmobugs
-mobile/activation
+eng-workflow/.*
+mobile/.*
 firefox-installer/.*
+coverage/.*
+edge-validator/.*
+firefox-launcher-process/.*
+mozdata/.*
+mozza/.*
+pocket/.*
+webpagetest/.*
