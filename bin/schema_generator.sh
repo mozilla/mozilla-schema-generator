@@ -124,7 +124,7 @@ function main() {
     clone_and_configure_mps
 
     # Generate new schemas
-    mozilla-schema-generator generate-glean-ping --out-dir . --pretty
+    mozilla-schema-generator generate-glean-pings --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +

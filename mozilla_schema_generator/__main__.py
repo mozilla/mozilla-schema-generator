@@ -110,7 +110,7 @@ def generate_main_ping(config, out_dir, split, pretty):
     required=False,
     type=str
 )
-def generate_glean_ping(config, out_dir, split, pretty, repo):
+def generate_glean_pings(config, out_dir, split, pretty, repo):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
 
@@ -164,7 +164,7 @@ def main(args=None):
 
 
 main.add_command(generate_main_ping)
-main.add_command(generate_glean_ping)
+main.add_command(generate_glean_pings)
 
 
 if __name__ == "__main__":
