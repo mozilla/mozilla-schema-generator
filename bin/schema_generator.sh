@@ -23,7 +23,7 @@ set -exuo pipefail
 MPS_REPO_URL="git@github.com:mozilla-services/mozilla-pipeline-schemas.git"
 MPS_BRANCH_SOURCE="dev"
 MPS_BRANCH_WORKING="local-working-branch"
-MPS_BRANCH_PUBLISH="test-generated-schemas"
+MPS_BRANCH_PUBLISH="generated-schemas"
 MPS_SCHEMAS_DIR="schemas"
 
 BASE_DIR="/app"
