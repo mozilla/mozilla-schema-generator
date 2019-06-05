@@ -4,12 +4,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import logging
+
 from requests import HTTPError
 
 from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
-from typing import List
+
+logger = logging.getLogger(__name__)
 
 
 class GleanPing(GenericPing):
@@ -42,7 +45,7 @@ class GleanPing(GenericPing):
                 self.dependencies_url_template.format(self.repo)
             )
         except HTTPError:
-            print(f"For {self.repo}, using default Glean dependencies")
+            logging.info(f"For {self.repo}, using default Glean dependencies")
             return self.default_dependencies
 
         dependency_library_names = list(dependencies.keys())
@@ -59,10 +62,10 @@ class GleanPing(GenericPing):
                 dependencies.append(repos_by_dependency_name[name])
 
         if len(dependencies) == 0:
-            print(f"For {self.repo}, using default Glean dependencies")
+            logging.info(f"For {self.repo}, using default Glean dependencies")
             return self.default_dependencies
 
-        print(f"For {self.repo}, found Glean dependencies: {dependencies}")
+        logging.info(f"For {self.repo}, found Glean dependencies: {dependencies}")
         return dependencies
 
     def get_probes(self) -> List[GleanProbe]:

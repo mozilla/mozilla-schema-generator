@@ -160,7 +160,8 @@ def dump_schema(schemas, out_dir, pretty):
 @click.group()
 def main(args=None):
     """Command line utility for mozilla-schema-generator."""
-    pass
+    import logging
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 
 main.add_command(generate_main_ping)
