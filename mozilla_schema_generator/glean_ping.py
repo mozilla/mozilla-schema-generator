@@ -11,6 +11,9 @@ from requests import HTTPError
 from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
+from .schema import Schema
+from typing import Dict, List, Set
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +82,7 @@ class GleanPing(GenericPing):
 
         return [GleanProbe(_id, defn) for _id, defn in items]
 
-    def get_pings(self):
+    def get_pings(self) -> Set[str]:
         probes = self.get_probes()
         addl_pings = {
             ping for probe in probes
@@ -89,7 +92,7 @@ class GleanPing(GenericPing):
 
         return self.default_pings | addl_pings
 
-    def generate_schema(self, config, split):
+    def generate_schema(self, config, split, generic_schema = False) -> Dict[str, List[Schema]]:
         pings = self.get_pings()
         schemas = {}
 
@@ -99,7 +102,10 @@ class GleanPing(GenericPing):
                 matcher.matcher["send_in_pings"]["contains"] = ping
             new_config = Config(ping, matchers=matchers)
 
-            schemas.update(super().generate_schema(new_config))
+            if generic_schema: # Use the generic glean ping schema
+                schemas[new_config.name] = [self.get_schema()]
+            else:
+                schemas.update(super().generate_schema(new_config))
 
         return schemas
 
@@ -109,4 +115,4 @@ class GleanPing(GenericPing):
         Retrieve name and app_id for Glean repositories
         """
         repos = GleanPing._get_json(GleanPing.repos_url)
-        return [(repo['name'], repo['app_id']) for repo in repos]
+        return [(repo['name'], repo['app_id']) for repo in repos if 'library_names' not in repo]
