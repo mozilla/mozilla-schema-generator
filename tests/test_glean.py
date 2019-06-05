@@ -6,6 +6,7 @@
 
 import yaml
 import pytest
+from .test_utils import print_and_test
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
@@ -50,5 +51,14 @@ class TestGleanPing(object):
 
     def test_get_repos(self):
         repos = glean_ping.GleanPing.get_repos()
+        assert ("fenix", "org-mozilla-fenix") in repos
 
-        assert ("glean", "glean") in repos
+    def test_generic_schema(self, glean, config):
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        generic_schema = glean.get_schema().schema
+
+        assert schemas.keys() == {"baseline", "events", "metrics"}
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            print_and_test(generic_schema, schema)

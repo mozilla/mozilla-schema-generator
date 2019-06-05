@@ -110,17 +110,24 @@ def generate_main_ping(config, out_dir, split, pretty):
     required=False,
     type=str
 )
-def generate_glean_ping(config, out_dir, split, pretty, repo):
+@click.option(
+    '--generic-schema',
+    is_flag=True,
+    help=("When specified, schemas are not filled in, "
+          "but instead the generic schema is used for "
+          "every application's glean pings.")
+)
+def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
 
     if out_dir:
         out_dir = Path(out_dir)
 
+    repos = GleanPing.get_repos()
+
     if repo is not None:
-        repos = [repo]
-    else:
-        repos = GleanPing.get_repos()
+        repos = [(r_name, r_id) for r_name, r_id in repos if r_id == repo]
 
     with open(config, 'r') as f:
         config_data = yaml.load(f)
@@ -128,12 +135,12 @@ def generate_glean_ping(config, out_dir, split, pretty, repo):
     config = Config(config_data)
 
     for repo_name, repo_id in repos:
-        write_schema(repo_name, repo_id, config, out_dir, split, pretty)
+        write_schema(repo_name, repo_id, config, out_dir, split, pretty, generic_schema)
 
 
-def write_schema(repo, repo_id, config, out_dir, split, pretty):
+def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema):
     schema_generator = GleanPing(repo)
-    schemas = schema_generator.generate_schema(config, split=False)
+    schemas = schema_generator.generate_schema(config, split=False, generic_schema=generic_schema)
     dump_schema(schemas, out_dir.joinpath(repo_id), pretty)
 
 
@@ -160,11 +167,12 @@ def dump_schema(schemas, out_dir, pretty):
 @click.group()
 def main(args=None):
     """Command line utility for mozilla-schema-generator."""
-    pass
+    import logging
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 
 main.add_command(generate_main_ping)
-main.add_command(generate_glean_ping)
+main.add_command(generate_glean_pings)
 
 
 if __name__ == "__main__":

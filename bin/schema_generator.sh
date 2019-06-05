@@ -98,9 +98,13 @@ function commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository
-
     find . -name "*.bq" -type f -exec git add {} +
     git checkout ./*.schema.json
+
+    # Add Glean JSON schemas with generic schema
+    mozilla-schema-generator generate-glean-pings --out-dir $MPS_SCHEMAS_DIR --pretty --generic-schema
+    find . -name "*.schema.json" -type f -exec git add {} +
+
     git commit -a -m "Interim Commit"
 
     git checkout $MPS_BRANCH_PUBLISH || git checkout -b $MPS_BRANCH_PUBLISH
@@ -124,7 +128,7 @@ function main() {
     clone_and_configure_mps
 
     # Generate new schemas
-    mozilla-schema-generator generate-glean-ping --out-dir . --pretty
+    mozilla-schema-generator generate-glean-pings --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
