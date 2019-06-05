@@ -117,10 +117,10 @@ def generate_glean_pings(config, out_dir, split, pretty, repo):
     if out_dir:
         out_dir = Path(out_dir)
 
+    repos = GleanPing.get_repos()
+
     if repo is not None:
-        repos = [repo]
-    else:
-        repos = GleanPing.get_repos()
+        repos = [(r_name, r_id) for r_name, r_id in repos if r_id == repo]
 
     with open(config, 'r') as f:
         config_data = yaml.load(f)
