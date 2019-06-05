@@ -92,7 +92,7 @@ class GleanPing(GenericPing):
 
         return self.default_pings | addl_pings
 
-    def generate_schema(self, config, split, generic_schema = False) -> Dict[str, List[Schema]]:
+    def generate_schema(self, config, split, generic_schema=False) -> Dict[str, List[Schema]]:
         pings = self.get_pings()
         schemas = {}
 
@@ -102,7 +102,7 @@ class GleanPing(GenericPing):
                 matcher.matcher["send_in_pings"]["contains"] = ping
             new_config = Config(ping, matchers=matchers)
 
-            if generic_schema: # Use the generic glean ping schema
+            if generic_schema:  # Use the generic glean ping schema
                 schemas[new_config.name] = [self.get_schema()]
             else:
                 schemas.update(super().generate_schema(new_config))
