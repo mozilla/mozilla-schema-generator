@@ -4,6 +4,13 @@ org-mozilla-reference-browser/.*
 org-mozilla-samples-glean/.*
 org-mozilla-tv-firefox/.*
 activity-stream/.*
-eng-workflow/bmobugs
-mobile/activation
+eng-workflow/.*
+mobile/.*
 firefox-installer/.*
+coverage/.*
+edge-validator/.*
+firefox-launcher-process/.*
+mozdata/.*
+mozza/.*
+pocket/.*
+webpagetest/.*
