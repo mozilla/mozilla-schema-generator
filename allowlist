@@ -1,6 +1,8 @@
 telemetry/core
 org-mozilla-fenix/.*
 org-mozilla-reference-browser/.*
+org-mozilla-samples-glean/.*
+org-mozilla-tv-firefox/.*
 activity-stream/.*
 eng-workflow/bmobugs
 mobile/activation
