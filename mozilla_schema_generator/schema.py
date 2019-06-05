@@ -35,6 +35,13 @@ class Schema(object):
         self.schema = schema
 
     def set_schema_elem(self, key: Tuple[str], elem: Any, *, propogate=True) -> dict:
+        """
+        @param key: The key set
+        @param elem: The value to set the key to
+        @param propogate: If True, creates objects until it reaches the full key.
+                          If False, and the parent of the key is not in the
+                          schema, then the key will not be added.
+        """
         new_elem = self.schema
 
         for k in key[:-1]:
@@ -66,6 +73,12 @@ class Schema(object):
             return
 
     def delete_group_from_schema(self, key: Tuple[str], *, propogate=True):
+        """
+        @param key: The key to remove
+        @param propogate: If True, then removes any parents of the deleted key
+                          if they are now empty, i.e. there are no other
+                          `properties`.
+        """
         self._delete_key(key)
 
         # Now check, moving backwards, if that was the only available property
