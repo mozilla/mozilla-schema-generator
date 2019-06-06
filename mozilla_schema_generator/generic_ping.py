@@ -99,8 +99,8 @@ class GenericPing(object):
         schemas.append(final_schema)
         for s in schemas:
             for key in config.get_match_keys():
-                s.delete_group_from_schema(key + ("propertyNames",), propogate=False)
-                s.set_schema_elem(key + ("additionalProperties",), False, propogate=False)
+                s.delete_group_from_schema(key + ("propertyNames",), propagate=False)
+                s.delete_group_from_schema(key + ("additionalProperties",), propagate=True)
 
         return schemas
 

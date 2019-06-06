@@ -34,11 +34,11 @@ class Schema(object):
     def __init__(self, schema: dict):
         self.schema = schema
 
-    def set_schema_elem(self, key: Tuple[str], elem: Any, *, propogate=True) -> dict:
+    def set_schema_elem(self, key: Tuple[str], elem: Any, *, propagate=True) -> dict:
         """
         @param key: The key set
         @param elem: The value to set the key to
-        @param propogate: If True, creates objects until it reaches the full key.
+        @param propagate: If True, creates objects until it reaches the full key.
                           If False, and the parent of the key is not in the
                           schema, then the key will not be added.
         """
@@ -46,7 +46,7 @@ class Schema(object):
 
         for k in key[:-1]:
             if k not in new_elem:
-                if not propogate:
+                if not propagate:
                     return
 
                 new_elem[k] = {}
@@ -72,10 +72,10 @@ class Schema(object):
         except KeyError:
             return
 
-    def delete_group_from_schema(self, key: Tuple[str], *, propogate=True):
+    def delete_group_from_schema(self, key: Tuple[str], *, propagate=True):
         """
         @param key: The key to remove
-        @param propogate: If True, then removes any parents of the deleted key
+        @param propagate: If True, then removes any parents of the deleted key
                           if they are now empty, i.e. there are no other
                           `properties`.
         """
@@ -83,15 +83,18 @@ class Schema(object):
 
         # Now check, moving backwards, if that was the only available property
         # If it was, and there are no additionalProperties, delete the parent
-        if propogate:
+        if propagate:
             for subkey in reversed([key[:i] for i in range(len(key))]):
                 if not subkey or subkey[-1] == "properties":
                     # we only want to check the actual entry
                     continue
 
-                elem = _get(self.schema, subkey)
-                if not elem.get("properties") and not elem.get("additionalProperties", False):
-                    self._delete_key(subkey)
+                try:
+                    elem = _get(self.schema, subkey)
+                    if not elem.get("properties") and not elem.get("additionalProperties", False):
+                        self._delete_key(subkey)
+                except KeyError:
+                    break
 
     @staticmethod
     def _get_schema_size(schema: dict, key=None) -> int:
