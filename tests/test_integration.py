@@ -47,14 +47,12 @@ class TestIntegration(object):
                             "type": "object",
                             "properties": {
                                 "test_probe": MainProbe.histogram_schema
-                            },
-                            "additionalProperties": False
+                            }
                         },
                         "nested": {
                             "type": "object",
                             "properties": {
                                 "second_level": {
-                                    "additionalProperties": False,
                                     "type": "object",
                                     "properties": {
                                         "second_level_probe": MainProbe.histogram_schema
@@ -104,8 +102,7 @@ class TestIntegration(object):
                             "type": "object",
                             "properties": {
                                 "test_probe": MainProbe.histogram_schema
-                            },
-                            "additionalProperties": False
+                            }
                         }
                     }
                 },
@@ -124,8 +121,7 @@ class TestIntegration(object):
                                     "type": "object",
                                     "properties": {
                                         "second_level_probe": MainProbe.histogram_schema
-                                    },
-                                    "additionalProperties": False
+                                    }
                                 }
                             }
                         }
@@ -264,8 +260,7 @@ class TestIntegration(object):
                             "properties": {
                                 "test_probe": MainProbe.histogram_schema,
                                 "third_probe": MainProbe.histogram_schema
-                            },
-                            "additionalProperties": False
+                            }
                         }
                     }
                 },
@@ -279,7 +274,6 @@ class TestIntegration(object):
                             "type": "object",
                             "properties": {
                                 "second_level": {
-                                    "additionalProperties": False,
                                     "type": "object",
                                     "properties": {
                                         "second_level_probe": MainProbe.histogram_schema

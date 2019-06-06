@@ -44,12 +44,8 @@ class TestGleanPing(object):
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
             # A few parts of the generic structure
-            assert "metrics" in schema["properties"]
             assert "ping_info" in schema["properties"]
-
-            # Client id should not be included, since it's in the ping_info
-            uuids = _get(schema, prepend_properties(("metrics", "uuid")))
-            assert "client_id" not in uuids.get("properties", {})
+            assert "client_info" in schema["properties"]
 
             if name == "baseline":
                 # Device should be included, since it's a standard metric
@@ -79,8 +75,6 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
-            assert "metrics" in schema["properties"]
-
-            for metric_type in schema["properties"]["metrics"]["properties"]:
-                key = prepend_properties(("metrics", metric_type))
-                assert not _get(schema, key + ("additionalProperties",))
+            # The metrics key should have been deleted through
+            # propagation
+            assert "metrics" not in schema["properties"]

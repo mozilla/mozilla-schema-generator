@@ -49,7 +49,7 @@ class TestSchema(object):
         _tuple = {"type": "array", "items": [{"type": "string"}, {"type": "string"}]}
         assert Schema._get_schema_size(_tuple) == 2
 
-    def test_set_elem_propogate(self):
+    def test_set_elem_propagate(self):
         schema = Schema({
             "properties": {
                 "a": {
@@ -65,7 +65,7 @@ class TestSchema(object):
         res_schema.set_schema_elem(
                 ("properties", "b", "properties", "hello"),
                 {"type": "string"},
-                propogate=False)
+                propagate=False)
 
         print_and_test(schema.schema, res_schema.schema)
 
@@ -90,13 +90,6 @@ class TestSchema(object):
         res_schema.set_schema_elem(
                 ("properties", "b", "properties", "hello"),
                 {"type": "string"},
-                propogate=True)
+                propagate=True)
 
         print_and_test(expected, res_schema.schema)
-
-        # Deleting the elem again should match our original schema
-        res_schema.delete_group_from_schema(
-                ("properties", "b", "properties", "hello"),
-                propogate=True)
-
-        print_and_test(schema.schema, res_schema.schema)
