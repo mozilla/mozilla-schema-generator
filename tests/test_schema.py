@@ -93,3 +93,10 @@ class TestSchema(object):
                 propagate=True)
 
         print_and_test(expected, res_schema.schema)
+
+        # Deleting the elem again should match our original schema
+        res_schema.delete_group_from_schema(
+                ("properties", "b", "properties", "hello"),
+                propagate=True)
+
+        print_and_test(schema.schema, res_schema.schema)
