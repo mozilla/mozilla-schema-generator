@@ -5,6 +5,7 @@ telemetry/anonymous
 telemetry/bhr
 telemetry/block-autoplay
 telemetry/certificate-checker
+telemetry/core
 telemetry/crash
 telemetry/deletion
 telemetry/deployment-checker
