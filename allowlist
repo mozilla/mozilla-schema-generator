@@ -21,7 +21,6 @@ telemetry/health
 telemetry/heartbeat
 telemetry/malware-addon-states
 telemetry/mobile-event
-telemetry/mobile-metrics
 telemetry/modules
 telemetry/new-profile
 telemetry/optout
