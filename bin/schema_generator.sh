@@ -130,6 +130,9 @@ function main() {
     # Generate new schemas
     mozilla-schema-generator generate-glean-pings --out-dir .
 
+    # Overwrite schemas in schemas dir
+    cp -TRv $BASE_DIR/mozilla-schema-generator/schemas/ ./
+
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
 
