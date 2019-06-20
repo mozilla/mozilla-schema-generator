@@ -14,4 +14,5 @@ org-mozilla-tv-firefox/.*
 pocket/.*
 telemetry/core
 telemetry/main
+telemetry/prio
 webpagetest/.*
