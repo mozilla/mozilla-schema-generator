@@ -17,9 +17,6 @@
 #   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
 #   make build && make run
 #
-# In a development environment, the script will default to a testing branch.
-# This can be changed by setting MPS_BRANCH_PUBLISH in the local shell.
-#
 # TODO: Update schema mapping for validation
 # TODO: Handle overwriting glean schemas
 # TODO: Include Main Ping from schema generation
@@ -29,7 +26,7 @@ set -exuo pipefail
 
 MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
 MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
-MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"generated-schemas"}
+MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
 
 MPS_BRANCH_WORKING="local-working-branch"
 MPS_SCHEMAS_DIR="schemas"
