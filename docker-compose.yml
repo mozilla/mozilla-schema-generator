@@ -9,3 +9,6 @@ services:
     command: "true"
     environment:
       - MPS_SSH_KEY_BASE64
+      - MPS_REPO_URL
+      - MPS_BRANCH_SOURCE
+      - MPS_BRANCH_PUBLISH=test-generated-schemas

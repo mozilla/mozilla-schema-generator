@@ -8,10 +8,17 @@
 # Environment variables:
 #   MPS_SSH_KEY_BASE64: A base64-encoded ssh secret key with permissions to push
 #                       to mozilla-pipeline-schemas
+#   MPS_REPO_URL:       The URL to the mozilla-pipeline-schemas repository
+#   MPS_BRANCH_SOURCE:  The source branch for generating schemas e.g. master
+#   MPS_BRANCH_PUBLISH: The destination branch for publishing schemas
+#                       e.g. generated-schemas
 #
 # Example usage:
 #   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
 #   make build && make run
+#
+# In a development environment, the script will default to a testing branch.
+# This can be changed by setting MPS_BRANCH_PUBLISH in the local shell.
 #
 # TODO: Update schema mapping for validation
 # TODO: Handle overwriting glean schemas
@@ -20,12 +27,12 @@
 
 set -exuo pipefail
 
-MPS_REPO_URL="git@github.com:mozilla-services/mozilla-pipeline-schemas.git"
-MPS_BRANCH_SOURCE="master"
-MPS_BRANCH_WORKING="local-working-branch"
-MPS_BRANCH_PUBLISH="generated-schemas"
-MPS_SCHEMAS_DIR="schemas"
+MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
+MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
+MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"generated-schemas"}
 
+MPS_BRANCH_WORKING="local-working-branch"
+MPS_SCHEMAS_DIR="schemas"
 BASE_DIR="/app"
 ALLOWLIST="$BASE_DIR/mozilla-schema-generator/allowlist"
 
@@ -67,9 +74,9 @@ function clone_and_configure_mps() {
 
     [[ -d mozilla-pipeline-schemas ]] && rm -r mozilla-pipeline-schemas
 
-    git clone $MPS_REPO_URL
+    git clone "$MPS_REPO_URL"
     cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR
-    git checkout $MPS_BRANCH_SOURCE
+    git checkout "$MPS_BRANCH_SOURCE"
     git checkout -b $MPS_BRANCH_WORKING
 }
 
@@ -107,7 +114,7 @@ function commit_schemas() {
 
     git commit -a -m "Interim Commit"
 
-    git checkout $MPS_BRANCH_PUBLISH || git checkout -b $MPS_BRANCH_PUBLISH
+    git checkout "$MPS_BRANCH_PUBLISH" || git checkout -b "$MPS_BRANCH_PUBLISH"
 
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
