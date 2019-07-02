@@ -146,7 +146,7 @@ function main() {
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
         bq_out=${fname/schema.json/bq}
-        jsonschema-transpiler --type bigquery "$fname" > "$bq_out"
+        jsonschema-transpiler --resolve drop --type bigquery "$fname" > "$bq_out"
     done
 
     # Keep only allowed schemas
