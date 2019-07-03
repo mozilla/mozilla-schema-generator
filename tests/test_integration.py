@@ -213,19 +213,24 @@ class TestIntegration(object):
 
     def test_max_size(self, schema, env, probes):  # noqa F811
         # Test that we split into multiple tables when we exceed max_size of columns
-        probes["histogram/third_probe"] = {
-            "history": [
-                {
-                    "second_level": False,
-                    "details": {"keyed": False}
+
+        # env size = 1, existing histograms = 1, add 4 to get max size of 6
+        num_added_histograms = 4
+
+        for n in range(num_added_histograms):
+            probes["histogram/{}".format(n)] = {
+                "history": [
+                    {
+                        "second_level": False,
+                        "details": {"keyed": False}
+                    }
+                ],
+                "type": "histogram",
+                "name": str(n),
+                "first_added": {
+                    "nightly": "2019-01-01 00:00:00"
                 }
-            ],
-            "type": "histogram",
-            "name": "third_probe",
-            "first_added": {
-                "nightly": "2019-01-01 00:00:00"
             }
-        }
 
         config = Config({
             "top_level": {
@@ -246,6 +251,13 @@ class TestIntegration(object):
             }
         })
 
+        props = {
+            str(n): MainProbe.histogram_schema
+            for n in range(num_added_histograms)
+        }
+
+        props["test_probe"] = MainProbe.histogram_schema
+
         expected = {
             "extra": [env],
             "single": [
@@ -257,10 +269,7 @@ class TestIntegration(object):
                         },
                         "top_level": {
                             "type": "object",
-                            "properties": {
-                                "test_probe": MainProbe.histogram_schema,
-                                "third_probe": MainProbe.histogram_schema
-                            }
+                            "properties": props
                         }
                     }
                 },
@@ -287,5 +296,5 @@ class TestIntegration(object):
         }
 
         ping = LocalMainPing(schema, env, probes)
-        result = ping.generate_schema(config, split=True, max_size=13)
+        result = ping.generate_schema(config, split=True, max_size=6)
         print_and_test(expected, result)
