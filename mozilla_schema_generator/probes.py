@@ -51,39 +51,8 @@ class MainProbe(Probe):
 
     first_added_key = "first_added"
 
-    # TODO: Do we use log_sum_*, sum_squares_*?
     histogram_schema = {
-        "type": "object",
-        "properties": {
-            "bucket_count": {
-                "minimum": 0,
-                "type": "integer"
-            },
-            "histogram_type": {
-                "minimum": 0,
-                "type": "integer"
-            },
-            "range": {
-                "items": {
-                    "type": "integer"
-                },
-                "type": "array"
-            },
-            "sum": {
-                "minimum": 0,
-                "type": "integer"
-            },
-            "values": {
-                "additionalProperties": False,
-                "patternProperties": {
-                    "^[0-9]+$": {
-                        "minimum": 0,
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            }
-        }
+        "type": "string",
     }
 
     def __init__(self, identifier: str, definition: dict):
