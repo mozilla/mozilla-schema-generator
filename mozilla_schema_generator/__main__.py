@@ -64,7 +64,7 @@ def generate_main_ping(config, out_dir, split, pretty):
 
     config = Config("main", config_data)
     schemas = schema_generator.generate_schema(config, split=split)
-    dump_schema(schemas, out_dir, pretty)
+    dump_schema(schemas, out_dir, pretty, version=4)
 
 
 @click.command()
@@ -144,7 +144,7 @@ def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema):
     dump_schema(schemas, out_dir.joinpath(repo_id), pretty)
 
 
-def dump_schema(schemas, out_dir, pretty):
+def dump_schema(schemas, out_dir, pretty, *, version=1):
     json_dump_args = {'cls': SchemaEncoder}
     if pretty:
         json_dump_args['indent'] = 4
@@ -158,10 +158,14 @@ def dump_schema(schemas, out_dir, pretty):
             ping_out_dir = out_dir.joinpath(name)
             if not ping_out_dir.exists():
                 ping_out_dir.mkdir(parents=True)
-            for i, schema in enumerate(_schemas):
-                fname = ping_out_dir.joinpath("{}.{}.schema.json".format(name, i+1))
-                with open(fname, 'w') as f:
-                    f.write(json.dumps(schema, **json_dump_args))
+
+            if len(_schemas) > 1:
+                raise Exception("Table splitting is currently unsupported")
+
+            schema = _schemas[0]
+            fname = ping_out_dir.joinpath("{}.{}.schema.json".format(name, version))
+            with open(fname, 'w') as f:
+                f.write(json.dumps(schema, **json_dump_args))
 
 
 @click.group()
