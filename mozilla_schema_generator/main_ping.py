@@ -8,13 +8,14 @@ import json
 from .generic_ping import GenericPing
 from .schema import Schema
 from .probes import MainProbe
+from .utils import prepend_properties
 from typing import List
 
 
 class MainPing(GenericPing):
 
-    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/schemas/telemetry/main/main.4.schema.json" # noqa E501
-    env_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/dev/templates/include/telemetry/environment.1.schema.json" # noqa E501
+    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json" # noqa E501
+    env_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/templates/include/telemetry/environment.1.schema.json" # noqa E501
     probes_url = "https://probeinfo.telemetry.mozilla.org/firefox/all/main/all_probes"
 
     def __init__(self):
@@ -66,6 +67,7 @@ class MainPing(GenericPing):
         # 2. Make partnerNames just a str array
         schema.set_schema_elem(("properties", "environment", "properties", "partner", "properties", "partnerNames", "type"), "array") # noqa E501
         schema.set_schema_elem(("properties", "environment", "properties", "partner", "properties", "partnerNames", "items"), {"type": "string"}) # noqa E501
+        schema._delete_key(prepend_properties(("environment", "settings", "userPrefs")))
         return schema
 
     def get_env(self):

@@ -17,4 +17,4 @@ class TestPing(object):
         ping = LocalMainPing(schema, env, probes)
 
         with pytest.raises(SchemaException):
-            ping.generate_schema(Config({}), max_size=1)
+            ping.generate_schema(Config("default", {}), max_size=1)

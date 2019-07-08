@@ -23,7 +23,7 @@ def glean():
 def config():
     config_file = "./mozilla_schema_generator/configs/glean.yaml"
     with open(config_file) as f:
-        return Config(yaml.load(f))
+        return Config("glean", yaml.load(f))
 
 
 class NoProbeGleanPing(glean_ping.GleanPing):

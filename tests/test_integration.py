@@ -16,7 +16,7 @@ from mozilla_schema_generator.probes import MainProbe
 class TestIntegration(object):
 
     def test_full_representation(self, schema, env, probes):  # noqa F811
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "top_level",
@@ -36,7 +36,7 @@ class TestIntegration(object):
         })
 
         expected = {
-            "full": [
+            "default": [
                 {
                     "type": "object",
                     "properties": {
@@ -70,7 +70,7 @@ class TestIntegration(object):
 
 
     def test_split_representation(self, schema, env, probes):  # noqa F811
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "top_level",
@@ -137,7 +137,7 @@ class TestIntegration(object):
     def test_non_env_or_probe_full(self, schema, env, probes):  # noqa F811
         # Add a new field that is neither probe nor env
         schema["properties"]["env_ignore"] = {"type": "string"}
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "top_level",
@@ -158,13 +158,13 @@ class TestIntegration(object):
 
         ping = LocalMainPing(schema, env, probes)
         result = ping.generate_schema(config)
-        assert "env_ignore" in result["full"][0]["properties"]
+        assert "env_ignore" in result["default"][0]["properties"]
 
 
     def test_non_env_or_probe_split(self, schema, env, probes):  # noqa F811
         # Add a new field that is neither probe nor env - should be in "extra" table
         schema["properties"]["env_ignore"] = {"type": "string"}
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "top_level",
@@ -194,7 +194,7 @@ class TestIntegration(object):
         probes["histogram/test_probe"]["history"][0]["arr"] = ["val1", "val2"]
         probes["histogram/second_level_probe"]["history"][0]["arr"] = ["val2"]
 
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "top_level",
@@ -209,7 +209,7 @@ class TestIntegration(object):
         ping = LocalMainPing(schema, env, probes)
         result = ping.generate_schema(config)
 
-        assert "test_probe" in result["full"][0]["properties"]["top_level"]["properties"]
+        assert "test_probe" in result["default"][0]["properties"]["top_level"]["properties"]
 
     def test_max_size(self, schema, env, probes):  # noqa F811
         # Test that we split into multiple tables when we exceed max_size of columns
@@ -232,7 +232,7 @@ class TestIntegration(object):
                 }
             }
 
-        config = Config({
+        config = Config("default", {
             "top_level": {
                 "match": {
                     "table_group": "single",

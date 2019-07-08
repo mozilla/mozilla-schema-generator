@@ -62,7 +62,7 @@ def generate_main_ping(config, out_dir, split, pretty):
     with open(config, 'r') as f:
         config_data = yaml.load(f)
 
-    config = Config(config_data)
+    config = Config("main", config_data)
     schemas = schema_generator.generate_schema(config, split=split)
     dump_schema(schemas, out_dir, pretty)
 
@@ -132,7 +132,7 @@ def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
     with open(config, 'r') as f:
         config_data = yaml.load(f)
 
-    config = Config(config_data)
+    config = Config("glean", config_data)
 
     for repo_name, repo_id in repos:
         write_schema(repo_name, repo_id, config, out_dir, split, pretty, generic_schema)
