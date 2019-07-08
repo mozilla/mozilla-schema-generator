@@ -23,50 +23,9 @@ class MainPing(GenericPing):
 
     def get_schema(self):
         schema = super().get_schema()
-
-        # 1. add item to range
-        range_type = {"type": "integer"}
-        schema.set_schema_elem(("properties", "payload", "properties", "histograms", "additionalProperties", "properties", "range", "items"), range_type) # noqa E501
-        schema.set_schema_elem(("properties", "payload", "properties", "keyedHistograms", "additionalProperties", "additionalProperties", "properties", "range", "items"), range_type) # noqa E501
-        for p in ("parent", "content", "gpu"):
-            schema.set_schema_elem(("properties", "payload", "properties", "processes", "properties", p, "properties", "histograms", "additionalProperties", "properties", "range", "items"), range_type) # noqa E501
-            schema.set_schema_elem(("properties", "payload", "properties", "processes", "properties", p, "properties", "keyedHistograms", "additionalProperties", "additionalProperties", "properties", "range", "items"), range_type) # noqa E501
-
-        # 3. Add items defn to UIMeasurements
-        schema.set_schema_elem(
-            ("properties", "payload", "properties", "UIMeasurements", "items"),
-            {
-                "type": "object",
-                "properties": {
-                    "type": {"type": "string"},
-                    "action": {"type": "string"},
-                    "method": {"type": "string"},
-                    "extras": {"type": "string"},
-                    "timestamp": {"type": "number"},
-                },
-                "additionalProperties": False
-            })
-
-        # 4. Ignore childPayloads, deprecated in 61
-        schema._delete_key(("properties", "payload", "properties", "childPayloads"))
-
-        # 5. Ignore log, deprecated in 61
-        schema._delete_key(("properties", "payload", "properties", "log"))
-
-        # 6. Update slices
-        for p in ("parent", "content", "gpu"):
-            schema.set_schema_elem(("properties", "payload", "properties", "processes", "properties", p, "properties", "gc", "properties", "random", "items", "properties", "slices", "type"), "number") # noqa E501
-            schema.set_schema_elem(("properties", "payload", "properties", "processes", "properties", p, "properties", "gc", "properties", "worst", "items", "properties", "slices", "type"), "number") # noqa E501
-
-        # 7. Ignore threadHangStats, deprecated in 57
-        schema._delete_key(("properties", "payload", "properties", "threadHangStats"))
-
         return self._update_env(schema)
 
     def _update_env(self, schema):
-        # 2. Make partnerNames just a str array
-        schema.set_schema_elem(("properties", "environment", "properties", "partner", "properties", "partnerNames", "type"), "array") # noqa E501
-        schema.set_schema_elem(("properties", "environment", "properties", "partner", "properties", "partnerNames", "items"), {"type": "string"}) # noqa E501
         schema._delete_key(prepend_properties(("environment", "settings", "userPrefs")))
         return schema
 
