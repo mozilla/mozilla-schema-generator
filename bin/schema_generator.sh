@@ -146,7 +146,10 @@ function main() {
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
         bq_out=${fname/schema.json/bq}
-        jsonschema-transpiler --resolve drop --type bigquery "$fname" > "$bq_out"
+        # Snake case untrustedModules for bug 1565074
+        bq_out=${bq_out//untrustedModules/untrusted_modules}
+        mkdir -p $(dirname "$bq_out")
+        jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
     done
 
     # Keep only allowed schemas
