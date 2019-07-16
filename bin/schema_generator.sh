@@ -146,8 +146,9 @@ function main() {
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
         bq_out=${fname/schema.json/bq}
-        # Snake case untrustedModules for bug 1565074
-        bq_out=${bq_out//untrustedModules/untrusted_modules}
+        # Normalize name of untrustedModules ping for bug 1565074;
+        # the // means "replace all".
+        bq_out=${bq_out//untrustedModules/untrusted-modules}
         mkdir -p $(dirname "$bq_out")
         jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
     done
