@@ -116,7 +116,7 @@ function commit_schemas() {
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
-    git commit -a -m "Auto-push from schema generation" || echo "Nothing to commit"
+    git commit -a -m "Auto-push from schema generation [ci skip]" || echo "Nothing to commit"
 }
 
 function main() {
