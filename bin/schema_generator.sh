@@ -116,7 +116,7 @@ function commit_schemas() {
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
-    git commit -a -m "Auto-push from schema generation" || echo "Nothing to commit"
+    git commit -a -m "Auto-push from schema generation [ci skip]" || echo "Nothing to commit"
 }
 
 function main() {
@@ -144,7 +144,11 @@ function main() {
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
         bq_out=${fname/schema.json/bq}
-        jsonschema-transpiler --type bigquery "$fname" > "$bq_out"
+        # Normalize name of untrustedModules ping for bug 1565074;
+        # the // means "replace all".
+        bq_out=${bq_out//untrustedModules/untrusted-modules}
+        mkdir -p $(dirname "$bq_out")
+        jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
     done
 
     # Keep only allowed schemas
