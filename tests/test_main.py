@@ -19,7 +19,7 @@ def main():
 def config():
     config_file = "./mozilla_schema_generator/configs/main.yaml"
     with open(config_file) as f:
-        return Config(yaml.load(f))
+        return Config("main", yaml.load(f))
 
 
 class TestMainPing(object):
@@ -28,7 +28,7 @@ class TestMainPing(object):
         assert main.get_env().get_size() > 0
 
     def test_single_schema(self, main, config):
-        schema = main.generate_schema(config)["full"][0].schema
+        schema = main.generate_schema(config)["main"][0].schema
 
         assert "environment" in schema["properties"]
         assert "payload" in schema["properties"]
