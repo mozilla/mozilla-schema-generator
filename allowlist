@@ -12,7 +12,5 @@ org-mozilla-reference-browser/.*
 org-mozilla-samples-glean/.*
 org-mozilla-tv-firefox/.*
 pocket/.*
-telemetry/core
-telemetry/main
-telemetry/prio
+telemetry/.*
 webpagetest/.*
