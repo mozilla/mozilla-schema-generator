@@ -83,14 +83,11 @@ function prepare_metadata() {
 
     find ./telemetry -name "*.schema.json" -type f \
         -exec metadata_merge $telemetry_metadata {} ";"
-    find . -path ./telemetry -prune -o -name "*.schema.json" -type f \
+    find . \( -path ./telemetry -o -path ./metadata \) -prune -o -name "*.schema.json" -type f \
         -exec metadata_merge $structured_metadata {} ";"
 }
 
 function filter_schemas() {
-    # Remove metadata schemas
-    rm -rf metadata
-
     # Pioneer-study is not nested, remove it
     rm -rf pioneer-study
 
@@ -143,6 +140,10 @@ function main() {
 
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
+        # This schema is AWS-specific, fails transpilation, and should be ignored
+        if [[ $fname =~ metadata/sources ]] ; then
+            continue
+        fi
         bq_out=${fname/schema.json/bq}
         # Normalize names of pings for bug 1565074;
         # the // means "replace all".
