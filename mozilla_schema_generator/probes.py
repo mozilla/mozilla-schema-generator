@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, List
 from .utils import _get
 from .schema import SchemaException
 
@@ -23,13 +23,15 @@ class Probe(object):
         self.id = identifier
         self.type = definition[self.type_key]
         self.name = definition[self.name_key]
-        self.definition = definition[self.history_key][0]
 
     def get_type(self) -> str:
         return self.type
 
     def get_name(self) -> str:
         return self.name
+
+    def get_last_change(self) -> datetime:
+        raise NotImplementedError("Last Change is not available on generic probe")
 
     def get_first_added(self) -> datetime:
         raise NotImplementedError("First added is not available on generic probe")
@@ -56,15 +58,25 @@ class MainProbe(Probe):
     }
 
     def __init__(self, identifier: str, definition: dict):
-        self._set_first_added(definition[self.first_added_key])
+        self._set_dates(definition[self.first_added_key])
+        self._set_definition(definition)
         super().__init__(identifier, definition)
 
-    def _set_first_added(self, first_added_value: dict):
+    def _set_definition(self, full_defn: dict):
+        history = [d for arr in full_defn["history"].values() for d in arr]
+        self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
+
+    def _set_dates(self, first_added_value: dict):
         vals = [datetime.fromisoformat(v) for v in first_added_value.values()]
+
         self.first_added = min(vals)
+        self.last_change = max(vals)
 
     def get_first_added(self) -> datetime:
         return self.first_added
+
+    def get_last_change(self) -> datetime:
+        return self.last_change
 
     def get_schema(self, addtlProps: Any) -> Any:
         # Get the schema based on the probe type
@@ -92,22 +104,39 @@ class MainProbe(Probe):
 
 class GleanProbe(Probe):
 
+    all_pings_keyword = "all_pings"
     first_added_key = "first_added"
 
-    def __init__(self, identifier: str, definition: dict):
-        self._set_first_added(definition)
+    def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
+        self._set_dates(definition)
+        self._set_definition(definition)
         super().__init__(identifier, definition)
 
-    def _set_first_added(self, definition: dict):
+        if pings is not None:
+            self._update_all_pings(pings)
+
+    def _update_all_pings(self, pings: List[str]):
+        if GleanProbe.all_pings_keyword in self.definition["send_in_pings"]:
+            self.definition["send_in_pings"] = pings
+
+    def _set_definition(self, full_defn: dict):
+        self.definition = max(full_defn[self.history_key],
+                              key=lambda x: datetime.fromisoformat(x["dates"]["last"]))
+
+    def _set_dates(self, definition: dict):
         vals = [
             datetime.fromisoformat(d["dates"]["first"])
             for d in definition[self.history_key]
         ]
 
         self.first_added = min(vals)
+        self.last_change = max(vals)
 
     def get_first_added(self) -> datetime:
         return self.first_added
+
+    def get_last_change(self) -> datetime:
+        return self.last_change
 
     def get_schema(self, addtlProps: Any) -> Any:
         if addtlProps is None:

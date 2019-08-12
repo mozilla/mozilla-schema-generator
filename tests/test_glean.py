@@ -7,11 +7,11 @@
 import yaml
 import pytest
 from .test_utils import print_and_test
-from mozilla_schema_generator import glean_ping, probes
+from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
 
-from typing import List
+from typing import Dict, List
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def config():
 
 
 class NoProbeGleanPing(glean_ping.GleanPing):
-    def get_probes(self) -> List[probes.GleanProbe]:
+    def _get_probe_defn_list(self) -> List[Dict]:
         return []
 
 

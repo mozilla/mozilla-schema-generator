@@ -41,11 +41,6 @@ class MainPing(GenericPing):
     def get_probes(self) -> List[MainProbe]:
         probes = self._get_json(self.probes_url)
 
-        for name, defn in probes.items():
-            history = [d for arr in defn["history"].values() for d in arr]
-            defn["history"] = sorted(history, key=lambda x: int(x["versions"]["first"]),
-                                     reverse=True)
-
         filtered = {
             pname: pdef for pname, pdef in probes.items()
             if "nightly" in pdef["first_added"]
