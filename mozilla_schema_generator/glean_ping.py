@@ -27,7 +27,7 @@ class GleanPing(GenericPing):
 
     default_dependencies = ['glean']
     default_pings = {"baseline", "events", "metrics"}
-    ignore_pings = {"default", "glean_ping_info", "glean_client_info"}
+    ignore_pings = {"all_pings", "default", "glean_ping_info", "glean_client_info"}
 
     def __init__(self, repo):  # TODO: Make env-url optional
         self.repo = repo
@@ -71,7 +71,7 @@ class GleanPing(GenericPing):
         logging.info(f"For {self.repo}, found Glean dependencies: {dependencies}")
         return dependencies
 
-    def get_probes(self) -> List[GleanProbe]:
+    def _get_probe_defn_list(self) -> List[Dict]:
         probes = self._get_json(self.probes_url)
         items = list(probes.items())
         for dependency in self.get_dependencies():
@@ -80,10 +80,16 @@ class GleanPing(GenericPing):
             )
             items += list(dependency_probes.items())
 
-        return [GleanProbe(_id, defn) for _id, defn in items]
+        return items
+
+    def get_probes(self) -> List[GleanProbe]:
+        probes = self._get_probe_defn_list()
+        pings = self.get_pings()
+
+        return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
 
     def get_pings(self) -> Set[str]:
-        probes = self.get_probes()
+        probes = [GleanProbe(_id, defn) for _id, defn in self._get_probe_defn_list()]
         addl_pings = {
             ping for probe in probes
             for ping in probe.definition["send_in_pings"]

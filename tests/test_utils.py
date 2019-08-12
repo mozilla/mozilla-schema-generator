@@ -68,13 +68,19 @@ def probes():
             "first_added": {
                 "nightly": "2019-01-02 00:00:00"
             },
-            "history": [
-                {
-                    "description": "Remember the Canterbury",
-                    "second_level": True,
-                    "details": {"keyed": False}
-                }
-            ]
+            "history": {
+                'nightly': [
+                    {
+                        "description": "Remember the Canterbury",
+                        "second_level": True,
+                        "details": {"keyed": False},
+                        "versions": {
+                            "first": "50",
+                            "last": "60",
+                        },
+                    }
+                ]
+            }
         },
         "histogram/test_probe": {
             "name": "test_probe",
@@ -82,13 +88,19 @@ def probes():
             "first_added": {
                 "nightly": "2019-01-01 00:00:00"
             },
-            "history": [
-                {
-                    "description": "Remember the Canterbury",
-                    "second_level": False,
-                    "details": {"keyed": False}
-                }
-            ]
+            "history": {
+                'nightly': [
+                    {
+                        "description": "Remember the Canterbury",
+                        "second_level": False,
+                        "details": {"keyed": False},
+                        "versions": {
+                            "first": "50",
+                            "last": "60",
+                        },
+                    }
+                ]
+            }
         }
     }
 

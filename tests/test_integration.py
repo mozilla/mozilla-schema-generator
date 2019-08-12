@@ -191,8 +191,8 @@ class TestIntegration(object):
 
 
     def test_contains(self, schema, env, probes):  # noqa F811
-        probes["histogram/test_probe"]["history"][0]["arr"] = ["val1", "val2"]
-        probes["histogram/second_level_probe"]["history"][0]["arr"] = ["val2"]
+        probes["histogram/test_probe"]["history"]["nightly"][0]["arr"] = ["val1", "val2"]
+        probes["histogram/second_level_probe"]["history"]["nightly"][0]["arr"] = ["val2"]
 
         config = Config("default", {
             "top_level": {
@@ -219,12 +219,18 @@ class TestIntegration(object):
 
         for n in range(num_added_histograms):
             probes["histogram/{}".format(n)] = {
-                "history": [
-                    {
-                        "second_level": False,
-                        "details": {"keyed": False}
-                    }
-                ],
+                "history": {
+                    "nightly": [
+                        {
+                            "second_level": False,
+                            "details": {"keyed": False},
+                            "versions": {
+                                "first": "50",
+                                "last": "60",
+                            },
+                        }
+                    ]
+                },
                 "type": "histogram",
                 "name": str(n),
                 "first_added": {
