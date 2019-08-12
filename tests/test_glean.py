@@ -47,6 +47,9 @@ class TestGleanPing(object):
             assert "ping_info" in schema["properties"]
             assert "client_info" in schema["properties"]
 
+            labeled_counters = _get(schema, prepend_properties(("metrics", "labeled_counter")))
+            assert "glean.error.invalid_label" in labeled_counters['properties']
+
             if name == "baseline":
                 # Device should be included, since it's a standard metric
                 strings = _get(schema, prepend_properties(("metrics", "string")))
