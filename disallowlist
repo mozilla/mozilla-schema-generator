@@ -1,0 +1,5 @@
+\./pioneer-study/.*
+metadata/structured-ingestion/.*
+metadata/telemetry-ingestion/.*
+metadata/credentials/.*
+glean/.*

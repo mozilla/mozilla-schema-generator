@@ -31,7 +31,7 @@ MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
 MPS_BRANCH_WORKING="local-working-branch"
 MPS_SCHEMAS_DIR="schemas"
 BASE_DIR="/app"
-ALLOWLIST="$BASE_DIR/mozilla-schema-generator/allowlist"
+DISALLOWLIST="$BASE_DIR/mozilla-schema-generator/disallowlist"
 
 
 function setup_git_ssh() {
@@ -91,8 +91,8 @@ function filter_schemas() {
     # Pioneer-study is not nested, remove it
     rm -rf pioneer-study
 
-    # Remove BigQuery schemas that are not in the allowlist
-    find . -name '*.bq' | grep -v -f $ALLOWLIST | xargs rm -f
+    # Remove BigQuery schemas that are in the disallow list
+    find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
 }
 
 function commit_schemas() {
