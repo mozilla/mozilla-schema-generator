@@ -8,6 +8,7 @@ mobile/.*
 mozdata/.*
 mozza/.*
 org-mozilla-fenix/.*
+org-mozilla-fenix-nightly/.*
 org-mozilla-reference-browser/.*
 org-mozilla-samples-glean/.*
 org-mozilla-tv-firefox/.*
