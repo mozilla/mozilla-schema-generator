@@ -4,3 +4,4 @@ metadata/telemetry-ingestion/.*
 metadata/credentials/.*
 metadata/sources/.*
 glean/.*
+telemetry/first-shutdown/.*
