@@ -4,6 +4,14 @@ import click
 import json 
 import pathlib
 import shutil
+import jsonschema
+
+
+SCHEMA_PATH = pathlib.Path(__file__).parent.parent / "validation-schemas" / "aliases.json"
+
+def get_schema():
+    with open(SCHEMA_PATH) as f:
+        return json.load(f)
 
 
 @click.command()
@@ -28,10 +36,13 @@ import shutil
     required=True
 )
 def main(aliases_path, base_dir):
+
     base_dir = pathlib.Path(base_dir)
 
     with open(aliases_path) as f:
         aliases_parsed = json.load(f)
+
+    jsonschema.validate(instance=aliases_parsed, schema=get_schema())
 
     for dest_namespace, doctypes in aliases_parsed.items():
         for dest_doctype, alias_info in doctypes.items():
@@ -40,11 +51,15 @@ def main(aliases_path, base_dir):
             source_dir = base_dir / source_namespace / source_doctype
             dest_dir = base_dir / dest_namespace / dest_doctype
 
+            assert source_dir.exists()
+
             for source in source_dir.glob('*'):
                 fname = source.name.replace(source_doctype, dest_doctype)
                 dest = dest_dir / fname
 
                 print("Aliasing {} to {}".format(dest, source))
+
+                dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(source, dest)
 
 
