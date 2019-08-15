@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import click
+import json 
+import pathlib
+import shutil
+
+
+@click.command()
+@click.argument(
+    'aliases-path',
+    type=click.Path(
+        dir_okay=False,
+        file_okay=True,
+        writable=False,
+        exists=True,
+    ),
+    required=True
+)
+@click.argument(
+    'base-dir',
+    type=click.Path(
+        dir_okay=True,
+        file_okay=False,
+        writable=True,
+        exists=True,
+    ),
+    required=True
+)
+def main(aliases_path, base_dir):
+    base_dir = pathlib.Path(base_dir)
+
+    with open(aliases_path) as f:
+        aliases_parsed = json.load(f)
+
+    for dest_ns, doctypes in aliases_parsed.items():
+        for dest_dt, alias_info in doctypes.items():
+            source_ns = alias_info['src-namespace']
+            source_dt = alias_info['src-doctype']
+            source_dir = base_dir / source_ns / source_dt
+            dest_dir = base_dir / dest_ns / dest_dt 
+            for source in source_dir.glob('*'):
+                fname = source.name.replace(source_dt, dest_dt)
+                dest = dest_dir / fname
+
+                print("Aliasing {} to {}".format(dest, source))
+                shutil.copy(source, dest)
+
+
+if __name__ == "__main__":
+    main()

@@ -32,6 +32,7 @@ MPS_BRANCH_WORKING="local-working-branch"
 MPS_SCHEMAS_DIR="schemas"
 BASE_DIR="/app"
 DISALLOWLIST="$BASE_DIR/mozilla-schema-generator/disallowlist"
+ALIASES_PATH="$BASE_DIR/mozilla-schema-generator/aliases.json"
 
 
 function setup_git_ssh() {
@@ -155,6 +156,9 @@ function main() {
 
     # Keep only allowed schemas
     filter_schemas
+
+    # Add schema aliases
+    alias_schemas $ALIASES_PATH .
 
     # Push to branch of MPS
     cd ../

@@ -32,6 +32,7 @@ lint:
 
 test:
 	py.test
+	jsonschema -i aliases.json validation-schemas/aliases.json
 
 coverage:
 	pytest tests/ --cov=mozilla_schema_generator
