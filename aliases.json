@@ -1,12 +1,12 @@
 {
   "telemetry": {
     "saved-session": {
-      "src-namespace": "telemetry",
-      "src-doctype": "main"
+      "source-namespace": "telemetry",
+      "source-doctype": "main"
     },
     "first-shutdown": {
-      "src-namespace": "telemetry",
-      "src-doctype": "main"
+      "source-namespace": "telemetry",
+      "source-doctype": "main"
     }
   }
 }
