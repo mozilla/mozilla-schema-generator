@@ -7,16 +7,16 @@
         "[a-zA-Z_-]": {
           "type": "object",
           "properties": {
-            "src-namespace": {
+            "source-namespace": {
               "type": "string"
             },
-            "src-doctype": {
+            "source-doctype": {
               "type": "string"
             }
           },
           "required": [
-            "src-namespace",
-            "src-doctype"
+            "source-namespace",
+            "source-doctype"
           ],
           "additionalProperties": false
         }

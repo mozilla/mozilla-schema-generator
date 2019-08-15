@@ -33,14 +33,15 @@ def main(aliases_path, base_dir):
     with open(aliases_path) as f:
         aliases_parsed = json.load(f)
 
-    for dest_ns, doctypes in aliases_parsed.items():
-        for dest_dt, alias_info in doctypes.items():
-            source_ns = alias_info['src-namespace']
-            source_dt = alias_info['src-doctype']
-            source_dir = base_dir / source_ns / source_dt
-            dest_dir = base_dir / dest_ns / dest_dt 
+    for dest_namespace, doctypes in aliases_parsed.items():
+        for dest_doctype, alias_info in doctypes.items():
+            source_namespace = alias_info['source-namespace']
+            source_doctype = alias_info['source-doctype']
+            source_dir = base_dir / source_namespace / source_doctype
+            dest_dir = base_dir / dest_namespace / dest_doctype
+
             for source in source_dir.glob('*'):
-                fname = source.name.replace(source_dt, dest_dt)
+                fname = source.name.replace(source_doctype, dest_doctype)
                 dest = dest_dir / fname
 
                 print("Aliasing {} to {}".format(dest, source))
