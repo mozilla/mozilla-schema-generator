@@ -31,6 +31,10 @@ RUN pip install --upgrade pip
 
 WORKDIR ${HOME}
 
+ADD requirements requirements/
+RUN pip install -r requirements/requirements.txt
+RUN pip install -r requirements/test_requirements.txt
+
 ADD . ${HOME}/mozilla-schema-generator
 ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
 
