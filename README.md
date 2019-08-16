@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/master.svg?style=svg)](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/master)
+
 # Mozilla Schema Generator
 
 A library for generating full representations of Mozilla telemetry pings.
