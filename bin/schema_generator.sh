@@ -57,15 +57,6 @@ function setup_git_ssh() {
     chmod 700 "$HOME/.ssh/id_ed25519"
 }
 
-function setup_dependencies() {
-    # Installs mozilla-schema-generator in a virtual environment
-
-    python3 -m venv msg-venv
-    # shellcheck disable=SC1091
-    source msg-venv/bin/activate
-    pip install -e ./mozilla-schema-generator
-}
-
 function clone_and_configure_mps() {
     # Checkout mozilla-pipeline-schemas and changes directory to prepare for
     # schema generation.
@@ -122,9 +113,6 @@ function main() {
 
     # Setup ssh key and git config
     setup_git_ssh
-
-    # Install dependencies
-    setup_dependencies
 
     # Pull in all schemas from MPS and change directory
     clone_and_configure_mps
