@@ -36,9 +36,10 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        'requests',
         'click',
+        'jsonschema'
         'pyyaml',
+        'requests',
     ],
     license='MIT',
     zip_safe=False,
