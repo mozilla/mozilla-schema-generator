@@ -133,11 +133,6 @@ function main() {
         if [[ $fname =~ metadata/sources ]] ; then
             continue
         fi
-        # This is a legacy camelCase docType and should be ignored in favor of
-        # its kebab-case replacement.
-        if [[ $fname =~ [^-_.a-z0-9] ]] ; then
-            continue
-        fi
         bq_out=${fname/schema.json/bq}
         mkdir -p $(dirname "$bq_out")
         jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
