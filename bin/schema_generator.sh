@@ -134,10 +134,6 @@ function main() {
             continue
         fi
         bq_out=${fname/schema.json/bq}
-        # Normalize names of pings for bug 1565074;
-        # the // means "replace all".
-        bq_out=${bq_out//untrustedModules/untrusted-modules}
-        bq_out=${bq_out//disableSHA1rollout/disable-sha1rollout}
         mkdir -p $(dirname "$bq_out")
         jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
     done

@@ -5,3 +5,5 @@ metadata/credentials/.*
 metadata/sources/.*
 glean/.*
 telemetry/first-shutdown/.*
+telemetry/disableSHA1rollout/.*
+telemetry/untrustedModules/.*
