@@ -14,6 +14,11 @@ from typing import List
 
 class MainPing(GenericPing):
 
+    # Only includes probes that have been available at some point past
+    # this version.
+    # ONLY DECREMENT, or the schema will change in an incompatible way!
+    MIN_FX_VERSION = 30
+
     schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json" # noqa E501
     env_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/templates/include/telemetry/environment.1.schema.json" # noqa E501
     probes_url = "https://probeinfo.telemetry.mozilla.org/firefox/all/main/all_probes"
@@ -46,4 +51,7 @@ class MainPing(GenericPing):
             if "nightly" in pdef["first_added"]
         }
 
-        return [MainProbe(_id, defn) for _id, defn in filtered.items()]
+        # This will be made much better with PEP 572
+        main_probes = [MainProbe(_id, defn) for _id, defn in filtered.items()]
+        return [p for p in main_probes
+                if int(p.definition["versions"]["last"]) > self.MIN_FX_VERSION]

@@ -33,6 +33,10 @@ class TestMainPing(object):
         assert "environment" in schema["properties"]
         assert "payload" in schema["properties"]
 
+    def test_min_probe_version(self, main):
+        probes = main.get_probes()
+        assert max([int(p.definition["versions"]["last"]) for p in probes]) >= main.MIN_FX_VERSION
+
     def test_split_schema(self, main, config):
         schema = main.generate_schema(config, split=True)
 

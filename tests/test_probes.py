@@ -50,6 +50,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"],
                     },
                     "versions": {
                         "first": "66",
@@ -60,6 +61,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"],
                     },
                     "versions": {
                         "first": "61",
@@ -70,6 +72,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"],
                     },
                     "versions": {
                         "first": "55",
@@ -82,6 +85,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"],
                     },
                     "versions": {
                         "first": "62",
@@ -92,6 +96,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"]
                     },
                     "versions": {
                         "first": "67",
@@ -102,6 +107,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main"],
                     },
                     "versions": {
                         "first": "56",
@@ -114,6 +120,7 @@ def main_probe_defn():
                     "details": {
                         "keyed": False,
                         "kind": "string",
+                        "record_in_processes": ["main", "content"]
                     },
                     "versions": {
                         "first": "65",
@@ -160,4 +167,8 @@ class TestProbe(object):
 
     def test_main_sort(self, main_probe_defn):
         probe = MainProbe("scalar/test_probe", main_probe_defn)
-        assert probe.definition == main_probe_defn["history"]["nightly"][1]
+        assert probe.definition['versions'] == main_probe_defn["history"]["nightly"][1]['versions']
+
+    def test_main_probe_processes(self, main_probe_defn):
+        probe = MainProbe("scalar/test_probe", main_probe_defn)
+        assert probe.definition['details']['record_in_processes'] == {"main", "content"}

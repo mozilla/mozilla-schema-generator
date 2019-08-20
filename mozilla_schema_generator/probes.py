@@ -66,6 +66,10 @@ class MainProbe(Probe):
         history = [d for arr in full_defn["history"].values() for d in arr]
         self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
 
+        # Include all historical processes
+        processes = set([p for d in history for p in d["details"].get("record_in_processes", [])])
+        self.definition["details"]["record_in_processes"] = processes
+
     def _set_dates(self, first_added_value: dict):
         vals = [datetime.fromisoformat(v) for v in first_added_value.values()]
 
