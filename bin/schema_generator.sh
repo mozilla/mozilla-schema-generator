@@ -135,7 +135,12 @@ function main() {
         fi
         bq_out=${fname/schema.json/bq}
         mkdir -p $(dirname "$bq_out")
-        jsonschema-transpiler --resolve drop --type bigquery --normalize-case "$fname" > "$bq_out"
+        jsonschema-transpiler \
+            --resolve drop \
+            --type bigquery \
+            --normalize-case \
+            --force-nullable \
+                "$fname" > "$bq_out"
     done
 
     # Keep only allowed schemas
