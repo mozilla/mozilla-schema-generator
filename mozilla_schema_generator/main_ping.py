@@ -17,7 +17,7 @@ class MainPing(GenericPing):
     # Only includes probes that have been available at some point past
     # this version.
     # ONLY DECREMENT, or the schema will change in an incompatible way!
-    MIN_FX_VERSION = 60
+    MIN_FX_VERSION = 30
 
     schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json" # noqa E501
     env_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/templates/include/telemetry/environment.1.schema.json" # noqa E501
