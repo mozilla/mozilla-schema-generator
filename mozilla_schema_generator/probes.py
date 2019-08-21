@@ -116,12 +116,15 @@ class GleanProbe(Probe):
         self._set_definition(definition)
         super().__init__(identifier, definition)
 
+        defn_pings = set([p for d in definition[self.history_key] for p in d.get("send_in_pings", ["metrics"])])
+        self.definition["send_in_pings"] = defn_pings
+
         if pings is not None:
             self._update_all_pings(pings)
 
     def _update_all_pings(self, pings: List[str]):
         if GleanProbe.all_pings_keyword in self.definition["send_in_pings"]:
-            self.definition["send_in_pings"] = pings
+            self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
         self.definition = max(full_defn[self.history_key],

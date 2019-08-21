@@ -37,6 +37,34 @@ def glean_probe_defn():
 
 
 @pytest.fixture
+def glean_probe_defn_subset_pings():
+    return {
+        "history": [
+            {
+                "dates": {
+                    "first": "2019-04-12 13:44:13",
+                    "last": "2019-08-08 15:34:03",
+                },
+                "send_in_pings": [
+                    "metrics",
+                ],
+            },
+            {
+                "dates": {
+                    "first": "2019-08-08 15:34:14",
+                    "last": "2019-08-08 15:45:14",
+                },
+                "send_in_pings": [
+                    "baseline",
+                ],
+            }
+        ],
+        "name": "glean.error.invalid_value",
+        "type": "labeled_counter",
+    }
+
+
+@pytest.fixture
 def main_probe_defn():
     return {
         "first_added": {
@@ -163,7 +191,12 @@ class TestProbe(object):
     def test_glean_all_pings(self, glean_probe_defn):
         pings = ["ping1", "ping2", "ping3"]
         probe = GleanProbe("scalar/test_probe", glean_probe_defn, pings=pings)
-        assert probe.definition["send_in_pings"] == pings
+        assert probe.definition["send_in_pings"] == set(pings)
+
+    def test_glean_subset_of_pings(self, glean_probe_defn_subset_pings):
+        pings = ["ping1", "ping2", "ping3"]
+        probe = GleanProbe("scalar/test_probe", glean_probe_defn_subset_pings, pings=pings)
+        assert probe.definition["send_in_pings"] == {"baseline", "metrics"}
 
     def test_main_sort(self, main_probe_defn):
         probe = MainProbe("scalar/test_probe", main_probe_defn)
