@@ -116,7 +116,8 @@ class GleanProbe(Probe):
         self._set_definition(definition)
         super().__init__(identifier, definition)
 
-        defn_pings = set([p for d in definition[self.history_key] for p in d.get("send_in_pings", ["metrics"])])
+        defn_pings = set([p for d in definition[self.history_key]
+                          for p in d.get("send_in_pings", ["metrics"])])
         self.definition["send_in_pings"] = defn_pings
 
         if pings is not None:
