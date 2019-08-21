@@ -64,6 +64,9 @@ class Matcher(object):
 
     @staticmethod
     def _matches(match_v: Any, probe_v: Any) -> bool:
+        if isinstance(probe_v, set):
+            probe_v = list(probe_v)
+
         if probe_v is None:
             return False
 
