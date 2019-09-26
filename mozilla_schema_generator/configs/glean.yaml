@@ -11,6 +11,12 @@ metrics:
         not:
           - glean_ping_info
       type: counter
+  custom_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: custom_distribution
   datetime:
     match:
       send_in_pings:
@@ -23,12 +29,24 @@ metrics:
         not:
           - glean_ping_info
       type: enumeration
+  memory_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: memory_distribution
   number:
     match:
       send_in_pings:
         not:
           - glean_ping_info
       type: number
+  quantity:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: quantity      
   rate:
     match:
       send_in_pings:
