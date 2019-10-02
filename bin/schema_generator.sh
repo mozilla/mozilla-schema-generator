@@ -140,6 +140,7 @@ function main() {
             --type bigquery \
             --normalize-case \
             --force-nullable \
+            --tuple-struct \
                 "$fname" > "$bq_out"
     done
 
