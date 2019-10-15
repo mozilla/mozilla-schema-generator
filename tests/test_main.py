@@ -37,6 +37,8 @@ class TestMainPing(object):
             == {"type": "object", "additionalProperties": {"type": "string"}}
         assert _get(schema, prepend_properties(("environment", "system", "os", "version"))) \
             == {"type": "string"}
+        assert "extension" in \
+            _get(schema, prepend_properties(("payload", "processes")))["properties"]
 
     def test_min_probe_version(self, main):
         probes = main.get_probes()
