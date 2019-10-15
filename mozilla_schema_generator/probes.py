@@ -57,6 +57,14 @@ class MainProbe(Probe):
         "type": "string",
     }
 
+    child_processes = {
+        "content", "gpu", "extension", "dynamic", "socket",
+    }
+
+    processes_map = {
+        "all_childs": child_processes
+    }
+
     def __init__(self, identifier: str, definition: dict):
         self._set_dates(definition[self.first_added_key])
         self._set_definition(definition)
@@ -65,9 +73,12 @@ class MainProbe(Probe):
     def _set_definition(self, full_defn: dict):
         history = [d for arr in full_defn["history"].values() for d in arr]
         self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
+        self._set_processes(history)
 
+    def _set_processes(self, history):
         # Include all historical processes
-        processes = set([p for d in history for p in d["details"].get("record_in_processes", [])])
+        processes = {p for d in history for p in d["details"].get("record_in_processes", [])}
+        processes = {sub_p for p in processes for sub_p in self.processes_map.get(p, [p])}
         self.definition["details"]["record_in_processes"] = processes
 
     def _set_dates(self, first_added_value: dict):

@@ -182,6 +182,68 @@ def main_probe_defn():
     }
 
 
+@pytest.fixture
+def main_probe_all_childs_defn():
+    return {
+        "first_added": {
+            "release": "2017-09-19 01:26:22"
+        },
+        "history": {
+            "nightly": [
+                {
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["all_childs"]
+                    },
+                    "versions": {
+                        "first": "67",
+                        "last": "70"
+                    }
+                }
+            ],
+        },
+        "name": "a11y.instantiators",
+        "type": "scalar"
+    }
+
+@pytest.fixture
+def main_probe_all_childs_and_main_defn():
+    return {
+        "first_added": {
+            "release": "2017-09-19 01:26:22"
+        },
+        "history": {
+            "nightly": [
+                {
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["all_childs"]
+                    },
+                    "versions": {
+                        "first": "67",
+                        "last": "70"
+                    }
+                },
+                {
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["main"]
+                    },
+                    "versions": {
+                        "first": "62",
+                        "last": "66"
+                    }
+                }
+            ],
+        },
+        "name": "a11y.instantiators",
+        "type": "scalar"
+    }
+
+
 class TestProbe(object):
 
     def test_glean_sort(self, glean_probe_defn):
@@ -205,3 +267,11 @@ class TestProbe(object):
     def test_main_probe_processes(self, main_probe_defn):
         probe = MainProbe("scalar/test_probe", main_probe_defn)
         assert probe.definition['details']['record_in_processes'] == {"main", "content"}
+
+    def test_main_probe_all_childs(self, main_probe_all_childs_defn):
+        probe = MainProbe("scalar/test_probe", main_probe_all_childs_defn)
+        assert probe.definition['details']['record_in_processes'] == {"content", "gpu", "extension", "dynamic", "socket"}
+
+    def test_main_probe_all_childs_and_main(self, main_probe_all_childs_and_main_defn):
+        probe = MainProbe("scalar/test_probe", main_probe_all_childs_and_main_defn)
+        assert probe.definition['details']['record_in_processes'] == {"main", "content", "gpu", "extension", "dynamic", "socket"}
