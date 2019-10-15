@@ -57,12 +57,18 @@ class MainProbe(Probe):
         "type": "string",
     }
 
+    parent_processes = {
+        "main"
+    }
+
     child_processes = {
         "content", "gpu", "extension", "dynamic", "socket",
     }
 
     processes_map = {
-        "all_childs": child_processes
+        "all_childs": child_processes,
+        "all_children": child_processes,
+        "all": child_processes | parent_processes
     }
 
     def __init__(self, identifier: str, definition: dict):

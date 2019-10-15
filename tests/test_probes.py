@@ -245,6 +245,32 @@ def main_probe_all_childs_and_main_defn():
     }
 
 
+@pytest.fixture
+def main_probe_all_defn():
+    return {
+        "first_added": {
+            "release": "2017-09-19 01:26:22"
+        },
+        "history": {
+            "nightly": [
+                {
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["all"]
+                    },
+                    "versions": {
+                        "first": "67",
+                        "last": "70"
+                    }
+                }
+            ],
+        },
+        "name": "a11y.instantiators",
+        "type": "scalar"
+    }
+
+
 class TestProbe(object):
 
     def test_glean_sort(self, glean_probe_defn):
@@ -276,5 +302,10 @@ class TestProbe(object):
 
     def test_main_probe_all_childs_and_main(self, main_probe_all_childs_and_main_defn):
         probe = MainProbe("scalar/test_probe", main_probe_all_childs_and_main_defn)
+        assert probe.definition['details']['record_in_processes'] == \
+            {"main", "content", "gpu", "extension", "dynamic", "socket"}
+
+    def test_main_probe_all(self, main_probe_all_defn):
+        probe = MainProbe("scalar/test_probe", main_probe_all_defn)
         assert probe.definition['details']['record_in_processes'] == \
             {"main", "content", "gpu", "extension", "dynamic", "socket"}
