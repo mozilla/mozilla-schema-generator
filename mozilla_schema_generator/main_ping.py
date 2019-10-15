@@ -31,7 +31,17 @@ class MainPing(GenericPing):
         return self._update_env(schema)
 
     def _update_env(self, schema):
-        schema._delete_key(prepend_properties(("environment", "settings", "userPrefs")))
+        user_pref_elem = {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        }
+
+        schema.set_schema_elem(
+                prepend_properties(("environment", "settings", "userPrefs")), user_pref_elem)
+        schema.set_schema_elem(
+                prepend_properties(("environment", "system", "os", "version")), {"type": "string"})
         return schema
 
     def get_env(self):
