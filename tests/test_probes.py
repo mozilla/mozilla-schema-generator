@@ -207,6 +207,7 @@ def main_probe_all_childs_defn():
         "type": "scalar"
     }
 
+
 @pytest.fixture
 def main_probe_all_childs_and_main_defn():
     return {
@@ -270,8 +271,10 @@ class TestProbe(object):
 
     def test_main_probe_all_childs(self, main_probe_all_childs_defn):
         probe = MainProbe("scalar/test_probe", main_probe_all_childs_defn)
-        assert probe.definition['details']['record_in_processes'] == {"content", "gpu", "extension", "dynamic", "socket"}
+        assert probe.definition['details']['record_in_processes'] == \
+            {"content", "gpu", "extension", "dynamic", "socket"}
 
     def test_main_probe_all_childs_and_main(self, main_probe_all_childs_and_main_defn):
         probe = MainProbe("scalar/test_probe", main_probe_all_childs_and_main_defn)
-        assert probe.definition['details']['record_in_processes'] == {"main", "content", "gpu", "extension", "dynamic", "socket"}
+        assert probe.definition['details']['record_in_processes'] == \
+            {"main", "content", "gpu", "extension", "dynamic", "socket"}
