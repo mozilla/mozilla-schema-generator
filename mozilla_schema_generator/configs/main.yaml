@@ -15,6 +15,7 @@ payload:
         keyed: false
         record_in_processes:
           contains: main
+
   processes:
     parent:
       scalars:
@@ -33,6 +34,7 @@ payload:
             keyed: true
             record_in_processes:
               contains: main
+
     content:
       histograms:
         match:
@@ -66,6 +68,7 @@ payload:
             keyed: true
             record_in_processes:
               contains: content
+
     gpu:
       histograms:
         match:
@@ -99,3 +102,105 @@ payload:
             keyed: true
             record_in_processes:
               contains: gpu
+
+    extension:
+      histograms:
+        match:
+          table_group: histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: extension
+      keyedHistograms:
+        match:
+          table_group: keyed_histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: extension
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: extension
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: extension
+
+    dynamic:
+      histograms:
+        match:
+          table_group: histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: dynamic
+      keyedHistograms:
+        match:
+          table_group: keyed_histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: dynamic
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: dynamic
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: dynamic
+
+    socket:
+      histograms:
+        match:
+          table_group: histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: socket
+      keyedHistograms:
+        match:
+          table_group: keyed_histograms
+          type: histogram
+          details:
+            keyed: true
+            record_in_processes:
+              contains: socket
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: socket
+      keyedScalars:
+        match:
+          table_group: keyed_scalars
+          type: scalar
+          details:
+            keyed: true
+            record_in_processes:
+              contains: socket
