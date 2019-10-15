@@ -8,6 +8,7 @@ import yaml
 import pytest
 from mozilla_schema_generator import main_ping
 from mozilla_schema_generator.config import Config
+from mozilla_schema_generator.utils import _get, prepend_properties
 
 
 @pytest.fixture
@@ -32,6 +33,10 @@ class TestMainPing(object):
 
         assert "environment" in schema["properties"]
         assert "payload" in schema["properties"]
+        assert _get(schema, prepend_properties(("environment", "settings", "userPrefs"))) \
+            == {"type": "object", "additionalProperties": {"type": "string"}}
+        assert _get(schema, prepend_properties(("environment", "system", "os", "version"))) \
+            == {"type": "string"}
 
     def test_min_probe_version(self, main):
         probes = main.get_probes()
