@@ -61,7 +61,7 @@ docker-rm: stop
 	docker-compose rm -f
 
 shell:
-	docker-compose run app bash
+	docker-compose run --entrypoint /bin/bash app
 
 run:
 	docker-compose run app $(COMMAND)
