@@ -31,17 +31,32 @@ class MainPing(GenericPing):
         return self._update_env(schema)
 
     def _update_env(self, schema):
-        user_pref_elem = {
+        integer = {"type": "integer"}
+        string = {"type": "string"}
+        string_map = {
             "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
+            "additionalProperties": string,
         }
 
+        active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
+            + ("additionalProperties", "properties")
+        simple_measurements = prepend_properties(("payload", "simpleMeasurements", ""))[:-1]
+
         schema.set_schema_elem(
-                prepend_properties(("environment", "settings", "userPrefs")), user_pref_elem)
+                prepend_properties(("environment", "settings", "userPrefs")), string_map)
         schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "version")), {"type": "string"})
+                prepend_properties(("environment", "system", "os", "version")), string)
+        schema.set_schema_elem(
+                prepend_properties(("environment", "addons", "theme", "foreignInstall")), integer)
+        schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
+        schema.set_schema_elem(active_addons + ("version",), string)
+        schema.set_schema_elem(active_addons + ("userDisabled",), integer)
+        schema.set_schema_elem(simple_measurements + ("activeTicks",), integer)
+        schema.set_schema_elem(simple_measurements + ("blankWindowShown",), integer)
+        schema.set_schema_elem(simple_measurements + ("firstPaint",), integer)
+        schema.set_schema_elem(simple_measurements + ("main",), integer)
+        schema.set_schema_elem(simple_measurements + ("sessionRestored",), integer)
+        schema.set_schema_elem(simple_measurements + ("totalTime",), integer)
         return schema
 
     def get_env(self):
