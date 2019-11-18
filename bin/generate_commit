@@ -67,6 +67,11 @@ function _generate_schemas() {
         if [[ $fname =~ metadata/sources ]] ; then
             continue
         fi
+        if [[ $fname =~ telemetry/main/main.4.schema.json ]] ; then
+          extra_flags=( --allow-maps-without-value )
+        else
+          extra_flags=()
+        fi
         bq_out=${fname/schema.json/bq}
         mkdir -p "$(dirname "$bq_out")"
         jsonschema-transpiler \
@@ -75,6 +80,7 @@ function _generate_schemas() {
             --normalize-case \
             --force-nullable \
             --tuple-struct \
+            "${extra_flags[@]}" \
                 "$fname" > "$bq_out"
     done
 

@@ -19,10 +19,19 @@ class MainPing(CommonPing):
 
     def _update_env(self, schema):
         integer = {"type": "integer"}
+        map_without_values = {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+            },
+        }
         simple_measurements = prepend_properties(("payload", "simpleMeasurements", ""))[
             :-1
         ]
 
+        schema.set_schema_elem(
+            prepend_properties(("payload", "addonDetails", "XPI")), map_without_values
+        )
         schema.set_schema_elem(simple_measurements + ("activeTicks",), integer)
         schema.set_schema_elem(simple_measurements + ("blankWindowShown",), integer)
         schema.set_schema_elem(simple_measurements + ("firstPaint",), integer)
