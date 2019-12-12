@@ -22,6 +22,7 @@ class GleanPing(GenericPing):
 
     schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/glean/glean/glean.1.schema.json" # noqa E501
     probes_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/metrics"
+    ping_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/pings"
     repos_url = "https://probeinfo.telemetry.mozilla.org/glean/repositories"
     dependencies_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/dependencies"
 
@@ -89,12 +90,9 @@ class GleanPing(GenericPing):
         return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
 
     def get_pings(self) -> Set[str]:
-        probes = [GleanProbe(_id, defn) for _id, defn in self._get_probe_defn_list()]
-        addl_pings = {
-            ping for probe in probes
-            for ping in probe.definition["send_in_pings"]
-            if ping not in self.ignore_pings
-        }
+        url = self.ping_url_template.format(self.repo)
+        pings = GleanPing._get_json(url)
+        addl_pings = set(pings.keys())
 
         return self.default_pings | addl_pings
 
