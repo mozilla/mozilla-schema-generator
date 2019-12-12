@@ -155,6 +155,9 @@ def dump_schema(schemas, out_dir, pretty, *, version=1):
 
     else:
         for name, _schemas in schemas.items():
+            # Bug 1601270; we transform ping names from snake_case to kebab-case;
+            # we can remove this line once all snake_case probes have converted.
+            name = name.replace('_', '-')
             ping_out_dir = out_dir.joinpath(name)
             if not ping_out_dir.exists():
                 ping_out_dir.mkdir(parents=True)
