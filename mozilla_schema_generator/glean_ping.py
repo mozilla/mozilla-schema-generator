@@ -72,29 +72,29 @@ class GleanPing(GenericPing):
         logging.info(f"For {self.repo}, found Glean dependencies: {dependencies}")
         return dependencies
 
-    def _get_probe_defn_list(self) -> List[Dict]:
-        probes = self._get_json(self.probes_url)
-        items = list(probes.items())
+    def get_probes(self) -> List[GleanProbe]:
+        data = self._get_json(self.probes_url)
+        probes = list(data.items())
         for dependency in self.get_dependencies():
             dependency_probes = self._get_json(
                 self.probes_url_template.format(dependency)
             )
-            items += list(dependency_probes.items())
+            probes += list(dependency_probes.items())
 
-        return items
-
-    def get_probes(self) -> List[GleanProbe]:
-        probes = self._get_probe_defn_list()
         pings = self.get_pings()
 
         return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
 
     def get_pings(self) -> Set[str]:
-        url = self.ping_url_template.format(self.repo)
-        pings = GleanPing._get_json(url)
-        addl_pings = set(pings.keys())
+        try:
+            url = self.ping_url_template.format(self.repo)
+            pings = GleanPing._get_json(url)
+            addl_pings = set(pings.keys())
 
-        return self.default_pings | addl_pings
+            return self.default_pings | addl_pings
+        except HTTPError:
+            # If we get an error (e.g. 404 Not Found) we fall back to only the default pings
+            return self.default_pings
 
     def generate_schema(self, config, split, generic_schema=False) -> Dict[str, List[Schema]]:
         pings = self.get_pings()
