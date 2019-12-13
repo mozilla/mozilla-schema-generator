@@ -27,7 +27,7 @@ def config():
 
 
 class NoProbeGleanPing(glean_ping.GleanPing):
-    def _get_probe_defn_list(self) -> List[Dict]:
+    def get_probes(self) -> List[Dict]:
         return []
 
 
@@ -39,7 +39,7 @@ class TestGleanPing(object):
     def test_single_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False)
 
-        assert schemas.keys() == {"baseline", "events", "metrics"}
+        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
@@ -62,7 +62,7 @@ class TestGleanPing(object):
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
         generic_schema = glean.get_schema().schema
-        assert schemas.keys() == {"baseline", "events", "metrics"}
+        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
@@ -74,7 +74,7 @@ class TestGleanPing(object):
         not_glean = NoProbeGleanPing("LeanGleanPingNoIding")
         schemas = not_glean.generate_schema(config, split=False)
 
-        assert schemas.keys() == {"baseline", "events", "metrics"}
+        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
