@@ -125,7 +125,7 @@ class MainProbe(Probe):
 
 class GleanProbe(Probe):
 
-    all_pings_keyword = "all_pings"
+    all_pings_keyword = "all-pings"
     first_added_key = "first_added"
 
     def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):

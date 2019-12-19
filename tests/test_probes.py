@@ -27,7 +27,7 @@ def glean_probe_defn():
                     "last": "2019-08-08 15:45:14",
                 },
                 "send_in_pings": [
-                    "all_pings",
+                    "all-pings",
                 ],
             }
         ],
