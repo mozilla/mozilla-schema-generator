@@ -27,7 +27,7 @@ class GleanPing(GenericPing):
 
     default_dependencies = ['glean']
     default_pings = {"baseline", "events", "metrics"}
-    ignore_pings = {"all-pings", "default", "glean_ping_info", "glean_client_info"}
+    ignore_pings = {"all_pings", "all-pings", "default", "glean_ping_info", "glean_client_info"}
 
     def __init__(self, repo):  # TODO: Make env-url optional
         self.repo = repo
