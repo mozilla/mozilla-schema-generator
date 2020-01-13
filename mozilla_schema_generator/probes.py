@@ -125,7 +125,7 @@ class MainProbe(Probe):
 
 class GleanProbe(Probe):
 
-    all_pings_keyword = "all-pings"
+    all_pings_keywords = ("all-pings", "all_pings")
     first_added_key = "first_added"
 
     def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
@@ -141,7 +141,7 @@ class GleanProbe(Probe):
             self._update_all_pings(pings)
 
     def _update_all_pings(self, pings: List[str]):
-        if GleanProbe.all_pings_keyword in self.definition["send_in_pings"]:
+        if any([kw in self.definition["send_in_pings"] for kw in GleanProbe.all_pings_keywords]):
             self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
