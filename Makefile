@@ -31,7 +31,7 @@ lint:
 	flake8 mozilla_schema_generator tests --max-line-length 100
 
 test:
-	py.test
+	py.test -v
 	jsonschema -i aliases.json validation-schemas/aliases.json
 
 coverage:
