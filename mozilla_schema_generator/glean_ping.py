@@ -86,15 +86,11 @@ class GleanPing(GenericPing):
         return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
 
     def get_pings(self) -> Set[str]:
-        try:
-            url = self.ping_url_template.format(self.repo)
-            pings = GleanPing._get_json(url)
-            addl_pings = set(pings.keys())
+        url = self.ping_url_template.format(self.repo)
+        pings = GleanPing._get_json(url)
+        addl_pings = set(pings.keys())
 
-            return self.default_pings | addl_pings
-        except HTTPError:
-            # If we get an error (e.g. 404 Not Found) we fall back to only the default pings
-            return self.default_pings
+        return self.default_pings | addl_pings
 
     def generate_schema(self, config, split, generic_schema=False) -> Dict[str, List[Schema]]:
         pings = self.get_pings()
