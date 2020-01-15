@@ -6,6 +6,7 @@
 
 import yaml
 import pytest
+import requests
 from .test_utils import print_and_test
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
@@ -68,16 +69,9 @@ class TestGleanPing(object):
         for name, schema in final_schemas.items():
             print_and_test(generic_schema, schema)
 
-    def test_removing_additional_properties(self, config):
-        # When there are no probes, previously all the addlProps
-        # fields remained; we now remove them
+    def test_missing_data(self, config):
+        # When there are no files, this should error
+
         not_glean = NoProbeGleanPing("LeanGleanPingNoIding")
-        schemas = not_glean.generate_schema(config, split=False)
-
-        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
-
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
-        for name, schema in final_schemas.items():
-            # The metrics key should have been deleted through
-            # propagation
-            assert "metrics" not in schema["properties"]
+        with pytest.raises(requests.exceptions.HTTPError):
+            schemas = not_glean.generate_schema(config, split=False)
