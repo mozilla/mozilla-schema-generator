@@ -27,7 +27,6 @@ class GleanPing(GenericPing):
     dependencies_url_template = "https://probeinfo.telemetry.mozilla.org/glean/{}/dependencies"
 
     default_dependencies = ['glean']
-    default_pings = {"baseline", "events", "metrics", "deletion-request"}
     ignore_pings = {"all-pings", "all_pings", "default", "glean_ping_info", "glean_client_info"}
 
     def __init__(self, repo):  # TODO: Make env-url optional
@@ -75,6 +74,7 @@ class GleanPing(GenericPing):
     def get_probes(self) -> List[GleanProbe]:
         data = self._get_json(self.probes_url)
         probes = list(data.items())
+
         for dependency in self.get_dependencies():
             dependency_probes = self._get_json(
                 self.probes_url_template.format(dependency)
@@ -82,15 +82,19 @@ class GleanPing(GenericPing):
             probes += list(dependency_probes.items())
 
         pings = self.get_pings()
-
         return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
 
     def get_pings(self) -> Set[str]:
         url = self.ping_url_template.format(self.repo)
-        pings = GleanPing._get_json(url)
-        addl_pings = set(pings.keys())
+        pings = GleanPing._get_json(url).keys()
 
-        return self.default_pings | addl_pings
+        for dependency in self.get_dependencies():
+            dependency_pings = self._get_json(
+                self.ping_url_template.format(dependency)
+            )
+            pings |= dependency_pings.keys()
+
+        return pings
 
     def generate_schema(self, config, split, generic_schema=False) -> Dict[str, List[Schema]]:
         pings = self.get_pings()

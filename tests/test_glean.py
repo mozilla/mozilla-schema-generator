@@ -74,4 +74,4 @@ class TestGleanPing(object):
 
         not_glean = NoProbeGleanPing("LeanGleanPingNoIding")
         with pytest.raises(requests.exceptions.HTTPError):
-            schemas = not_glean.generate_schema(config, split=False)
+            not_glean.generate_schema(config, split=False)
