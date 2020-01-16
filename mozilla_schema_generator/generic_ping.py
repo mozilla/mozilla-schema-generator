@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import json
+import random
 import requests
 
 from .schema import Schema, SchemaException
@@ -15,6 +16,7 @@ from typing import Dict, List
 
 class GenericPing(object):
 
+    probe_info_base_url = 'https://probeinfo.telemetry.mozilla.org'
     default_encoding = 'utf-8'
     default_max_size = 9000  # 10k col limit in BQ
     extra_schema_key = "extra"
@@ -144,4 +146,9 @@ class GenericPing(object):
 
     @staticmethod
     def _get_json(url: str) -> dict:
+        if url.startswith(GenericPing.probe_info_base_url):
+            # For probe-info-service requests, add
+            # random query param to force cloudfront
+            # to bypass the cache
+            url += f'?r={random.randint(0,100)}'
         return json.loads(GenericPing._get_json_str(url))
