@@ -55,6 +55,10 @@ function setup_git_ssh() {
     chown -R "$(id -u):$(id -g)" "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
     chmod 700 "$HOME/.ssh/id_ed25519"
+
+    # add private key to the ssh agent to prompt for password once
+    eval "$(ssh-agent)"
+    ssh-add
 }
 
 function clone_and_configure_mps() {
