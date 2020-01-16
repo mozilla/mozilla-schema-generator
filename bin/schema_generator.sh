@@ -91,6 +91,20 @@ function filter_schemas() {
     find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
 }
 
+function create_changelog() {
+    # Generate output for referencing to the changeset in the source branch.
+    # Useful references for --format and --pretty
+    # https://stackoverflow.com/questions/25563455/how-do-i-get-last-commit-date-from-git-repository
+    # https://stackoverflow.com/questions/1441010/the-shortest-possible-output-from-git-log-containing-author-and-date
+    # https://git-scm.com/docs/git-log/1.8.0#git-log---daterelativelocaldefaultisorfcshortraw
+    local start_date
+    start_date=$(git log "${MPS_BRANCH_PUBLISH}" -1 --format=%cd --date=iso)
+    git log "${MPS_BRANCH_SOURCE}" \
+        --since="$start_date" \
+        --pretty=format:"%h%x09%ad%x09%s" \
+        --date=iso
+}
+
 function commit_and_push_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
@@ -109,7 +123,10 @@ function commit_and_push_schemas() {
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
-    git commit -a -m "Auto-push from schema generation [ci skip]" || echo "Nothing to commit"
+    git commit --all \
+        --message "Auto-push from schema generation [ci skip]" \
+        --message "$(create_changelog)" \
+        || echo "Nothing to commit"
     git push
 }
 
