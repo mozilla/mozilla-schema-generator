@@ -91,7 +91,7 @@ function filter_schemas() {
     find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
 }
 
-function commit_schemas() {
+function commit_and_push_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository
@@ -110,6 +110,7 @@ function commit_schemas() {
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
     git commit -a -m "Auto-push from schema generation [ci skip]" || echo "Nothing to commit"
+    git push
 }
 
 function main() {
@@ -156,8 +157,7 @@ function main() {
 
     # Push to branch of MPS
     cd ../
-    commit_schemas
-    git push
+    commit_and_push_schemas
 }
 
 main "$@"
