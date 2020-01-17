@@ -16,11 +16,6 @@
 # Example usage:
 #   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
 #   make build && make run
-#
-# TODO: Update schema mapping for validation
-# TODO: Handle overwriting glean schemas
-# TODO: Include Main Ping from schema generation
-# TODO: What the heck to do with pioneer-study, a non-nested namespace
 
 set -exuo pipefail
 
