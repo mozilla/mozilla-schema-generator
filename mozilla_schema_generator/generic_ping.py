@@ -4,8 +4,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import datetime
 import json
-import random
 import requests
 
 from .schema import Schema, SchemaException
@@ -150,5 +150,5 @@ class GenericPing(object):
             # For probe-info-service requests, add
             # random query param to force cloudfront
             # to bypass the cache
-            url += f'?r={random.randint(0,100)}'
+            url += f'?t={datetime.datetime.utcnow().isoformat()}'
         return json.loads(GenericPing._get_json_str(url))
