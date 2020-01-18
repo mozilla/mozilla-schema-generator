@@ -93,11 +93,18 @@ function create_changelog() {
     # https://stackoverflow.com/questions/1441010/the-shortest-possible-output-from-git-log-containing-author-and-date
     # https://git-scm.com/docs/git-log/1.8.0#git-log---daterelativelocaldefaultisorfcshortraw
     local start_date
+    # NOTES: Since this function is looking at commit dates (such as rebases),
+    # it's best to enforce squash/rebase commits onto the master branch. If this
+    # isn't enforced, it's possible to miss out on certain commits to the
+    # generated branch. Another solution is to generate a tag on master before
+    # the generator is run. However, the heuristic of using the latest commit
+    # date works well enough.
     start_date=$(git log "${MPS_BRANCH_PUBLISH}" -1 --format=%cd --date=iso)
     git log "${MPS_BRANCH_SOURCE}" \
         --since="$start_date" \
-        --pretty=format:"%h%x09%ad%x09%s" \
-        --date=iso
+        --pretty=format:"%h%x09%cd%x09%s" \
+        --date=iso \
+        | cat
 }
 
 function commit_and_push_schemas() {
@@ -122,7 +129,7 @@ function commit_and_push_schemas() {
         --message "Auto-push from schema generation [ci skip]" \
         --message "$(create_changelog)" \
         || echo "Nothing to commit"
-    git push
+    git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
 
 function main() {
