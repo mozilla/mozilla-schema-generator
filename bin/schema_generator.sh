@@ -103,8 +103,7 @@ function create_changelog() {
     git log "${MPS_BRANCH_SOURCE}" \
         --since="$start_date" \
         --pretty=format:"%h%x09%cd%x09%s" \
-        --date=iso \
-        | cat
+        --date=iso
 }
 
 function commit_and_push_schemas() {
