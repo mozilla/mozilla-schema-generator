@@ -42,7 +42,7 @@ bin/schema_generator.sh
 pushd ${MPS_GIT_PATH}
 git checkout ${MPS_BRANCH_PUBLISH}
 GIT_COMMITTER_DATE=$(git log ${initial_commit} -1 --pretty=%cd --date=iso) \
-    git commit --amend
+    git commit --amend --no-edit
 # now the commit hash has changed, so we must force push
 git push -f
 popd
