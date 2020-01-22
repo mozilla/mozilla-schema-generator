@@ -16,11 +16,6 @@
 # Example usage:
 #   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
 #   make build && make run
-#
-# TODO: Update schema mapping for validation
-# TODO: Handle overwriting glean schemas
-# TODO: Include Main Ping from schema generation
-# TODO: What the heck to do with pioneer-study, a non-nested namespace
 
 set -exuo pipefail
 
@@ -55,6 +50,10 @@ function setup_git_ssh() {
     chown -R "$(id -u):$(id -g)" "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
     chmod 700 "$HOME/.ssh/id_ed25519"
+
+    # add private key to the ssh agent to prompt for password once
+    eval "$(ssh-agent)"
+    ssh-add
 }
 
 function clone_and_configure_mps() {
@@ -87,6 +86,26 @@ function filter_schemas() {
     find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
 }
 
+function create_changelog() {
+    # Generate output for referencing to the changeset in the source branch.
+    # Useful references for --format and --pretty
+    # https://stackoverflow.com/questions/25563455/how-do-i-get-last-commit-date-from-git-repository
+    # https://stackoverflow.com/questions/1441010/the-shortest-possible-output-from-git-log-containing-author-and-date
+    # https://git-scm.com/docs/git-log/1.8.0#git-log---daterelativelocaldefaultisorfcshortraw
+    local start_date
+    # NOTES: Since this function is looking at commit dates (such as rebases),
+    # it's best to enforce squash/rebase commits onto the master branch. If this
+    # isn't enforced, it's possible to miss out on certain commits to the
+    # generated branch. Another solution is to generate a tag on master before
+    # the generator is run. However, the heuristic of using the latest commit
+    # date works well enough.
+    start_date=$(git log "${MPS_BRANCH_PUBLISH}" -1 --format=%cd --date=iso)
+    git log "${MPS_BRANCH_SOURCE}" \
+        --since="$start_date" \
+        --pretty=format:"%h%x09%cd%x09%s" \
+        --date=iso
+}
+
 function commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
@@ -105,7 +124,10 @@ function commit_schemas() {
     # Keep only the schemas dir
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout $MPS_BRANCH_WORKING -- schemas
-    git commit -a -m "Auto-push from schema generation [ci skip]" || echo "Nothing to commit"
+    git commit --all \
+        --message "Auto-push from schema generation [ci skip]" \
+        --message "$(create_changelog)" \
+        || echo "Nothing to commit"
 }
 
 function main() {
@@ -153,7 +175,7 @@ function main() {
     # Push to branch of MPS
     cd ../
     commit_schemas
-    git push
+    git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
 
 main "$@"
