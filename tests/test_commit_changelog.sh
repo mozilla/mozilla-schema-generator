@@ -1,6 +1,6 @@
 #!/bin/bash
 # A script for testing the functionality of changelog information in generated
-# schemas. The output of the this command must be checked manually, and this
+# schemas. The output of this command must be checked manually, and this
 # script must be configured to commit with your identity.
 
 # To run this script, copy and paste the commands in the heredoc into your shell

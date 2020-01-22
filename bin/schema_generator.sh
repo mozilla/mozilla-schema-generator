@@ -106,7 +106,7 @@ function create_changelog() {
         --date=iso
 }
 
-function commit_and_push_schemas() {
+function commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository
@@ -128,7 +128,6 @@ function commit_and_push_schemas() {
         --message "Auto-push from schema generation [ci skip]" \
         --message "$(create_changelog)" \
         || echo "Nothing to commit"
-    git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
 
 function main() {
@@ -175,7 +174,8 @@ function main() {
 
     # Push to branch of MPS
     cd ../
-    commit_and_push_schemas
+    commit_schemas
+    git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
 
 main "$@"
