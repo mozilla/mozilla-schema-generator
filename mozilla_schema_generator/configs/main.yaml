@@ -75,7 +75,7 @@ payload:
           table_group: histograms
           type: histogram
           details:
-            keyed: true
+            keyed: false
             record_in_processes:
               contains: gpu
       keyedHistograms:
