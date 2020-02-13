@@ -41,7 +41,7 @@ payload:
           table_group: histograms
           type: histogram
           details:
-            keyed: false 
+            keyed: false
             record_in_processes:
               contains: content
       keyedHistograms:
@@ -75,7 +75,10 @@ payload:
           table_group: histograms
           type: histogram
           details:
-            keyed: true
+            # https://bugzilla.mozilla.org/show_bug.cgi?id=1597782
+            # This had accidentally been set to "keyed: true". It would be an incompatible
+            # schema change to remove the keyed histogram fields, so don't.
+            # keyed: false
             record_in_processes:
               contains: gpu
       keyedHistograms:
