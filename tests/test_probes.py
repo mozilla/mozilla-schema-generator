@@ -271,6 +271,33 @@ def main_probe_all_defn():
     }
 
 
+@pytest.fixture
+def main_probe_description():
+    return {
+        "first_added": {
+            "release": "2017-09-19 01:26:22"
+        },
+        "history": {
+            "nightly": [
+                {
+                    "description": "Test description",
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["all"]
+                    },
+                    "versions": {
+                        "first": "67",
+                        "last": "70"
+                    }
+                }
+            ],
+        },
+        "name": "a11y.instantiators",
+        "type": "scalar"
+    }
+
+
 class TestProbe(object):
 
     def test_glean_sort(self, glean_probe_defn):
@@ -309,3 +336,7 @@ class TestProbe(object):
         probe = MainProbe("scalar/test_probe", main_probe_all_defn)
         assert probe.definition['details']['record_in_processes'] == \
             {"main", "content", "gpu", "extension", "dynamic", "socket"}
+
+    def test_main_probe_description(self, main_probe_description):
+        probe = MainProbe("scalar/test_probe", main_probe_description)
+        assert probe.description == "Test description"

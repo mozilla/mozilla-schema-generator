@@ -19,16 +19,20 @@ class Probe(object):
     name_key = "name"
     history_key = "history"
 
-    def __init__(self, identifier: str, definition: dict):
+    def __init__(self, identifier: str, definition: dict, description: str):
         self.id = identifier
         self.type = definition[self.type_key]
         self.name = definition[self.name_key]
+        self.description = description
 
     def get_type(self) -> str:
         return self.type
 
     def get_name(self) -> str:
         return self.name
+
+    def get_description(self) -> str:
+        return self.description
 
     def get_last_change(self) -> datetime:
         raise NotImplementedError("Last Change is not available on generic probe")
@@ -57,27 +61,30 @@ class MainProbe(Probe):
         "type": "string",
     }
 
-    parent_processes = {
-        "main"
-    }
+    parent_processes = {"main"}
 
     child_processes = {
-        "content", "gpu", "extension", "dynamic", "socket",
+        "content",
+        "gpu",
+        "extension",
+        "dynamic",
+        "socket",
     }
 
     processes_map = {
         "all_childs": child_processes,
         "all_children": child_processes,
-        "all": child_processes | parent_processes
+        "all": child_processes | parent_processes,
     }
 
-    def __init__(self, identifier: str, definition: dict):
+    def __init__(self, identifier: str, definition: dict, description: str = None):
         self._set_dates(definition[self.first_added_key])
         self._set_definition(definition)
-        super().__init__(identifier, definition)
+        self._set_description(self.definition)
+        super().__init__(identifier, definition, self.description)
 
     def _set_definition(self, full_defn: dict):
-        history = [d for arr in full_defn["history"].values() for d in arr]
+        history = [d for arr in full_defn[self.history_key].values() for d in arr]
         self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
         self._set_processes(history)
 
@@ -92,6 +99,12 @@ class MainProbe(Probe):
 
         self.first_added = min(vals)
         self.last_change = max(vals)
+
+    def _set_description(self, definition):
+        if "description" in definition:
+            self.description = definition["description"]
+        else:
+            self.description = None
 
     def get_first_added(self) -> datetime:
         return self.first_added
@@ -114,6 +127,9 @@ class MainProbe(Probe):
         elif self.get_type() == "histogram":
             pschema = self.histogram_schema
 
+        if self.description is not None:
+            pschema["description"] = self.description
+
         # Add nested level if keyed
         if self.get("details", "keyed"):
             final_schema = {"type": "object", "additionalProperties": pschema}
@@ -128,13 +144,17 @@ class GleanProbe(Probe):
     all_pings_keywords = ("all-pings", "all_pings")
     first_added_key = "first_added"
 
-    def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
+    def __init__(
+        self, identifier: str, definition: dict, *, pings: List[str] = None, description: str = None
+    ):
         self._set_dates(definition)
         self._set_definition(definition)
-        super().__init__(identifier, definition)
+        self._set_description(definition)
+        super().__init__(identifier, definition, description)
 
-        defn_pings = set([p for d in definition[self.history_key]
-                          for p in d.get("send_in_pings", ["metrics"])])
+        defn_pings = set(
+            [p for d in definition[self.history_key] for p in d.get("send_in_pings", ["metrics"])]
+        )
         self.definition["send_in_pings"] = defn_pings
 
         if pings is not None:
@@ -145,17 +165,21 @@ class GleanProbe(Probe):
             self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
-        self.definition = max(full_defn[self.history_key],
-                              key=lambda x: datetime.fromisoformat(x["dates"]["last"]))
+        self.definition = max(
+            full_defn[self.history_key], key=lambda x: datetime.fromisoformat(x["dates"]["last"])
+        )
 
     def _set_dates(self, definition: dict):
-        vals = [
-            datetime.fromisoformat(d["dates"]["first"])
-            for d in definition[self.history_key]
-        ]
+        vals = [datetime.fromisoformat(d["dates"]["first"]) for d in definition[self.history_key]]
 
         self.first_added = min(vals)
         self.last_change = max(vals)
+
+    def _set_description(self, definition):
+        if "description" in definition:
+            self.description = definition["description"]
+        else:
+            self.description = None
 
     def get_first_added(self) -> datetime:
         return self.first_added
