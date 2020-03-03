@@ -19,11 +19,10 @@ class Probe(object):
     name_key = "name"
     history_key = "history"
 
-    def __init__(self, identifier: str, definition: dict, description: str):
+    def __init__(self, identifier: str, definition: dict):
         self.id = identifier
         self.type = definition[self.type_key]
         self.name = definition[self.name_key]
-        self.description = description
 
     def get_type(self) -> str:
         return self.type
@@ -77,11 +76,11 @@ class MainProbe(Probe):
         "all": child_processes | parent_processes,
     }
 
-    def __init__(self, identifier: str, definition: dict, description: str = None):
+    def __init__(self, identifier: str, definition: dict):
         self._set_dates(definition[self.first_added_key])
         self._set_definition(definition)
         self._set_description(self.definition)
-        super().__init__(identifier, definition, self.description)
+        super().__init__(identifier, definition)
 
     def _set_definition(self, full_defn: dict):
         history = [d for arr in full_defn[self.history_key].values() for d in arr]
@@ -144,13 +143,11 @@ class GleanProbe(Probe):
     all_pings_keywords = ("all-pings", "all_pings")
     first_added_key = "first_added"
 
-    def __init__(
-        self, identifier: str, definition: dict, *, pings: List[str] = None, description: str = None
-    ):
+    def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
         self._set_dates(definition)
         self._set_definition(definition)
         self._set_description(definition)
-        super().__init__(identifier, definition, description)
+        super().__init__(identifier, definition)
 
         defn_pings = set(
             [p for d in definition[self.history_key] for p in d.get("send_in_pings", ["metrics"])]
