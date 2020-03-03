@@ -149,3 +149,20 @@ Run tests:
 ```
 make test
 ```
+
+Publish generated schemas to [mozilla-generated-schemas/test-generated-schemas](https://github.com/mozilla-services/mozilla-pipeline-schemas/tree/test-generated-schemas)
+run:
+
+```
+git fetch origin
+
+git checkout <branch-to-test>
+
+export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
+
+# generate all schemas for current master
+git checkout master && git pull make build && make run
+
+# generate all schemas with changes and compare with master
+git checkout <branch-to-test> make build && make run
+```
