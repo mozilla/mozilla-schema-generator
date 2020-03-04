@@ -21,9 +21,10 @@ readme = open('README.md').read()
 setup(
     name='mozilla-schema-generator',
     python_requires='>=3.6.0',
-    version='0.1.3',
+    version='0.1.4',
     description='Create full representations of schemas using the probe info service.',
     long_description=readme,
+    long_description_content_type="text/markdown",
     author='Frank Bertsch',
     author_email='frank@mozilla.com',
     url='https://github.com/mozilla/mozilla-schema-generator',
