@@ -13,6 +13,17 @@ from .utils import _get
 from .schema import SchemaException
 
 
+def _description_from_definition(definition):
+    description = None
+    if "description" in definition:
+        description = definition["description"]
+        # BigQuery limits descriptions to a maximum of 1024 characters,
+        # so we truncate anything longer than 1000.
+        if len(self.description) > 1000:
+            description = description[:1000] + "..."
+    return description
+
+
 class Probe(object):
 
     type_key = "type"
@@ -102,6 +113,10 @@ class MainProbe(Probe):
     def _set_description(self, definition):
         if "description" in definition:
             self.description = definition["description"]
+            # BigQuery limits descriptions to a maximum of 1024 characters,
+            # so we truncate anything longer than 1000.
+            if len(self.description) > 1000:
+                self.description = self.description[:1000] + "..."
         else:
             self.description = None
 
