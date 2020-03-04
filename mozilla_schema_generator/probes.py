@@ -100,10 +100,13 @@ class MainProbe(Probe):
         self.last_change = max(vals)
 
     def _set_description(self, definition):
+        self.description = None
         if "description" in definition:
             self.description = definition["description"]
-        else:
-            self.description = None
+            # BigQuery limits descriptions to a maximum of 1024 characters,
+            # so we truncate anything longer than 1000.
+            if len(self.description) >= 1000:
+                self.description = self.description[:1000] + "…"
 
     def get_first_added(self) -> datetime:
         return self.first_added
