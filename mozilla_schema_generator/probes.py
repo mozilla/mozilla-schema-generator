@@ -149,7 +149,7 @@ class GleanProbe(Probe):
     def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
         self._set_dates(definition)
         self._set_definition(definition)
-        self._set_description(definition)
+        self._set_description(self.definition)
         super().__init__(identifier, definition)
 
         defn_pings = set(
