@@ -166,12 +166,16 @@ class GleanProbe(Probe):
 
     def _set_definition(self, full_defn: dict):
         # Expose the entire history, for special casing of the probe.
-        self.definition_history = list(sorted(
-            full_defn[self.history_key], key=lambda x: datetime.fromisoformat(x["dates"]["last"])
-        ))
+        self.definition_history = list(
+            sorted(
+                full_defn[self.history_key],
+                key=lambda x: datetime.fromisoformat(x["dates"]["last"]),
+                reverse=True
+            )
+        )
 
         # The canonical definition for up-to-date schemas
-        self.definition = max(self.definition_history)
+        self.definition = self.definition_history[0]
 
     def _set_dates(self, definition: dict):
         vals = [datetime.fromisoformat(d["dates"]["first"]) for d in definition[self.history_key]]
