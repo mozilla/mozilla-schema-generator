@@ -103,7 +103,9 @@ class GleanPing(GenericPing):
                 # Modify the definition with the truncated history.
                 hist_defn = defn.copy()
                 hist_defn[probe.history_key] = probe.definition_history[changepoint_index:]
-                incompatible_probe_type = GleanProbe(_id, hist_defn, pings=pings)
+                hist_defn["type"] = hist_defn[probe.history_key][0]["type"]
+                logging.info(hist_defn)
+                incompatible_probe_type = GleanProbe(_id, hist_defn, pings=ping)
                 processed.append(incompatible_probe_type)
 
         return processed
