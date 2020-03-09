@@ -104,7 +104,7 @@ class GleanPing(GenericPing):
                 hist_defn = defn.copy()
                 hist_defn[probe.history_key] = probe.definition_history[changepoint_index:]
                 hist_defn["type"] = hist_defn[probe.history_key][0]["type"]
-                incompatible_probe_type = GleanProbe(_id, hist_defn, pings=ping)
+                incompatible_probe_type = GleanProbe(_id, hist_defn, pings=pings)
                 processed.append(incompatible_probe_type)
 
         return processed
