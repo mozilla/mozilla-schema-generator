@@ -165,9 +165,13 @@ class GleanProbe(Probe):
             self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
-        self.definition = max(
+        # Expose the entire history, for special casing of the probe.
+        self.definition_history = list(sorted(
             full_defn[self.history_key], key=lambda x: datetime.fromisoformat(x["dates"]["last"])
-        )
+        ))
+
+        # The canonical definition for up-to-date schemas
+        self.definition = max(self.definition_history)
 
     def _set_dates(self, definition: dict):
         vals = [datetime.fromisoformat(d["dates"]["first"]) for d in definition[self.history_key]]
