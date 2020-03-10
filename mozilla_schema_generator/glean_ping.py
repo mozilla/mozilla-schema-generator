@@ -89,7 +89,14 @@ class GleanPing(GenericPing):
             processed.append(probe)
 
             # Manual handling of incompatible schema changes
-            if self.repo.startswith("fenix") and probe.get_name() == "installation.timestamp":
+            issue_118_affected = {
+                "fenix",
+                "fenix-nightly",
+                "firefox-android-nightly",
+                "firefox-android-beta",
+                "firefox-android-release",
+            }
+            if self.repo in issue_118_affected and probe.get_name() == "installation.timestamp":
                 logging.info(f"Writing column {probe.get_name()} for compatibility.")
                 # See: https://github.com/mozilla/mozilla-schema-generator/issues/118
                 # Search through history for the "string" type and add a copy of
