@@ -132,7 +132,13 @@ def generate_common_pings(config_dir, out_dir, split, pretty):
         name = m.group(1)
         version = m.group(2)
         config = Config(name, config_data)
-        schemas = schema_generator.generate_schema(config, split=split)
+
+        if name == "main":
+            schemas = schema_generator.generate_schema(config, split=split)
+        else:
+            # do not split schemas except the main schema
+            schemas = schema_generator.generate_schema(config, split=False)
+
         dump_schema(schemas, out_dir, pretty, version=int(version))
 
 
