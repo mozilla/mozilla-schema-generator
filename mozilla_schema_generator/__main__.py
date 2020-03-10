@@ -8,16 +8,18 @@ import click
 import sys
 import yaml
 import json
+import re
 from pathlib import Path
 
-from .main_ping import MainPing
+from .common_ping import CommonPing
 from .glean_ping import GleanPing
 from .config import Config
 from .schema import SchemaEncoder
 
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
-
+COMMON_PINGS = "common_pings.json"
+SCHEMA_NAME_RE = re.compile(".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
 
 @click.command()
 @click.argument(
@@ -55,7 +57,8 @@ CONFIGS_DIR = ROOT_DIR / "configs"
           "the schemas will be on one line."),
 )
 def generate_main_ping(config, out_dir, split, pretty):
-    schema_generator = MainPing()
+    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json",
+    schema_generator = CommonPing(schema_url)
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -65,6 +68,67 @@ def generate_main_ping(config, out_dir, split, pretty):
     config = Config("main", config_data)
     schemas = schema_generator.generate_schema(config, split=split)
     dump_schema(schemas, out_dir, pretty, version=4)
+
+
+@click.command()
+@click.argument(
+    'config-dir',
+    type=click.Path(
+        dir_okay=True,
+        file_okay=False,
+        writable=False,
+        exists=True,
+    ),
+    default=CONFIGS_DIR,
+)
+@click.option(
+    '--out-dir',
+    help=("The directory to write the schema files to. "
+          "If not provided, writes the schemas to stdout."),
+    type=click.Path(
+        dir_okay=True,
+        file_okay=False,
+        writable=True,
+    ),
+    required=False
+)
+@click.option(
+    '--split',
+    is_flag=True,
+    help=("If provided, splits the schema into "
+          "smaller sub-schemas"),
+)
+@click.option(
+    '--pretty',
+    is_flag=True,
+    help=("If specified, pretty-prints the JSON "
+          "schemas that are outputted. Otherwise "
+          "the schemas will be on one line."),
+)
+def generate_common_pings(config_dir, out_dir, split, pretty):
+    if out_dir:
+        out_dir = Path(out_dir)
+
+    common_pings = []
+
+    with open(COMMON_PINGS, 'r') as f:
+        common_pings = json.load(f)
+
+    for common_ping in common_pings:
+        schema_generator = CommonPing(common_ping["schema_url"])
+
+        config_data = {}
+
+        if "config" in common_ping:
+            with open(config_dir / common_ping["config"], 'r') as f:
+                config_data = yaml.load(f)
+
+        m = re.match(SCHEMA_NAME_RE, common_ping["schema_url"])
+        name = m.group(1)
+        version = m.group(2)
+        config = Config(name, config_data)
+        schemas = schema_generator.generate_schema(config, split=split)
+        dump_schema(schemas, out_dir, pretty, version=int(version))
 
 
 @click.command()
@@ -180,6 +244,7 @@ def main(args=None):
 
 main.add_command(generate_main_ping)
 main.add_command(generate_glean_pings)
+main.add_command(generate_common_pings)
 
 
 if __name__ == "__main__":

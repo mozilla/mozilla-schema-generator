@@ -27,7 +27,11 @@ class CommonPing(GenericPing):
 
     def get_schema(self):
         schema = super().get_schema()
-        return self._update_env(schema)
+
+        if schema.get(prepend_properties(("environment",))) is not None:
+            return self._update_env(schema)
+        else:
+            return schema
 
     def _update_env(self, schema):
         integer = {"type": "integer"}

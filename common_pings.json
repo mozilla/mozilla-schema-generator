@@ -1,0 +1,13 @@
+[
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json",
+        "config": "main.yaml"
+    },
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/voice/voice.4.schema.json"
+    },
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/deletion-request/deletion-request.4.schema.json",
+        "config": "deletion_request.yaml"
+    }
+]
