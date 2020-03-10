@@ -18,7 +18,6 @@ from .schema import SchemaEncoder
 
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
-COMMON_PINGS = "common_pings.json"
 SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
 
 
@@ -110,13 +109,19 @@ def generate_main_ping(config, out_dir, split, pretty):
           "schemas that are outputted. Otherwise "
           "the schemas will be on one line."),
 )
-def generate_common_pings(config_dir, out_dir, split, pretty):
+@click.option(
+    '--common-pings-config',
+    default="common_pings.json",
+    help=("File containing URLs to schemas and configs "
+          "of pings in the common ping format."),
+)
+def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_config):
     if out_dir:
         out_dir = Path(out_dir)
 
     common_pings = []
 
-    with open(COMMON_PINGS, 'r') as f:
+    with open(common_pings_config, 'r') as f:
         common_pings = json.load(f)
 
     for common_ping in common_pings:

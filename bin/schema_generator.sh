@@ -28,7 +28,7 @@ MPS_SCHEMAS_DIR="schemas"
 BASE_DIR="/app"
 DISALLOWLIST="$BASE_DIR/mozilla-schema-generator/disallowlist"
 ALIASES_PATH="$BASE_DIR/mozilla-schema-generator/aliases.json"
-
+COMMON_PINGS_PATH="$BASE_DIR/mozilla-schema-generator/common_pings.json"
 
 function setup_git_ssh() {
     # Configure the container for pushing to github
@@ -140,8 +140,8 @@ function main() {
     clone_and_configure_mps
 
     # Generate new schemas
+    mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --out-dir ./telemetry
     mozilla-schema-generator generate-glean-pings --out-dir .
-    mozilla-schema-generator generate-main-ping --out-dir ./telemetry
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
