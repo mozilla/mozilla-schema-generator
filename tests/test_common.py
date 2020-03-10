@@ -6,14 +6,18 @@
 
 import yaml
 import pytest
-from mozilla_schema_generator import main_ping
+from mozilla_schema_generator import common_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
 
 
 @pytest.fixture
 def main():
-    return main_ping.MainPing()
+    schema_url = (
+        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
+        "/schemas/telemetry/main/main.4.schema.json"
+    )
+    return common_ping.CommonPing(schema_url)
 
 
 @pytest.fixture
@@ -23,7 +27,7 @@ def config():
         return Config("main", yaml.load(f))
 
 
-class TestMainPing(object):
+class TestCommonPing(object):
 
     def test_env_size(self, main):
         assert main.get_env().get_size() > 0

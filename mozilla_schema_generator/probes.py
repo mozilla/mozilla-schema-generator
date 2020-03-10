@@ -27,7 +27,12 @@ class Probe(object):
         self.name = definition[self.name_key]
 
     def __repr__(self):
-        return json.dumps({"id": self.id, "type": self.type, "name": self.name})
+        return json.dumps({
+            "id": self.id,
+            "type": self.type,
+            "name": self.name,
+            "description": self.description
+        })
 
     def get_type(self) -> str:
         return self.type
@@ -84,7 +89,7 @@ class MainProbe(Probe):
     def __init__(self, identifier: str, definition: dict):
         self._set_dates(definition[self.first_added_key])
         self._set_definition(definition)
-        self._set_description(definition)
+        self._set_description(self.definition)
         super().__init__(identifier, definition)
 
     def _set_definition(self, full_defn: dict):
