@@ -19,7 +19,8 @@ from .schema import SchemaEncoder
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
 COMMON_PINGS = "common_pings.json"
-SCHEMA_NAME_RE = re.compile(".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
+SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
+
 
 @click.command()
 @click.argument(
@@ -57,7 +58,11 @@ SCHEMA_NAME_RE = re.compile(".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
           "the schemas will be on one line."),
 )
 def generate_main_ping(config, out_dir, split, pretty):
-    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json",
+    schema_url = (
+        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
+        "/schemas/telemetry/main/main.4.schema.json"
+    )
+
     schema_generator = CommonPing(schema_url)
     if out_dir:
         out_dir = Path(out_dir)
