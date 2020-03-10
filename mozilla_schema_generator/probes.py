@@ -79,7 +79,7 @@ class MainProbe(Probe):
     def __init__(self, identifier: str, definition: dict):
         self._set_dates(definition[self.first_added_key])
         self._set_definition(definition)
-        self._set_description(self.definition)
+        self._set_description(definition)
         super().__init__(identifier, definition)
 
     def _set_definition(self, full_defn: dict):
