@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+import json
+
 from datetime import datetime
 from typing import Any, List
 from .utils import _get
@@ -23,6 +25,9 @@ class Probe(object):
         self.id = identifier
         self.type = definition[self.type_key]
         self.name = definition[self.name_key]
+
+    def __repr__(self):
+        return json.dumps({"id": self.id, "type": self.type, "name": self.name})
 
     def get_type(self) -> str:
         return self.type
@@ -153,7 +158,11 @@ class GleanProbe(Probe):
         super().__init__(identifier, definition)
 
         defn_pings = set(
-            [p for d in definition[self.history_key] for p in d.get("send_in_pings", ["metrics"])]
+            [
+                p
+                for d in definition[self.history_key]
+                for p in d.get("send_in_pings", ["metrics"])
+            ]
         )
         self.definition["send_in_pings"] = defn_pings
 
@@ -161,7 +170,12 @@ class GleanProbe(Probe):
             self._update_all_pings(pings)
 
     def _update_all_pings(self, pings: List[str]):
-        if any([kw in self.definition["send_in_pings"] for kw in GleanProbe.all_pings_keywords]):
+        if any(
+            [
+                kw in self.definition["send_in_pings"]
+                for kw in GleanProbe.all_pings_keywords
+            ]
+        ):
             self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
@@ -178,7 +192,10 @@ class GleanProbe(Probe):
         self.definition = self.definition_history[0]
 
     def _set_dates(self, definition: dict):
-        vals = [datetime.fromisoformat(d["dates"]["first"]) for d in definition[self.history_key]]
+        vals = [
+            datetime.fromisoformat(d["dates"]["first"])
+            for d in definition[self.history_key]
+        ]
 
         self.first_added = min(vals)
         self.last_change = max(vals)
