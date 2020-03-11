@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 
 from .common_ping import CommonPing
+from .main_ping import MainPing
 from .glean_ping import GleanPing
 from .config import Config
 from .schema import SchemaEncoder
@@ -57,12 +58,7 @@ SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
           "the schemas will be on one line."),
 )
 def generate_main_ping(config, out_dir, split, pretty):
-    schema_url = (
-        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
-        "/schemas/telemetry/main/main.4.schema.json"
-    )
-
-    schema_generator = CommonPing(schema_url)
+    schema_generator = MainPing()
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -116,6 +112,9 @@ def generate_main_ping(config, out_dir, split, pretty):
           "of pings in the common ping format."),
 )
 def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_config):
+    if split:
+        raise NotImplementedError("Splitting of common pings is not yet supported.")
+
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -138,11 +137,7 @@ def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_confi
         version = m.group(2)
         config = Config(name, config_data)
 
-        if name == "main":
-            schemas = schema_generator.generate_schema(config, split=split)
-        else:
-            # do not split schemas except the main schema
-            schemas = schema_generator.generate_schema(config, split=False)
+        schemas = schema_generator.generate_schema(config, split=False)
 
         dump_schema(schemas, out_dir, pretty, version=int(version))
 

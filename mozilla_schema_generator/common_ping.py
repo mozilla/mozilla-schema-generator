@@ -43,7 +43,6 @@ class CommonPing(GenericPing):
 
         active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
             + ("additionalProperties", "properties")
-        simple_measurements = prepend_properties(("payload", "simpleMeasurements", ""))[:-1]
 
         schema.set_schema_elem(
                 prepend_properties(("environment", "settings", "userPrefs")), string_map)
@@ -54,12 +53,7 @@ class CommonPing(GenericPing):
         schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
         schema.set_schema_elem(active_addons + ("version",), string)
         schema.set_schema_elem(active_addons + ("userDisabled",), integer)
-        schema.set_schema_elem(simple_measurements + ("activeTicks",), integer)
-        schema.set_schema_elem(simple_measurements + ("blankWindowShown",), integer)
-        schema.set_schema_elem(simple_measurements + ("firstPaint",), integer)
-        schema.set_schema_elem(simple_measurements + ("main",), integer)
-        schema.set_schema_elem(simple_measurements + ("sessionRestored",), integer)
-        schema.set_schema_elem(simple_measurements + ("totalTime",), integer)
+
         return schema
 
     def get_env(self):

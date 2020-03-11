@@ -140,6 +140,7 @@ function main() {
     clone_and_configure_mps
 
     # Generate new schemas
+    mozilla-schema-generator generate-main-ping --out-dir ./telemetry
     mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --out-dir ./telemetry
     mozilla-schema-generator generate-glean-pings --out-dir .
 

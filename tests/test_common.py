@@ -4,7 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import yaml
 import pytest
 from mozilla_schema_generator import common_ping
 from mozilla_schema_generator.config import Config
@@ -12,49 +11,29 @@ from mozilla_schema_generator.utils import _get, prepend_properties
 
 
 @pytest.fixture
-def main():
+def ping():
     schema_url = (
         "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
-        "/schemas/telemetry/main/main.4.schema.json"
+        "/schemas/telemetry/event/event.4.schema.json"
     )
     return common_ping.CommonPing(schema_url)
 
 
 @pytest.fixture
 def config():
-    config_file = "./mozilla_schema_generator/configs/main.yaml"
-    with open(config_file) as f:
-        return Config("main", yaml.load(f))
+    return Config("event", {})
 
 
 class TestCommonPing(object):
 
-    def test_env_size(self, main):
-        assert main.get_env().get_size() > 0
+    def test_env_size(self, ping):
+        assert ping.get_env().get_size() > 0
 
-    def test_single_schema(self, main, config):
-        schema = main.generate_schema(config)["main"][0].schema
+    def test_single_schema(self, ping, config):
+        schema = ping.generate_schema(config)["event"][0].schema
 
         assert "environment" in schema["properties"]
-        assert "payload" in schema["properties"]
         assert _get(schema, prepend_properties(("environment", "settings", "userPrefs"))) \
             == {"type": "object", "additionalProperties": {"type": "string"}}
         assert _get(schema, prepend_properties(("environment", "system", "os", "version"))) \
             == {"type": "string"}
-        assert "extension" in \
-            _get(schema, prepend_properties(("payload", "processes")))["properties"]
-
-    def test_min_probe_version(self, main):
-        probes = main.get_probes()
-        assert max([int(p.definition["versions"]["last"]) for p in probes]) >= main.MIN_FX_VERSION
-
-    def test_split_schema(self, main, config):
-        schema = main.generate_schema(config, split=True)
-
-        expected = {"histograms", "scalars", "keyed_histograms", "keyed_scalars", "extra"}
-        assert set(schema.keys()) == expected
-
-        for k, schemas in schema.items():
-            for s in schemas:
-                assert "environment" in s.schema["properties"]
-                assert "payload" in s.schema["properties"]
