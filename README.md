@@ -4,7 +4,7 @@
 
 A library for generating full representations of Mozilla telemetry pings.
 
-See [Mozilla Pipeline Schemas](https://www.github.com/mozilla-services/mozilla-pipeline-services)
+See [Mozilla Pipeline Schemas](https://www.github.com/mozilla-services/mozilla-pipeline-schemas)
 for the more generic structure of pings. This library takes those generic structures and fills in
 all of the probes we expect to see in the appropriate places.
 

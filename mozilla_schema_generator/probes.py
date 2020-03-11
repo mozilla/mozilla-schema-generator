@@ -100,10 +100,13 @@ class MainProbe(Probe):
         self.last_change = max(vals)
 
     def _set_description(self, definition):
+        self.description = None
         if "description" in definition:
             self.description = definition["description"]
-        else:
-            self.description = None
+            # BigQuery limits descriptions to a maximum of 1024 characters,
+            # so we truncate anything longer than 1000.
+            if len(self.description) >= 1000:
+                self.description = self.description[:1000] + "…"
 
     def get_first_added(self) -> datetime:
         return self.first_added
@@ -146,7 +149,7 @@ class GleanProbe(Probe):
     def __init__(self, identifier: str, definition: dict, *, pings: List[str] = None):
         self._set_dates(definition)
         self._set_definition(definition)
-        self._set_description(definition)
+        self._set_description(self.definition)
         super().__init__(identifier, definition)
 
         defn_pings = set(
@@ -162,9 +165,17 @@ class GleanProbe(Probe):
             self.definition["send_in_pings"] = set(pings)
 
     def _set_definition(self, full_defn: dict):
-        self.definition = max(
-            full_defn[self.history_key], key=lambda x: datetime.fromisoformat(x["dates"]["last"])
+        # Expose the entire history, for special casing of the probe.
+        self.definition_history = list(
+            sorted(
+                full_defn[self.history_key],
+                key=lambda x: datetime.fromisoformat(x["dates"]["last"]),
+                reverse=True
+            )
         )
+
+        # The canonical definition for up-to-date schemas
+        self.definition = self.definition_history[0]
 
     def _set_dates(self, definition: dict):
         vals = [datetime.fromisoformat(d["dates"]["first"]) for d in definition[self.history_key]]

@@ -87,7 +87,7 @@ class GenericPing(object):
             except KeyError:
                 addtlProps = None
 
-            probe_schema = Schema(probe.get_schema(addtlProps))
+            probe_schema = Schema(probe.get_schema(addtlProps)).clone()
 
             if split and final_schema.get_size() + probe_schema.get_size() > max_size:
                 schemas.append(final_schema)

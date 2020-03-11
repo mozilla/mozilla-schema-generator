@@ -13,6 +13,7 @@ def glean_probe_defn():
     return {
         "history": [
             {
+                "description": "Glean test description",
                 "dates": {
                     "first": "2019-04-12 13:44:13",
                     "last": "2019-08-08 15:34:03",
@@ -22,6 +23,7 @@ def glean_probe_defn():
                 ],
             },
             {
+                "description": "Glean test description",
                 "dates": {
                     "first": "2019-08-08 15:34:14",
                     "last": "2019-08-08 15:45:14",
@@ -272,6 +274,28 @@ def main_probe_all_defn():
     }
 
 
+@pytest.fixture
+def main_probe_max_description_length():
+    return {
+        "first_added": {"release": "2017-09-19 01:26:22"},
+        "history": {
+            "nightly": [
+                {
+                    "description": "x" * 2000,
+                    "details": {
+                        "keyed": False,
+                        "kind": "string",
+                        "record_in_processes": ["all"],
+                    },
+                    "versions": {"first": "67", "last": "70"},
+                }
+            ],
+        },
+        "name": "a11y.instantiators",
+        "type": "scalar",
+    }
+
+
 class TestProbe(object):
 
     def test_glean_sort(self, glean_probe_defn):
@@ -282,6 +306,7 @@ class TestProbe(object):
         pings = ["ping1", "ping2", "ping3"]
         probe = GleanProbe("scalar/test_probe", glean_probe_defn, pings=pings)
         assert probe.definition["send_in_pings"] == set(pings)
+        assert probe.description == "Glean test description"
 
     def test_glean_subset_of_pings(self, glean_probe_defn_subset_pings):
         pings = ["ping1", "ping2", "ping3"]
@@ -311,3 +336,8 @@ class TestProbe(object):
         assert probe.definition['details']['record_in_processes'] == \
             {"main", "content", "gpu", "extension", "dynamic", "socket"}
         assert probe.description == "Test description"
+
+    def test_main_max_description_length(self, main_probe_max_description_length):
+        probe = MainProbe("scalar/test_probe", main_probe_max_description_length)
+        assert len(probe.description) <= 1024
+        assert probe.description == "x" * 1000 + "…"

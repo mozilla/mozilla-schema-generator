@@ -82,7 +82,39 @@ class GleanPing(GenericPing):
             probes += list(dependency_probes.items())
 
         pings = self.get_pings()
-        return [GleanProbe(_id, defn, pings=pings) for _id, defn in probes]
+
+        processed = []
+        for _id, defn in probes:
+            probe = GleanProbe(_id, defn, pings=pings)
+            processed.append(probe)
+
+            # Manual handling of incompatible schema changes
+            issue_118_affected = {
+                "fenix",
+                "fenix-nightly",
+                "firefox-android-nightly",
+                "firefox-android-beta",
+                "firefox-android-release",
+            }
+            if self.repo in issue_118_affected and probe.get_name() == "installation.timestamp":
+                logging.info(f"Writing column {probe.get_name()} for compatibility.")
+                # See: https://github.com/mozilla/mozilla-schema-generator/issues/118
+                # Search through history for the "string" type and add a copy of
+                # the probe at that time in history. The changepoint signifies
+                # this event.
+                changepoint_index = 0
+                for definition in probe.definition_history:
+                    if definition["type"] != probe.get_type():
+                        break
+                    changepoint_index += 1
+                # Modify the definition with the truncated history.
+                hist_defn = defn.copy()
+                hist_defn[probe.history_key] = probe.definition_history[changepoint_index:]
+                hist_defn["type"] = hist_defn[probe.history_key][0]["type"]
+                incompatible_probe_type = GleanProbe(_id, hist_defn, pings=pings)
+                processed.append(incompatible_probe_type)
+
+        return processed
 
     def get_pings(self) -> Set[str]:
         url = self.ping_url_template.format(self.repo)
