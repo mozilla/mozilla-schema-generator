@@ -1,9 +1,5 @@
 [
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/main/main.4.schema.json",
-        "config": "main.yaml"
-    },
-    {
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/voice/voice.4.schema.json"
     },
     {
