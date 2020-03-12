@@ -101,11 +101,15 @@ class GenericPing(object):
         schemas.append(final_schema)
         for s in schemas:
             for key in config.get_match_keys():
-                if s.get(key + ("propertyNames",)) is not None:
+                try:
                     s.delete_group_from_schema(key + ("propertyNames",), propagate=False)
+                except KeyError:
+                    pass
 
-                if s.get(key + ("additionalProperties",)) is not None:
+                try:
                     s.delete_group_from_schema(key + ("additionalProperties",), propagate=True)
+                except KeyError:
+                    pass
 
         return schemas
 
