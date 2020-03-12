@@ -12,12 +12,9 @@ from itertools import chain
 
 def _get(_dict: dict, key: Tuple[str]) -> Any:
     """
-    Retrieved the nested `key` from a dict
+    Retrieved the nested `key` from a dict.
     """
     if key:
-        if key[0] not in _dict:
-            return None
-
         return _get(_dict[key[0]], key[1:])
     return _dict
 

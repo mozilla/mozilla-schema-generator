@@ -23,7 +23,7 @@ def config():
         return Config("main", yaml.load(f))
 
 
-class TestCommonPing(object):
+class TestMainPing(object):
 
     def test_env_size(self, main):
         assert main.get_env().get_size() > 0
