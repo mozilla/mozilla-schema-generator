@@ -41,6 +41,7 @@ class CommonPing(GenericPing):
             "type": "object",
             "additionalProperties": string,
         }
+        boolean = {"type": "boolean"}
 
         active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
             + ("additionalProperties", "properties")
@@ -50,9 +51,9 @@ class CommonPing(GenericPing):
         schema.set_schema_elem(
                 prepend_properties(("environment", "system", "os", "version")), string)
         schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "hasSuperfetch")), string)
+                prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
         schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "hasPrefetch")), string)
+                prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
         schema.set_schema_elem(
                 prepend_properties(("environment", "addons", "theme", "foreignInstall")), integer)
         schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
