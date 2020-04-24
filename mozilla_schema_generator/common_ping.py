@@ -64,13 +64,8 @@ class CommonPing(GenericPing):
         schema.set_schema_elem(active_addons + ("version",), string)
         schema.set_schema_elem(active_addons + ("userDisabled",), integer)
         schema.set_schema_elem(
-            active_addons
-            + (
-                "activeGMPlugins",
-                "additionalProperties",
-                "properties",
-                "applyBackgroundUpdates",
-            ),
+            prepend_properties(("environment", "addons", "activeGMPlugins"))
+            + ("additionalProperties", "properties", "applyBackgroundUpdates"),
             with_description(
                 boolean,
                 "Cast into a boolean via mozilla-schema-generator. See bug 1611027.",
