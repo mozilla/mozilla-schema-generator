@@ -67,8 +67,8 @@ class CommonPing(GenericPing):
             prepend_properties(("environment", "addons", "activeGMPlugins"))
             + ("additionalProperties", "properties", "applyBackgroundUpdates"),
             with_description(
-                boolean,
-                "Cast into a boolean via mozilla-schema-generator. See bug 1611027.",
+                integer,
+                "Cast into an integer via mozilla-schema-generator. See bug 1611027.",
             ),
         )
 
