@@ -43,6 +43,10 @@ class CommonPing(GenericPing):
         }
         boolean = {"type": "boolean"}
 
+        def with_description(dtype: dict, comment: str) -> dict:
+            """Add a description to the types defined above."""
+            return {**dtype, **dict(description=comment)}
+
         active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
             + ("additionalProperties", "properties")
 
@@ -59,6 +63,14 @@ class CommonPing(GenericPing):
         schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
         schema.set_schema_elem(active_addons + ("version",), string)
         schema.set_schema_elem(active_addons + ("userDisabled",), integer)
+        schema.set_schema_elem(
+            prepend_properties(("environment", "addons", "activeGMPlugins"))
+            + ("additionalProperties", "properties", "applyBackgroundUpdates"),
+            with_description(
+                integer,
+                "Cast into an integer via mozilla-schema-generator. See bug 1611027.",
+            ),
+        )
 
         return schema
 
