@@ -63,7 +63,7 @@ def generate_main_ping(config, out_dir, split, pretty):
         out_dir = Path(out_dir)
 
     with open(config, 'r') as f:
-        config_data = yaml.load(f)
+        config_data = yaml.safe_load(f)
 
     config = Config("main", config_data)
     schemas = schema_generator.generate_schema(config, split=split)
@@ -130,7 +130,7 @@ def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_confi
 
         if "config" in common_ping:
             with open(config_dir / common_ping["config"], 'r') as f:
-                config_data = yaml.load(f)
+                config_data = yaml.safe_load(f)
 
         m = re.match(SCHEMA_NAME_RE, common_ping["schema_url"])
         name = m.group(1)
@@ -205,7 +205,7 @@ def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
         repos = [(r_name, r_id) for r_name, r_id in repos if r_id == repo]
 
     with open(config, 'r') as f:
-        config_data = yaml.load(f)
+        config_data = yaml.safe_load(f)
 
     config = Config("glean", config_data)
 
