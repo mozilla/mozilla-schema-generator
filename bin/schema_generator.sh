@@ -76,10 +76,9 @@ function prepare_metadata() {
     find ./telemetry \
         -name "*.schema.json" -type f \
         -exec metadata_merge $telemetry_metadata {} ";"
-    find . -type d -name "pioneer-*" -exec \
-        find {} \
-            -name "*.schema.json" -type f \
-            -exec metadata_merge $pioneer_metadata {} ";"
+    find . -path "./pioneer-*" \
+        -name "*.schema.json" -type f \
+        -exec metadata_merge $pioneer_metadata {} ";"
     find . \( -path ./telemetry -o -path ./metadata -o -path "./pioneer-*" \) -prune -o \
         -name "*.schema.json" -type f \
         -exec metadata_merge $structured_metadata {} ";"
