@@ -1,4 +1,4 @@
-\./pioneer-study/.*
+metadata/pioneer-ingestion/.*
 metadata/structured-ingestion/.*
 metadata/telemetry-ingestion/.*
 metadata/credentials/.*
