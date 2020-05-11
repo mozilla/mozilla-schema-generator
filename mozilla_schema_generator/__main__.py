@@ -9,6 +9,7 @@ import sys
 import yaml
 import json
 import re
+import multiprocessing
 from pathlib import Path
 
 from .common_ping import CommonPing
@@ -209,8 +210,11 @@ def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
 
     config = Config("glean", config_data)
 
+    args = []
     for repo_name, repo_id in repos:
-        write_schema(repo_name, repo_id, config, out_dir, split, pretty, generic_schema)
+        args.append((repo_name, repo_id, config, out_dir, split, pretty, generic_schema))
+    with multiprocessing.Pool() as pool:
+        pool.starmap(write_schema, args)
 
 
 def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema):
