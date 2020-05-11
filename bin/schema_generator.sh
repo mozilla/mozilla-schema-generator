@@ -73,15 +73,19 @@ function prepare_metadata() {
     local pioneer_metadata="metadata/pioneer-ingestion/pioneer-ingestion.1.schema.json"
     local structured_metadata="metadata/structured-ingestion/structured-ingestion.1.schema.json"
 
-    find ./telemetry \
-        -name "*.schema.json" -type f \
-        -exec metadata_merge $telemetry_metadata {} ";"
-    find . -path "./pioneer-*" \
-        -name "*.schema.json" -type f \
-        -exec metadata_merge $pioneer_metadata {} ";"
-    find . \( -path ./telemetry -o -path ./metadata -o -path "./pioneer-*" \) -prune -o \
-        -name "*.schema.json" -type f \
-        -exec metadata_merge $structured_metadata {} ";"
+    # schema directory structure is enforced by regex at compile-time
+    # shellcheck disable=SC2044
+    for schema in $(find . -name "*.schema.json" -type f); do
+        if [[ "$schema" == "./telemetry/*" ]]; then
+            metadata_merge $telemetry_metadata "$schema"
+        elif [[ "$schema" == "./pioneer-*/*" ]]; then
+            metadata_merge $pioneer_metadata "$schema"
+        elif [[ "$schema" == "./metadata/*" ]]; then
+            continue
+        else
+            metadata_merge $structured_metadata "$schema"
+        fi
+    done
 }
 
 function filter_schemas() {
