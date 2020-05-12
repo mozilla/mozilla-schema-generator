@@ -7,6 +7,8 @@
 import datetime
 import json
 import requests
+import pathlib
+import re
 
 from .schema import Schema, SchemaException
 from .probes import Probe
@@ -20,6 +22,7 @@ class GenericPing(object):
     default_encoding = 'utf-8'
     default_max_size = 9000  # 10k col limit in BQ
     extra_schema_key = "extra"
+    cache_dir = pathlib.Path(".probe_cache")
 
     def __init__(self, schema_url, env_url, probes_url):
         self.schema_url = schema_url
@@ -39,6 +42,8 @@ class GenericPing(object):
             -> Dict[str, List[Schema]]:
         schema = self.get_schema()
         env = self.get_env()
+
+
         probes = self.get_probes()
 
         if split is None:
@@ -139,7 +144,33 @@ class GenericPing(object):
         return [schema]
 
     @staticmethod
+    def _slugify(text: str) -> str:
+        """Get a valid slug from an arbitrary string"""
+        value = re.sub(r'[^\w\s-]', '', text.lower()).strip()
+        return re.sub(r'[-\s]+', '-', value)
+
+    @staticmethod
+    def _present_in_cache(url: str) -> bool:
+        return (GenericPing.cache_dir / GenericPing._slugify(url)).exists()
+
+    @staticmethod
+    def _add_to_cache(url: str, val: str):
+        if not GenericPing.cache_dir.exists():
+            GenericPing.cache_dir.mkdir(parents=True)
+
+        (GenericPing.cache_dir / GenericPing._slugify(url)).write_text(val)
+
+    @staticmethod
+    def _retrieve_from_cache(url: str) -> str:
+        return (GenericPing.cache_dir / GenericPing._slugify(url)).read_text()
+
+    @staticmethod
     def _get_json_str(url: str) -> str:
+        no_param_url = re.sub(r'\?.*', '', url)
+
+        if GenericPing._present_in_cache(no_param_url):
+            return GenericPing._retrieve_from_cache(no_param_url)
+
         r = requests.get(url, stream=True)
         r.raise_for_status()
 
@@ -148,6 +179,8 @@ class GenericPing(object):
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 final_json += chunk.decode(r.encoding or GenericPing.default_encoding)
+
+        GenericPing._add_to_cache(no_param_url, final_json)
 
         return final_json
 
