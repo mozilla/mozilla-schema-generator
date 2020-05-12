@@ -76,11 +76,11 @@ function prepare_metadata() {
     # schema directory structure is enforced by regex at compile-time
     # shellcheck disable=SC2044
     for schema in $(find . -name "*.schema.json" -type f); do
-        if [[ "$schema" == "./telemetry/*" ]]; then
+        if [[ "$schema" =~ \./telemetry/.* ]]; then
             metadata_merge $telemetry_metadata "$schema"
-        elif [[ "$schema" == "./pioneer-*/*" ]]; then
+        elif [[ "$schema" =~ \./pioneer-.*/.* ]]; then
             metadata_merge $pioneer_metadata "$schema"
-        elif [[ "$schema" == "./metadata/*" ]]; then
+        elif [[ "$schema" =~ \./metadata/.* ]]; then
             continue
         else
             metadata_merge $structured_metadata "$schema"
