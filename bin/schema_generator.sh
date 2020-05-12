@@ -70,18 +70,25 @@ function clone_and_configure_mps() {
 
 function prepare_metadata() {
     local telemetry_metadata="metadata/telemetry-ingestion/telemetry-ingestion.1.schema.json"
+    local pioneer_metadata="metadata/pioneer-ingestion/pioneer-ingestion.1.schema.json"
     local structured_metadata="metadata/structured-ingestion/structured-ingestion.1.schema.json"
 
-    find ./telemetry -name "*.schema.json" -type f \
-        -exec metadata_merge $telemetry_metadata {} ";"
-    find . \( -path ./telemetry -o -path ./metadata \) -prune -o -name "*.schema.json" -type f \
-        -exec metadata_merge $structured_metadata {} ";"
+    # schema directory structure is enforced by regex at compile-time
+    # shellcheck disable=SC2044
+    for schema in $(find . -name "*.schema.json" -type f); do
+        if [[ "$schema" =~ \./telemetry/.* ]]; then
+            metadata_merge $telemetry_metadata "$schema"
+        elif [[ "$schema" =~ \./pioneer-.*/.* ]]; then
+            metadata_merge $pioneer_metadata "$schema"
+        elif [[ "$schema" =~ \./metadata/.* ]]; then
+            continue
+        else
+            metadata_merge $structured_metadata "$schema"
+        fi
+    done
 }
 
 function filter_schemas() {
-    # Pioneer-study is not nested, remove it
-    rm -rf pioneer-study
-
     # Remove BigQuery schemas that are in the disallow list
     find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
 }
