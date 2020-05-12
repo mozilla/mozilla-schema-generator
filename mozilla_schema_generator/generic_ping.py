@@ -43,7 +43,6 @@ class GenericPing(object):
         schema = self.get_schema()
         env = self.get_env()
 
-
         probes = self.get_probes()
 
         if split is None:
