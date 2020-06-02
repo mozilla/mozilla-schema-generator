@@ -1,0 +1,13 @@
+payload:
+  processes:
+    parent:
+      scalars:
+        match:
+          table_group: scalars
+          type: scalar
+          details:
+            keyed: false
+            record_in_processes:
+              contains: main
+            record_into_store:
+              contains: new-profile
