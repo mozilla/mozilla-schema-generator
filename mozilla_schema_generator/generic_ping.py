@@ -20,7 +20,7 @@ class GenericPing(object):
 
     probe_info_base_url = 'https://probeinfo.telemetry.mozilla.org'
     default_encoding = 'utf-8'
-    default_max_size = 9000  # 10k col limit in BQ
+    default_max_size = 9500  # 10k col limit in BQ
     extra_schema_key = "extra"
     cache_dir = pathlib.Path(".probe_cache")
 
@@ -70,6 +70,9 @@ class GenericPing(object):
 
         if split:
             schemas[self.extra_schema_key] = self.make_extra_schema(schema, probes, configs)
+
+        if any(schema.get_size() > max_size for _, s in schemas.items() for schema in s):
+            raise SchemaException("Schema must be smaller or equal max_size {}".format(max_size))
 
         return schemas
 
