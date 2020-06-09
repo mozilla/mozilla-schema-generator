@@ -5,8 +5,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import pytest
+import yaml
 
 from .test_utils import LocalMainPing, env, probes, schema  # noqa F401
+from mozilla_schema_generator.main_ping import MainPing
 from mozilla_schema_generator.schema import SchemaException
 from mozilla_schema_generator.config import Config
 
@@ -18,3 +20,14 @@ class TestPing(object):
 
         with pytest.raises(SchemaException):
             ping.generate_schema(Config("default", {}), max_size=1)
+
+    def test_schema_max_size(self):
+        config_file = "./mozilla_schema_generator/configs/main.yaml"
+        with open(config_file) as f:
+            config = Config("main", yaml.load(f))
+            ping = MainPing()
+
+            max_size = ping.generate_schema(config, max_size=9500)['main'][0].get_size()
+
+            with pytest.raises(SchemaException):
+                ping.generate_schema(config, max_size=max_size - 1)
