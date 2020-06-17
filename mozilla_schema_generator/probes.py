@@ -220,4 +220,8 @@ class GleanProbe(Probe):
     def get_schema(self, addtlProps: Any) -> Any:
         if addtlProps is None:
             raise SchemaException("Additional Properties cannot be missing for Glean probes")
+
+        if self.description is not None:
+            addtlProps["description"] = self.description
+
         return addtlProps
