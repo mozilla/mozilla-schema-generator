@@ -82,6 +82,9 @@ function prepare_metadata() {
             metadata_merge $pioneer_metadata "$schema"
         elif [[ "$schema" =~ \./metadata/.* ]]; then
             continue
+        # See bug 1654558: https://bugzilla.mozilla.org/show_bug.cgi?id=1654558#c7
+        elif [[ "$schema" =~ \./xfocsp-error-report/.* ]]; then
+            metadata_merge $telemetry_metadata "$schema"
         else
             metadata_merge $structured_metadata "$schema"
         fi
