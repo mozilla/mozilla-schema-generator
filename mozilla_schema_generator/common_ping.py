@@ -54,7 +54,7 @@ class CommonPing(GenericPing):
             prepend_properties(("environment", "settings", "userPrefs")),
             with_description(
                 string_map,
-                "User preferences - limited to an allowlist defined in `toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",
+                "User preferences - limited to an allowlist defined in `toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",  # NOQA
             ),
         )
         schema.set_schema_elem(
