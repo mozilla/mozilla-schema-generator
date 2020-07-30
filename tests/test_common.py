@@ -34,6 +34,10 @@ class TestCommonPing(object):
 
         assert "environment" in schema["properties"]
         assert _get(schema, prepend_properties(("environment", "settings", "userPrefs"))) \
-            == {"type": "object", "additionalProperties": {"type": "string"}}
+            == {
+            "type": "object",
+            "description": "User preferences - limited to an allowlist defined in `toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",  # NOQA
+            "additionalProperties": {"type": "string"},
+        }
         assert _get(schema, prepend_properties(("environment", "system", "os", "version"))) \
             == {"type": "string"}
