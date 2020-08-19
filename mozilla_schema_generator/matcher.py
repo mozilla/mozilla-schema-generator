@@ -14,8 +14,9 @@ class Matcher(object):
     type_key = "type"
     contains_key = "contains"
     not_key = "not"
+    any_key = "any"
 
-    keywords = {contains_key, not_key, type_key, table_group_key}
+    keywords = {contains_key, not_key, type_key, table_group_key, any_key}
 
     def __init__(self, match_obj: dict, *, _type=None, table_group=None):
         """
@@ -90,4 +91,7 @@ class Matcher(object):
                 if match_v[Matcher.not_key] == probe_v:
                     return False
 
+            # Match if any of the listed values match
+            if Matcher.any_key in match_v:
+                return probe_v in match_v[Matcher.any_key]
         return True

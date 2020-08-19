@@ -1,0 +1,20 @@
+payload:
+  histograms:
+    match:
+      table_group: histograms
+      type: histogram
+      name: 
+        any:
+          - PWMGR_BLOCKLIST_NUM_SITES
+          - PWMGR_FORM_AUTOFILL_RESULT
+          - PWMGR_LOGIN_LAST_USED_DAYS
+          - PWMGR_LOGIN_PAGE_SAFETY
+          - PWMGR_NUM_PASSWORDS_PER_HOSTNAME
+          - PWMGR_NUM_SAVED_PASSWORDS
+          - PWMGR_PROMPT_REMEMBER_ACTION
+          - PWMGR_PROMPT_UPDATE_ACTION
+          - PWMGR_SAVING_ENABLED
+      details:
+        keyed: false
+        record_in_processes:
+          contains: main

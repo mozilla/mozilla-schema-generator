@@ -95,6 +95,7 @@ class MainProbe(Probe):
     def _set_definition(self, full_defn: dict):
         history = [d for arr in full_defn[self.history_key].values() for d in arr]
         self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
+        self.definition['name'] = full_defn[self.name_key]
         self._set_processes(history)
 
     def _set_processes(self, history):
@@ -195,6 +196,7 @@ class GleanProbe(Probe):
 
         # The canonical definition for up-to-date schemas
         self.definition = self.definition_history[0]
+        self.definition['name'] = full_defn[self.name_key]
 
     def _set_dates(self, definition: dict):
         vals = [
