@@ -3,6 +3,7 @@ metadata/structured-ingestion/.*
 metadata/telemetry-ingestion/.*
 metadata/credentials/.*
 metadata/sources/.*
+metadata/metaschema/.*
 glean/.*
 telemetry/first-shutdown/.*
 telemetry/disableSHA1rollout/.*
