@@ -176,12 +176,16 @@ class GenericPing(object):
         r = requests.get(url, stream=True)
         r.raise_for_status()
 
-        final_json = ""
+        json_bytes = b""
 
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:
-                final_json += chunk.decode(r.encoding or GenericPing.default_encoding)
+        try:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    json_bytes += chunk
+        except ValueError as e:
+            raise ValueError("Could not parse " + url) from e
 
+        final_json = json_bytes.decode(r.encoding or GenericPing.default_encoding)
         GenericPing._add_to_cache(no_param_url, final_json)
 
         return final_json
