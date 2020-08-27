@@ -214,16 +214,21 @@ def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
 
 
 def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema):
-    schema_generator = GleanPing(repo)
+    schema_generator = GleanPing(repo, repo_id)
     schemas = schema_generator.generate_schema(config, split=False, generic_schema=generic_schema)
-    dump_schema(schemas, out_dir.joinpath(repo_id), pretty)
+    dump_schema(schemas, out_dir and out_dir.joinpath(repo_id), pretty)
 
 
 def dump_schema(schemas, out_dir, pretty, *, version=1):
-    json_dump_args = {'cls': SchemaEncoder}
+    json_dump_args = {
+        'cls': SchemaEncoder
+    }
     if pretty:
-        json_dump_args['indent'] = 4
-        json_dump_args['separators'] = (',', ':')
+        json_dump_args.update({
+            'indent': 4,
+            'separators': (',', ':'),
+            'sort_keys': True,
+        })
 
     if not out_dir:
         print(json.dumps(schemas, **json_dump_args))
