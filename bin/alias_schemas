@@ -57,7 +57,7 @@ def main(aliases_path, base_dir):
                 fname = source.name.replace(source_doctype, dest_doctype)
                 dest = dest_dir / fname
 
-                print(f"Aliasing {dest} to {source}")
+                print(f"Aliasing {source} to {dest}")
 
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(source, dest)

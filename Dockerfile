@@ -38,7 +38,7 @@ RUN pip install -r requirements/test_requirements.txt
 ADD . ${HOME}/mozilla-schema-generator
 ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
 
-RUN pip install -e ${HOME}/mozilla-schema-generator
+RUN pip install --no-dependencies -e ${HOME}/mozilla-schema-generator
 
 # Drop root and change ownership of the application folder to the user
 RUN chown -R ${USER_ID}:${GROUP_ID} ${HOME}

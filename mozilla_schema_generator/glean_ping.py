@@ -29,8 +29,9 @@ class GleanPing(GenericPing):
     default_dependencies = ['glean']
     ignore_pings = {"all-pings", "all_pings", "default", "glean_ping_info", "glean_client_info"}
 
-    def __init__(self, repo):  # TODO: Make env-url optional
+    def __init__(self, repo, app_id):  # TODO: Make env-url optional
         self.repo = repo
+        self.app_id = app_id
         super().__init__(
             self.schema_url,
             self.schema_url,
@@ -139,7 +140,13 @@ class GleanPing(GenericPing):
             new_config = Config(ping, matchers=matchers)
 
             if generic_schema:  # Use the generic glean ping schema
-                schemas[new_config.name] = [self.get_schema()]
+                schema = self.get_schema()
+                schema.schema['mozPipelineMetadata'] = {
+                    "bq_dataset_family": self.app_id.replace("-", "_"),
+                    "bq_table": ping.replace("-", "_") + "_v1",
+                    "bq_metadata_format": "structured",
+                }
+                schemas[new_config.name] = [schema]
             else:
                 schemas.update(super().generate_schema(new_config))
 
