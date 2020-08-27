@@ -68,29 +68,6 @@ function clone_and_configure_mps() {
     git checkout -b $MPS_BRANCH_WORKING
 }
 
-function prepare_metadata() {
-    local telemetry_metadata="metadata/telemetry-ingestion/telemetry-ingestion.1.schema.json"
-    local pioneer_metadata="metadata/pioneer-ingestion/pioneer-ingestion.1.schema.json"
-    local structured_metadata="metadata/structured-ingestion/structured-ingestion.1.schema.json"
-
-    # schema directory structure is enforced by regex at compile-time
-    # shellcheck disable=SC2044
-    for schema in $(find . -name "*.schema.json" -type f); do
-        if [[ "$schema" =~ \./telemetry/.* ]]; then
-            metadata_merge $telemetry_metadata "$schema"
-        elif [[ "$schema" =~ \./pioneer-.*/.* ]]; then
-            metadata_merge $pioneer_metadata "$schema"
-        elif [[ "$schema" =~ \./metadata/.* ]]; then
-            continue
-        # See bug 1654558: https://bugzilla.mozilla.org/show_bug.cgi?id=1654558#c7
-        elif [[ "$schema" =~ \./xfocsp-error-report/.* ]]; then
-            metadata_merge $telemetry_metadata "$schema"
-        else
-            metadata_merge $structured_metadata "$schema"
-        fi
-    done
-}
-
 function filter_schemas() {
     # Remove BigQuery schemas that are in the disallow list
     find . -name '*.bq' | grep -f $DISALLOWLIST | xargs rm -f
@@ -157,8 +134,12 @@ function main() {
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
 
-    # Add metadata to all json schemas, drop metadata schemas
-    prepare_metadata
+    # Add metadata fields to all json schemas
+    # schema directory structure is enforced by regex at compile-time
+    # shellcheck disable=SC2044
+    for schema in $(find . -name "*.schema.json" -type f); do
+        metadata_merge metadata/ "$schema"
+    done
 
     # Add transpiled BQ schemas
     find . -type f -name "*.schema.json" | while read -r fname; do
