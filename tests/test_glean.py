@@ -17,7 +17,7 @@ from typing import Dict, List
 
 @pytest.fixture
 def glean():
-    return glean_ping.GleanPing("glean")
+    return glean_ping.GleanPing("glean", "org-mozilla-glean")
 
 
 @pytest.fixture
@@ -67,11 +67,17 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
+            meta = schema.pop("mozPipelineMetadata")
+            assert meta == {
+                'bq_dataset_family': 'org_mozilla_glean',
+                'bq_metadata_format': 'structured',
+                'bq_table': name.replace("-", "_") + '_v1',
+            }
             print_and_test(generic_schema, schema)
 
     def test_missing_data(self, config):
         # When there are no files, this should error
 
-        not_glean = NoProbeGleanPing("LeanGleanPingNoIding")
+        not_glean = NoProbeGleanPing("LeanGleanPingNoIding", "org-mozilla-lean")
         with pytest.raises(requests.exceptions.HTTPError):
             not_glean.generate_schema(config, split=False)
