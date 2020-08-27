@@ -43,5 +43,9 @@
     {
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/sync/sync.4.schema.json",
         "config": "sync.yaml"
+    },
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/account-ecosystem/account-ecosystem.4.schema.json",
+        "config": "account_ecosystem.yaml"
     }
 ]

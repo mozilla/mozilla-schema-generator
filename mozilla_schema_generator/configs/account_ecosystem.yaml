@@ -1,0 +1,23 @@
+payload:
+  scalars:
+    parent:
+      match:
+        table_group: scalars
+        type: scalar
+        details:
+          keyed: false
+          record_in_processes:
+            contains: main
+          record_into_store:
+            contains: account-ecosystem
+  keyedHistograms:
+    parent:
+      match:
+        table_group: keyed_histograms
+        type: histogram
+        details:
+          keyed: true
+          record_in_processes:
+            contains: main
+          record_into_store:
+            contains: account-ecosystem

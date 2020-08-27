@@ -8,7 +8,7 @@ import json
 from .generic_ping import GenericPing
 from .schema import Schema
 from .probes import MainProbe
-from .utils import prepend_properties
+from .utils import prepend_properties, property_exists
 from typing import List
 
 
@@ -50,32 +50,37 @@ class CommonPing(GenericPing):
         active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
             + ("additionalProperties", "properties")
 
-        schema.set_schema_elem(
-            prepend_properties(("environment", "settings", "userPrefs")),
-            with_description(
-                string_map,
-                "User preferences - limited to an allowlist defined in `toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",  # NOQA
-            ),
-        )
-        schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "version")), string)
-        schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
-        schema.set_schema_elem(
-                prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
-        schema.set_schema_elem(
-                prepend_properties(("environment", "addons", "theme", "foreignInstall")), integer)
-        schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
-        schema.set_schema_elem(active_addons + ("version",), string)
-        schema.set_schema_elem(active_addons + ("userDisabled",), integer)
-        schema.set_schema_elem(
-            prepend_properties(("environment", "addons", "activeGMPlugins"))
-            + ("additionalProperties", "properties", "applyBackgroundUpdates"),
-            with_description(
-                integer,
-                "Cast into an integer via mozilla-schema-generator. See bug 1611027.",
-            ),
-        )
+        # If active_addons doesn't exist in the schema, then this is a simplified
+        # environment and we can skip the below modifications.
+        if property_exists(schema.schema, active_addons):
+            schema.set_schema_elem(
+                prepend_properties(("environment", "settings", "userPrefs")),
+                with_description(
+                    string_map,
+                    "User preferences - limited to an allowlist defined in "
+                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",
+                ),
+            )
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "version")), string)
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "addons", "theme", "foreignInstall")),
+                    integer)
+            schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
+            schema.set_schema_elem(active_addons + ("version",), string)
+            schema.set_schema_elem(active_addons + ("userDisabled",), integer)
+            schema.set_schema_elem(
+                prepend_properties(("environment", "addons", "activeGMPlugins"))
+                + ("additionalProperties", "properties", "applyBackgroundUpdates"),
+                with_description(
+                    integer,
+                    "Cast into an integer via mozilla-schema-generator. See bug 1611027.",
+                ),
+            )
 
         return schema
 
