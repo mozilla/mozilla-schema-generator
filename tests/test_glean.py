@@ -62,13 +62,12 @@ class TestGleanPing(object):
 
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        generic_schema = glean.get_schema().schema
         assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
-            meta = schema.pop("mozPipelineMetadata")
-            assert meta == {
+            generic_schema = glean.get_schema().schema
+            generic_schema["mozPipelineMetadata"] = {
                 'bq_dataset_family': 'org_mozilla_glean',
                 'bq_metadata_format': 'structured',
                 'bq_table': name.replace("-", "_") + '_v1',
