@@ -47,32 +47,15 @@ class CommonPing(GenericPing):
             """Add a description to the types defined above."""
             return {**dtype, **dict(description=comment)}
 
-        active_addons = prepend_properties(("environment", "addons", "activeAddons")) \
-            + ("additionalProperties", "properties")
-
-        # If active_addons doesn't exist in the schema, then this is a simplified
-        # environment and we can skip the below modifications.
-        if schema.property_exists(active_addons):
-            schema.set_schema_elem(
-                prepend_properties(("environment", "settings", "userPrefs")),
-                with_description(
-                    string_map,
-                    "User preferences - limited to an allowlist defined in "
-                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",
-                ),
-            )
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "version")), string)
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "addons", "theme", "foreignInstall")),
-                    integer)
+        if schema.property_exists(prepend_properties(("environment", "addons"))):
+            active_addons = (prepend_properties(("environment", "addons", "activeAddons"))
+                             + ("additionalProperties", "properties"))
             schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
             schema.set_schema_elem(active_addons + ("version",), string)
             schema.set_schema_elem(active_addons + ("userDisabled",), integer)
+            schema.set_schema_elem(
+                prepend_properties(("environment", "addons", "theme", "foreignInstall")),
+                integer)
             schema.set_schema_elem(
                 prepend_properties(("environment", "addons", "activeGMPlugins"))
                 + ("additionalProperties", "properties", "applyBackgroundUpdates"),
@@ -81,6 +64,27 @@ class CommonPing(GenericPing):
                     "Cast into an integer via mozilla-schema-generator. See bug 1611027.",
                 ),
             )
+
+        user_prefs = (prepend_properties(("environment", "settings", "userPrefs")))
+        if schema.property_exists(user_prefs):
+            schema.set_schema_elem(user_prefs,
+                with_description(
+                    string_map,
+                    "User preferences - limited to an allowlist defined in "
+                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",
+                ),
+            )
+
+        # TODO: Remove this section in favor of injecting the fields to raw schemas;
+        # See https://github.com/mozilla-services/mozilla-pipeline-schemas/pull/600
+        if schema.property_exists(prepend_properties(("environment", "system",
+                                                      "os", "installYear"))):
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "version")), string)
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
+            schema.set_schema_elem(
+                    prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
 
         return schema
 
