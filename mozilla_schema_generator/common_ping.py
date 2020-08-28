@@ -67,13 +67,9 @@ class CommonPing(GenericPing):
 
         user_prefs = (prepend_properties(("environment", "settings", "userPrefs")))
         if schema.property_exists(user_prefs):
-            schema.set_schema_elem(user_prefs,
-                with_description(
-                    string_map,
-                    "User preferences - limited to an allowlist defined in "
-                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",
-                ),
-            )
+            desc = ("User preferences - limited to an allowlist defined in "
+                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`")
+            schema.set_schema_elem(user_prefs, with_description(string_map, desc))
 
         # TODO: Remove this section in favor of injecting the fields to raw schemas;
         # See https://github.com/mozilla-services/mozilla-pipeline-schemas/pull/600
