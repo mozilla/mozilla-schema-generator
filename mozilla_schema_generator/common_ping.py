@@ -8,7 +8,7 @@ import json
 from .generic_ping import GenericPing
 from .schema import Schema
 from .probes import MainProbe
-from .utils import prepend_properties, property_exists
+from .utils import prepend_properties
 from typing import List
 
 
@@ -52,7 +52,7 @@ class CommonPing(GenericPing):
 
         # If active_addons doesn't exist in the schema, then this is a simplified
         # environment and we can skip the below modifications.
-        if property_exists(schema.schema, active_addons):
+        if schema.property_exists(active_addons):
             schema.set_schema_elem(
                 prepend_properties(("environment", "settings", "userPrefs")),
                 with_description(

@@ -32,15 +32,3 @@ def prepend_properties(key: Tuple[str]) -> Tuple[str]:
     ```
     """
     return tuple(chain.from_iterable(zip(("properties" for k in key), key)))
-
-
-def property_exists(schema: Dict, key: Tuple[str]) -> bool:
-    """
-    Check if the `key` exists in `schema`.
-
-    `key` is a list of keys as output by `prepend_properties`.
-    """
-    target = schema
-    for x in key:
-        target = target.get(x, {})
-    return bool(target)
