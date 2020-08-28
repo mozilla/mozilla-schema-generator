@@ -71,17 +71,6 @@ class CommonPing(GenericPing):
                     "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`")
             schema.set_schema_elem(user_prefs, with_description(string_map, desc))
 
-        # TODO: Remove this section in favor of injecting the fields to raw schemas;
-        # See https://github.com/mozilla-services/mozilla-pipeline-schemas/pull/600
-        if schema.property_exists(prepend_properties(("environment", "system",
-                                                      "os", "installYear"))):
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "version")), string)
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "hasSuperfetch")), boolean)
-            schema.set_schema_elem(
-                    prepend_properties(("environment", "system", "os", "hasPrefetch")), boolean)
-
         return schema
 
     def get_env(self):
