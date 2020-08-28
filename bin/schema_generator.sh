@@ -124,7 +124,7 @@ function commit_schemas() {
     git checkout ./*.schema.json
 
     # Add Glean JSON schemas with generic schema
-    mozilla-schema-generator generate-glean-pings --out-dir $MPS_SCHEMAS_DIR --pretty --generic-schema
+    mozilla-schema-generator generate-glean-pings --out-dir $MPS_SCHEMAS_DIR --pretty --generic-schema --mps-branch $MPS_BRANCH_SOURCE
     find . -name "*.schema.json" -type f -exec git add {} +
 
     git commit -a -m "Interim Commit"
@@ -150,9 +150,9 @@ function main() {
     clone_and_configure_mps
 
     # Generate new schemas
-    mozilla-schema-generator generate-main-ping --out-dir ./telemetry
-    mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --out-dir ./telemetry
-    mozilla-schema-generator generate-glean-pings --out-dir .
+    mozilla-schema-generator generate-main-ping --out-dir ./telemetry --mps-branch $MPS_BRANCH_SOURCE
+    mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --mps-branch $MPS_BRANCH_SOURCE --out-dir ./telemetry
+    mozilla-schema-generator generate-glean-pings --mps-branch $MPS_BRANCH_SOURCE --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +

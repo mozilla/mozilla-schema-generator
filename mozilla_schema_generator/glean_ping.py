@@ -29,13 +29,14 @@ class GleanPing(GenericPing):
     default_dependencies = ['glean']
     ignore_pings = {"all-pings", "all_pings", "default", "glean_ping_info", "glean_client_info"}
 
-    def __init__(self, repo, app_id):  # TODO: Make env-url optional
+    def __init__(self, repo, app_id, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
         self.app_id = app_id
         super().__init__(
             self.schema_url,
             self.schema_url,
-            self.probes_url_template.format(repo)
+            self.probes_url_template.format(repo),
+            **kwargs
         )
 
     def get_dependencies(self):

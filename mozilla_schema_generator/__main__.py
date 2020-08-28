@@ -57,8 +57,14 @@ SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
           "schemas that are outputted. Otherwise "
           "the schemas will be on one line."),
 )
-def generate_main_ping(config, out_dir, split, pretty):
-    schema_generator = MainPing()
+@click.option(
+    '--mps-branch',
+    help=("If specified, the source branch of "
+          "mozilla-pipeline-schemas to reference"),
+    required=False,
+)
+def generate_main_ping(config, out_dir, split, pretty, mps_branch):
+    schema_generator = MainPing(mps_branch=mps_branch)
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -111,7 +117,13 @@ def generate_main_ping(config, out_dir, split, pretty):
     help=("File containing URLs to schemas and configs "
           "of pings in the common ping format."),
 )
-def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_config):
+@click.option(
+    '--mps-branch',
+    help=("If specified, the source branch of "
+          "mozilla-pipeline-schemas to reference"),
+    required=False,
+)
+def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_config, mps_branch):
     if split:
         raise NotImplementedError("Splitting of common pings is not yet supported.")
 
@@ -124,7 +136,7 @@ def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_confi
         common_pings = json.load(f)
 
     for common_ping in common_pings:
-        schema_generator = CommonPing(common_ping["schema_url"])
+        schema_generator = CommonPing(common_ping["schema_url"], mps_branch=mps_branch)
 
         config_data = {}
 
@@ -192,7 +204,13 @@ def generate_common_pings(config_dir, out_dir, split, pretty, common_pings_confi
           "but instead the generic schema is used for "
           "every application's glean pings.")
 )
-def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
+@click.option(
+    '--mps-branch',
+    help=("If specified, the source branch of "
+          "mozilla-pipeline-schemas to reference"),
+    required=False,
+)
+def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema, mps_branch):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
 
@@ -210,11 +228,11 @@ def generate_glean_pings(config, out_dir, split, pretty, repo, generic_schema):
     config = Config("glean", config_data)
 
     for repo_name, repo_id in repos:
-        write_schema(repo_name, repo_id, config, out_dir, split, pretty, generic_schema)
+        write_schema(repo_name, repo_id, config, out_dir, split, pretty, generic_schema, mps_branch)
 
 
-def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema):
-    schema_generator = GleanPing(repo, repo_id)
+def write_schema(repo, repo_id, config, out_dir, split, pretty, generic_schema, mps_branch):
+    schema_generator = GleanPing(repo, repo_id, mps_branch=mps_branch)
     schemas = schema_generator.generate_schema(config, split=False, generic_schema=generic_schema)
     dump_schema(schemas, out_dir and out_dir.joinpath(repo_id), pretty)
 

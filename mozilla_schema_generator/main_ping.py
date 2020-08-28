@@ -14,8 +14,8 @@ class MainPing(CommonPing):
         "/schemas/telemetry/main/main.4.schema.json"
     )
 
-    def __init__(self):
-        super().__init__(self.schema_url)
+    def __init__(self, **kwargs):
+        super().__init__(self.schema_url, **kwargs)
 
     def _update_env(self, schema):
         integer = {"type": "integer"}

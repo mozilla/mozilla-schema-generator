@@ -22,8 +22,8 @@ class CommonPing(GenericPing):
     env_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/templates/include/telemetry/environment.1.schema.json" # noqa E501
     probes_url = GenericPing.probe_info_base_url + "/firefox/all/main/all_probes"
 
-    def __init__(self, schema_url):
-        super().__init__(schema_url, self.env_url, self.probes_url)
+    def __init__(self, schema_url, **kwargs):
+        super().__init__(schema_url, self.env_url, self.probes_url, **kwargs)
 
     def get_schema(self):
         schema = super().get_schema()
