@@ -41,7 +41,6 @@ class CommonPing(GenericPing):
             "type": "object",
             "additionalProperties": string,
         }
-        boolean = {"type": "boolean"}
 
         def with_description(dtype: dict, comment: str) -> dict:
             """Add a description to the types defined above."""
