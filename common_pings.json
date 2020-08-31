@@ -1,51 +1,51 @@
 [
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/voice/voice.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/voice/voice.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/deletion-request/deletion-request.4.schema.json",
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/deletion-request/deletion-request.4.schema.json",
         "config": "deletion_request.yaml"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/heartbeat/heartbeat.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/heartbeat/heartbeat.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/crash/crash.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/crash/crash.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/modules/modules.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/modules/modules.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/testpilot/testpilot.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/testpilot/testpilot.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/update/update.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/update/update.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/untrusted-modules/untrusted-modules.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/untrusted-modules/untrusted-modules.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/event/event.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/event/event.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/first-shutdown/first-shutdown.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/first-shutdown/first-shutdown.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/saved-session/saved-session.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/saved-session/saved-session.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/third-party-modules/third-party-modules.4.schema.json"
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/third-party-modules/third-party-modules.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/new-profile/new-profile.4.schema.json",
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/new-profile/new-profile.4.schema.json",
         "config": "new_profile.yaml"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/sync/sync.4.schema.json",
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/sync/sync.4.schema.json",
         "config": "sync.yaml"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/telemetry/account-ecosystem/account-ecosystem.4.schema.json",
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/account-ecosystem/account-ecosystem.4.schema.json",
         "config": "account_ecosystem.yaml"
     }
 ]

@@ -10,8 +10,8 @@ from .utils import prepend_properties
 
 class MainPing(CommonPing):
     schema_url = (
-        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
-        "/schemas/telemetry/main/main.4.schema.json"
+        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+        "/{branch}/schemas/telemetry/main/main.4.schema.json"
     )
 
     def __init__(self, **kwargs):

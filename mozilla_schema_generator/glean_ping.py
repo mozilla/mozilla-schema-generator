@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 class GleanPing(GenericPing):
 
-    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/glean/glean/glean.1.schema.json" # noqa E501
+    schema_url = ("https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+                  "/{branch}/schemas/glean/glean/glean.1.schema.json")
     probes_url_template = GenericPing.probe_info_base_url + "/glean/{}/metrics"
     ping_url_template = GenericPing.probe_info_base_url + "/glean/{}/pings"
     repos_url = GenericPing.probe_info_base_url + "/glean/repositories"

@@ -13,8 +13,8 @@ from mozilla_schema_generator.utils import _get, prepend_properties
 @pytest.fixture
 def ping():
     schema_url = (
-        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master"
-        "/schemas/telemetry/event/event.4.schema.json"
+        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+        "/{branch}/schemas/telemetry/event/event.4.schema.json"
     )
     return common_ping.CommonPing(schema_url)
 
