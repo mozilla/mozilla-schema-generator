@@ -14,6 +14,13 @@ payload:
           - PWMGR_PROMPT_REMEMBER_ACTION
           - PWMGR_PROMPT_UPDATE_ACTION
           - PWMGR_SAVING_ENABLED
+          - PWMGR_MANAGE_VISIBILITY_TOGGLED
+          - PWMGR_MANAGE_COPIED_PASSWORD
+          - PWMGR_MANAGE_COPIED_USERNAME
+          - PWMGR_MANAGE_DELETED_ALL
+          - PWMGR_MANAGE_DELETED
+          - PWMGR_MANAGE_OPENED
+          - PWMGR_MANAGE_SORTED
       details:
         keyed: false
         record_in_processes:
