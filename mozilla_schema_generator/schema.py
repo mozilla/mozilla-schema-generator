@@ -96,6 +96,15 @@ class Schema(object):
                 except KeyError:
                     break
 
+    def property_exists(self, key: Tuple[str]) -> bool:
+        """
+        @param key: The key to check for existence
+        """
+        target = self.schema
+        for x in key:
+            target = target.get(x, {})
+        return bool(target)
+
     @staticmethod
     def _get_schema_size(schema: dict, key=None) -> int:
         if key is None:
