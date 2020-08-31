@@ -2,13 +2,14 @@
 
 import click
 import json
+from os import path
 
 @click.command()
 @click.argument(
-    'metadata',
+    'metadata_dir',
     type=click.Path(
-        dir_okay=False,
-        file_okay=True,
+        dir_okay=True,
+        file_okay=False,
         writable=False,
         exists=True,
     ),
@@ -24,14 +25,26 @@ import json
     ),
     required=True
 )
-def main(metadata, schema):
-    print("Merging metadata {} and schema {}".format(metadata, schema))
-
-    with open(metadata, "r") as f:
-        metadata_contents = json.load(f)
+def main(metadata_dir, schema):
+    print("Merging metadata into schema {}".format(schema))
 
     with open(schema, "r") as f:
         schema_contents = json.load(f)
+
+    meta = schema_contents.get("mozPipelineMetadata", {})
+    bq_metadata_format = meta.get("bq_metadata_format", None)
+    if bq_metadata_format:
+        print("Using format {} for metadata merged into schema {}".format(bq_metadata_format, schema))
+    else:
+        print("Skipping metadata merge for schema {}".format(schema))
+        return
+
+    metadata = path.join(
+        metadata_dir,
+        "{0}-ingestion/{0}-ingestion.1.schema.json".format(bq_metadata_format))
+
+    with open(metadata, "r") as f:
+        metadata_contents = json.load(f)
 
     properties = metadata_contents.get("properties", {})
     required = metadata_contents.get("required", [])
