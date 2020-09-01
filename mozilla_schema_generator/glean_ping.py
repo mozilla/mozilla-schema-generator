@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 class GleanPing(GenericPing):
 
-    schema_url = "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/master/schemas/glean/glean/glean.1.schema.json" # noqa E501
+    schema_url = ("https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+                  "/{branch}/schemas/glean/glean/glean.1.schema.json")
     probes_url_template = GenericPing.probe_info_base_url + "/glean/{}/metrics"
     ping_url_template = GenericPing.probe_info_base_url + "/glean/{}/pings"
     repos_url = GenericPing.probe_info_base_url + "/glean/repositories"
@@ -29,13 +30,14 @@ class GleanPing(GenericPing):
     default_dependencies = ['glean']
     ignore_pings = {"all-pings", "all_pings", "default", "glean_ping_info", "glean_client_info"}
 
-    def __init__(self, repo, app_id):  # TODO: Make env-url optional
+    def __init__(self, repo, app_id, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
         self.app_id = app_id
         super().__init__(
             self.schema_url,
             self.schema_url,
-            self.probes_url_template.format(repo)
+            self.probes_url_template.format(repo),
+            **kwargs
         )
 
     def get_dependencies(self):
