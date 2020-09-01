@@ -31,9 +31,6 @@
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/first-shutdown/first-shutdown.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/saved-session/saved-session.4.schema.json"
-    },
-    {
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/third-party-modules/third-party-modules.4.schema.json"
     },
     {

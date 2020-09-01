@@ -1,9 +1,5 @@
 {
   "telemetry": {
-    "saved-session": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
-    },
     "first-shutdown": {
       "source-namespace": "telemetry",
       "source-doctype": "main"
