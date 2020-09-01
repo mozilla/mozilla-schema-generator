@@ -141,16 +141,24 @@ class GleanPing(GenericPing):
                 matcher.matcher["send_in_pings"]["contains"] = ping
             new_config = Config(ping, matchers=matchers)
 
-            if generic_schema:  # Use the generic glean ping schema
-                schema = self.get_schema()
-                schema.schema['mozPipelineMetadata'] = {
+            defaults = {
+                "mozPipelineMetadata": {
                     "bq_dataset_family": self.app_id.replace("-", "_"),
                     "bq_table": ping.replace("-", "_") + "_v1",
                     "bq_metadata_format": "structured",
                 }
+            }
+
+            if generic_schema:  # Use the generic glean ping schema
+                schema = self.get_schema()
+                schema.schema.update(defaults)
                 schemas[new_config.name] = [schema]
             else:
-                schemas.update(super().generate_schema(new_config))
+                generated = super().generate_schema(new_config)
+                for value in generated.values():
+                    for schema in value:
+                        schema.schema.update(defaults)
+                schemas.update(generated)
 
         return schemas
 
