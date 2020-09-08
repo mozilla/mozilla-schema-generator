@@ -27,7 +27,7 @@ class TestPing(object):
             config = Config("main", yaml.load(f))
             ping = MainPing()
 
-            max_size = ping.generate_schema(config, max_size=9500)['main'][0].get_size()
+            max_size = ping.generate_schema(config, max_size=MainPing.default_max_size)['main'][0].get_size()
 
             with pytest.raises(SchemaException):
                 ping.generate_schema(config, max_size=max_size - 1)
