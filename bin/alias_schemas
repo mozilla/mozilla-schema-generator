@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import click
-import json 
+import json
 import pathlib
 import shutil
 import jsonschema
@@ -60,7 +60,18 @@ def main(aliases_path, base_dir):
                 print(f"Aliasing {source} to {dest}")
 
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy(source, dest)
+
+                if ''.join(dest.suffixes) == '.schema.json':
+                    # We must preserve metadata from the source schema.
+                    with open(source, 'r') as f:
+                        schema_contents = json.load(f)
+                    with open(dest, 'r') as f:
+                        metadata = json.load(f).get('mozPipelineMetadata', {})
+                    schema_contents['mozPipelineMetadata'] = metadata
+                    with open(dest, 'w') as f:
+                        json.dump(schema_contents, f, ensure_ascii=False, separators=(',', ': '))
+                else:
+                    shutil.copy(source, dest)
 
 
 if __name__ == "__main__":
