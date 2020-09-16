@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+import click
+import json
+import os
+from pathlib import Path
+import shutil
+
+ROOT_DIR = Path(__file__).parent.parent
+BQ_DIR = ROOT_DIR / "bq"
+
+
+@click.command()
+@click.argument(
+    'source_paths',
+    type=click.Path(
+        dir_okay=False,
+        file_okay=True,
+        writable=False,
+        exists=True,
+    ),
+    required=True,
+    nargs=-1,
+)
+def main(source_paths):
+    for p in source_paths:
+        process_path(p)
+
+
+def process_path(source_path):
+    source_path = Path(source_path)
+    source_json_path = source_path.parent / (source_path.stem + '.schema.json')
+    source_bq_path = source_path.parent / (source_path.stem + '.bq')
+
+    if source_json_path.exists() and source_bq_path.exists():
+        print(f"Processing {source_bq_path} for copying to bq/")
+    else:
+        print(f"Not copying {source_path} into {BQ_DIR} due to missing schema")
+        return
+
+    with open(source_json_path, "r") as f:
+        schema_contents = json.load(f)
+
+    meta = schema_contents.get("mozPipelineMetadata", {})
+    bq_dataset_family = meta.get("bq_dataset_family", None)
+    bq_table = meta.get("bq_table", None)
+    if bq_dataset_family and bq_table:
+        dest_dataset_dir = source_path.parent.parent.parent.parent / "bq" / bq_dataset_family
+        dest_dataset_dir.mkdir(parents=True, exist_ok=True)
+        dest_bq_path = dest_dataset_dir / f"{bq_table}.bq"
+        print(f"Copying {source_bq_path} to {dest_bq_path}")
+        shutil.copy(source_bq_path, dest_bq_path)
+        dest_json_path = dest_dataset_dir / f"{bq_table}.schema.json"
+        if not dest_json_path.exists():
+            dest_json_path.symlink_to(source_json_path)
+    else:
+        print(f"Not copying {source_bq_path} into {BQ_DIR}")
+
+
+if __name__ == "__main__":
+    main()

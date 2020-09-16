@@ -83,7 +83,16 @@ function _generate_schemas() {
 
     # Copy aliased BQ schemas into place
     alias_schemas "$ALIASES_PATH" .
+
     popd
+
+    # Copy all BQ schemas from schemas/ to appropriate paths under bq/
+    # TODO: Remove the exemption for xfocsp-error-report/xfocsp-error-report
+    # once ops logic has adapted to the bq/ directory structure.
+    find schemas/ -name '*.bq' | \
+        grep -v xfocsp-error-report/xfocsp-error-report | \
+        xargs copy_to_bq_folder
+
 }
 
 function _create_changelog() {
@@ -149,7 +158,9 @@ function _commit_schemas() {
     # Note that in this step we throw out all the temporary modifications we've
     # made to the JSON schemas.
     find . -name "*.bq" -type f -exec git add {} +
-    git checkout ./*.schema.json
+
+    # Commit Glean JSON schemas and symlinks under bq/ dir
+    find . -name "*.schema.json" -exec git add {} +
 
     # Add Glean JSON schemas with generic schema
     mozilla-schema-generator generate-glean-pings \
@@ -167,9 +178,9 @@ function _commit_schemas() {
 
     git checkout "$mps_branch_publish" || git checkout -b "$mps_branch_publish"
 
-    # Keep only the schemas dir and readme
+    # Keep only schemas/ bq/ and readme
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
-    git checkout "$mps_branch_working" -- schemas README.md
+    git checkout "$mps_branch_working" -- schemas bq README.md
     git commit --all \
         --message "Auto-push from schema generation [ci skip]" \
         --message "$(_create_changelog "$mps_branch_source" "$mps_branch_publish")" \
