@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-from .utils import _get, prepend_properties
-import queue
+from .utils import _get, prepend_properties, unnest_dict
 from collections import defaultdict
 # TODO: s/probes/probe
 from .probes import Probe
@@ -31,25 +30,8 @@ class Config(object):
         """
         Transform the nested config into a single dictionary
         """
-        keys = queue.SimpleQueue()
-        matchers = {}
-
-        for key, v in config.items():
-            if isinstance(v, dict):
-                keys.put((key,))
-
-        while not keys.empty():
-            key = keys.get()
-            elem = _get(config, key)
-
-            if self.match_key in elem:
-                matchers[key] = Matcher(elem[self.match_key])
-            else:
-                for k, v in elem.items():
-                    if isinstance(v, dict):
-                        keys.put(key + (k,))
-
-        self.matchers = matchers
+        unnested = unnest_dict(config, should_add=lambda _, x: self.match_key in x, should_continue=lambda _, x: not self.match_key in x)
+        self.matchers = {k: Matcher(e[self.match_key]) for k, e in unnested.items()}
 
     def _get_splits(self) -> Dict[str, Dict[Tuple[str], Matcher]]:
         """

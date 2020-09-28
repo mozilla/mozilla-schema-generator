@@ -100,3 +100,155 @@ class TestSchema(object):
                 propagate=True)
 
         print_and_test(schema.schema, res_schema.schema)
+
+    def test_valid_schema_change(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                }
+            }
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                },
+                "second": {
+                    "type": "boolean"
+                }
+            }
+        }
+
+        assert len(Schema.is_valid_schema_change(_from, _to)) == 0
+
+    def test_valid_schema_change__nested(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "object",
+                    "properties": {
+                        "a": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "object",
+                    "properties": {
+                        "a": {
+                            "type": "string"
+                        },  
+                        "b": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        }
+
+        assert len(Schema.is_valid_schema_change(_from, _to)) == 0
+
+    def test_valid_schema_change__make_nullable(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                },
+                "second": {
+                    "type": "string"
+                }
+            },
+            "required": ["first"]
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                },
+                "second": {
+                    "type": ["string", "null"]
+                }
+            }
+        }
+
+        assert len(Schema.is_valid_schema_change(_from, _to)) == 0
+
+    def test_invalid_schema_change__removing_column(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                },
+                "second": {
+                    "type": "boolean"
+                }
+            }
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                }
+            }
+        }
+
+        assert len(Schema.is_valid_schema_change(_from, _to)) > 0
+
+    def test_invalid_schema_change__changing_type(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                }
+            }
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "boolean"
+                }
+            }
+        }
+
+        assert len(Schema.is_valid_schema_change(_from, _to)) == 1
+
+    def test_valid_schema_change__to_non_required(self):
+        _from = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": "string"
+                }
+            }
+        }
+
+        _to = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": {
+                "first": {
+                    "type": ["string", "null"]
+                }
+            }
+        }
+
+        assert Schema.is_valid_schema_change(_from, _to) == {}

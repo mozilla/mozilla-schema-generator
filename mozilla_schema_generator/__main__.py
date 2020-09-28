@@ -15,7 +15,7 @@ from .common_ping import CommonPing
 from .main_ping import MainPing
 from .glean_ping import GleanPing
 from .config import Config
-from .schema import SchemaEncoder
+from .schema import Schema, SchemaEncoder
 
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
@@ -269,6 +269,65 @@ def dump_schema(schemas, out_dir, pretty, *, version=1):
                 f.write(json.dumps(schema, **json_dump_args))
 
 
+@click.command()
+@click.argument(
+    'orig',
+    type=click.Path(
+        dir_okay=True,
+        file_okay=False,
+        exists=True,
+    ),
+)
+@click.argument(
+    'altered',
+    type=click.Path(
+        dir_okay=True,
+        file_okay=False,
+        exists=True,
+    ),
+)
+@click.option(
+    '-v',
+    '--verbose',
+    count=True
+)
+def check_schema_changes(orig, altered, verbose):
+    from_files = {str(p)[len(str(orig))+1:] for p in Path(orig).rglob('*.schema.json')}
+    to_files = {str(p)[len(str(altered))+1:] for p in Path(altered).rglob('*.schema.json')}
+
+    removed_files = from_files - to_files
+    added_files = to_files - from_files
+
+    def read_json(f):
+        with open(f) as json_file:
+            return json.load(json_file)
+
+    all_schema_changes = {fname: "File Removed (disallowed)" for fname in removed_files}
+
+    for fname in set(to_files) - added_files:
+        if verbose > 1:
+            click.echo("Comparing " + fname)
+        from_json = read_json(f'{orig}/{fname}')
+        to_json = read_json(f'{altered}/{fname}')
+
+        schema_changes = Schema.get_invalid_schema_changes(from_json, to_json, verbosity=verbose)
+        if schema_changes:
+            all_schema_changes[fname] = '\n'.join([f'{col}: {change}' for col, change in schema_changes.items()])
+
+    file_invalid_changes = '\n\n'.join(
+        [
+            f'{fname}\n{changes}' 
+            for fname, changes in all_schema_changes.items()
+        ]
+    )
+
+    if all_schema_changes:
+        if verbose > 0:
+            click.echo("\nSchema Incompatible Changes Found\n")
+            click.echo(file_invalid_changes)
+        sys.exit(1)
+
+
 @click.group()
 def main(args=None):
     """Command line utility for mozilla-schema-generator."""
@@ -279,6 +338,7 @@ def main(args=None):
 main.add_command(generate_main_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
+main.add_command(check_schema_changes)
 
 
 if __name__ == "__main__":

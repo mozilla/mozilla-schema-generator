@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 from typing import Any, Tuple
-from .utils import _get
+from .utils import _get, unnest_dict
 from json import JSONEncoder
 import copy
 
@@ -145,3 +145,67 @@ class Schema(object):
 
         # Otherwise, assume a scalar value
         return 1
+
+    @staticmethod
+    def get_type_as_list(t):
+        if isinstance(t, list):
+            return t
+
+        elif isinstance(t, str):
+            return([t])
+
+        elif isinstance(t, dict):
+            if "type" in t:
+                return(Schema.get_type_as_list(t["type"]))
+            elif "enum" in t:
+                return ["string"]
+
+        else:
+            raise Exception("Unknown JSON Schema `type` type " + str(type(t)))
+
+    @staticmethod
+    def get_invalid_schema_changes(_from, _to, verbosity=0):
+        """Check if changing _from to _to is a valid BQ schema change.
+            Use a verbosity > 2 to output the field being compared for
+                types."""
+
+        # 1. Removing properties is an invalid schema change
+
+        def is_property(key, elem):
+            return len(key) >= 2 and key[-2] == "properties"
+
+        from_fields = unnest_dict(_from, should_add=is_property)
+        to_fields = unnest_dict(_to, should_add=is_property)
+        removed_fields = [k for k in from_fields.keys() - to_fields.keys()]
+        added_fields = [k for k in to_fields.keys() - from_fields.keys()]
+
+        # 2. Changing types, except for adding "null", is an invalid schema change
+
+        def is_type(k, _):
+            # Handles the field with name "type" by ignoring properties
+            return k[-1] == "type" and (len(k) < 2 or k[-2] != "properties")
+
+        from_types = unnest_dict(_from, should_add=is_type)
+        to_types = unnest_dict(_to, should_add=is_type)
+
+        invalid_type_changes = []
+        for k in from_types.keys() & to_types.keys():
+            if verbosity > 2:
+                print('  Checking ' + '.'.join(k))
+
+            from_val = Schema.get_type_as_list(from_types[k])
+            to_val = Schema.get_type_as_list(to_types[k])
+
+            if set(to_val) - set(from_val) not in ({"null"}, set()):
+                invalid_type_changes.append(k)
+
+        # Report errors
+
+        invalid_changes = {}
+        for f in removed_fields:
+            invalid_changes['.'.join(f)] = "Dropped"
+
+        for f in invalid_type_changes:
+            invalid_changes['.'.join(f)] = "Type Changed"
+
+        return invalid_changes
