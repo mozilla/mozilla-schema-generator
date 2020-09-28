@@ -93,6 +93,19 @@ function create_changelog() {
         --date=iso
 }
 
+function check_compatible_schema_evolution() {
+    cd $BASE_DIR/mozilla-pipeline-schemas
+
+    # Get the set of schemas that are currently deployed, to compare these against
+    mv schemas/ updated_schemas/
+    git fetch origin
+    git checkout "$MPS_BRANCH_PUBLISH" || return 0
+    git checkout -- schemas/
+
+    mozilla-schema-generator check-schema-changes schemas updated_schemas -vv || \
+        grep $(git rev-parse HEAD) "$BASE_DIR/mozilla-schema-generator/schema_change_allowlist"
+}
+
 function commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
@@ -105,6 +118,7 @@ function commit_schemas() {
     find . -name "*.schema.json" -type f -exec git add {} +
 
     git commit -a -m "Interim Commit"
+    check_compatible_schema_evolution
 
     git checkout "$MPS_BRANCH_PUBLISH" || git checkout -b "$MPS_BRANCH_PUBLISH"
 
