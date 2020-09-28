@@ -183,7 +183,7 @@ class Schema(object):
 
         def is_type(k, _):
             # Handles the field with name "type" by ignoring properties
-            return k[-1] == "type" and (len(k) < 2 or k[-2] != "properties")
+            return k[-1] == "type" and not is_property(key, elem)
 
         from_types = unnest_dict(_from, should_add=is_type)
         to_types = unnest_dict(_to, should_add=is_type)
