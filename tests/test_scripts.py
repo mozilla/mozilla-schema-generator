@@ -61,7 +61,6 @@ class TestSchemaAliasing(object):
         assert res.returncode == 0
 
         test_path = pathlib.Path(self.base_dir) / self.source_namespace / test_doctype
-        assert (test_path / f"{test_doctype}.1.schema.json").exists()
         assert (test_path / f"{test_doctype}.1.bq").exists()
 
     def test_aliasing_new_namespace(self):
@@ -81,7 +80,6 @@ class TestSchemaAliasing(object):
         assert res.returncode == 0
 
         test_path = pathlib.Path(self.base_dir) / test_namespace / test_doctype
-        assert (test_path / f"{test_doctype}.1.schema.json").exists()
         assert (test_path / f"{test_doctype}.1.bq").exists()
 
     def test_no_aliasing(self):

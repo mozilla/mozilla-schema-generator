@@ -96,7 +96,9 @@ function create_changelog() {
 function commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
-    # Assumes the current directory is the root of the repository
+    # Assumes the current directory is the root of the repository.
+    # Note that in this step we throw out all the temporary modifications we've
+    # made to the JSON schemas.
     find . -name "*.bq" -type f -exec git add {} +
     git checkout ./*.schema.json
 
@@ -126,7 +128,11 @@ function main() {
     # Pull in all schemas from MPS and change directory
     clone_and_configure_mps
 
-    # Generate new schemas
+    # Generate concrete JSON schemas that contain per-probe fields.
+    # These are used only as the basis for generating BQ schemas;
+    # we publish JSON schemas exactly as they appear in the source branch so
+    # that the pipeline doesn't rely on per-probe types when validating pings.
+    # For Glean pings, we copy the generic Glean schema into place later on.
     mozilla-schema-generator generate-main-ping --out-dir ./telemetry --mps-branch $MPS_BRANCH_SOURCE
     mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --mps-branch $MPS_BRANCH_SOURCE --out-dir ./telemetry
     mozilla-schema-generator generate-glean-pings --mps-branch $MPS_BRANCH_SOURCE --out-dir .
@@ -161,7 +167,7 @@ function main() {
     # Keep only allowed schemas
     filter_schemas
 
-    # Add schema aliases
+    # Copy aliased BQ schemas into place
     alias_schemas $ALIASES_PATH .
 
     # Push to branch of MPS
