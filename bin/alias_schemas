@@ -53,7 +53,7 @@ def main(aliases_path, base_dir):
 
             assert source_dir.exists()
 
-            for source in source_dir.glob('*'):
+            for source in source_dir.glob('*.bq'):
                 fname = source.name.replace(source_doctype, dest_doctype)
                 dest = dest_dir / fname
 
