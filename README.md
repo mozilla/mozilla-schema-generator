@@ -32,7 +32,7 @@ writes to.
 [BigQuery has a hard limit of ten thousand columns on any single table](https://cloud.google.com/bigquery/quotas). 
 This library can take that limitation into account by splitting schemas into multiple tables,
 although so far we have been able to avoid this complication. We retain schema
-splitting support here as an option to use in the future.
+splitting support here as an option to use in the future. The option is currently disabled.
 
 When a schema is split, each
 table has some common information duplicated in every table, and then a set
