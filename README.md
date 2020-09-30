@@ -10,11 +10,11 @@ all of the probes we expect to see in the appropriate places.
 
 ## Telemetry Integration
 
-The two primary pings we are targeting for integration with this library are:
+There are two generic ping types we're targeting for this library:
 
-1. [The Main Ping](http://gecko-docs.mozilla.org.s3.amazonaws.com/toolkit/components/telemetry/telemetry/data/main-ping.html)
-   is the historical Firefox Desktop ping, and contains many more than ten-thousand distinct subfields.
-2. [The Glean Ping](https://github.com/mozilla/glean_parser) is structure being used for
+1. [The Common Ping Format](http://gecko-docs.mozilla.org.s3.amazonaws.com/toolkit/components/telemetry/telemetry/data/main-ping.html)
+   is used for many legacy pings from Firefox Desktop ping, including the "main" ping
+2. [The Glean Ping Format](https://github.com/mozilla/glean_parser) is the common structure being used for
    all newly instrumented products at Mozilla, including mobile browsers.
 
 This library takes the information for what should be in those pings from the [Probe Info Service](https://www.github.com/mozilla/probe-scraper).
