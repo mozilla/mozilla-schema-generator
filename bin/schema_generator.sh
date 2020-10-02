@@ -119,14 +119,9 @@ function commit_schemas() {
         || echo "Nothing to commit"
 }
 
-function main() {
-    cd $BASE_DIR
-
-    # Setup ssh key and git config
-    setup_git_ssh
-
-    # Pull in all schemas from MPS and change directory
-    clone_and_configure_mps
+function generate_schemas() {
+    # Ensure we're in the correct directory
+    cd $BASE_DIR/mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR
 
     # Generate concrete JSON schemas that contain per-probe fields.
     # These are used only as the basis for generating BQ schemas;
@@ -169,6 +164,18 @@ function main() {
 
     # Copy aliased BQ schemas into place
     alias_schemas $ALIASES_PATH .
+}
+
+function main() {
+    cd $BASE_DIR
+
+    # Setup ssh key and git config
+    setup_git_ssh
+
+    # Pull in all schemas from MPS and change directory
+    clone_and_configure_mps
+
+    generate_schemas
 
     # Push to branch of MPS
     cd ../
@@ -176,4 +183,6 @@ function main() {
     git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
