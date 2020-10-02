@@ -63,7 +63,7 @@ function clone_and_configure_mps() {
     [[ -d mozilla-pipeline-schemas ]] && rm -r mozilla-pipeline-schemas
 
     git clone "$MPS_REPO_URL"
-    cd mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR
+    cd mozilla-pipeline-schemas
     git checkout "$MPS_BRANCH_SOURCE"
     git checkout -b $MPS_BRANCH_WORKING
 }
@@ -103,7 +103,12 @@ function commit_schemas() {
     git checkout ./*.schema.json
 
     # Add Glean JSON schemas with generic schema
-    mozilla-schema-generator generate-glean-pings --out-dir $MPS_SCHEMAS_DIR --pretty --generic-schema --mps-branch $MPS_BRANCH_SOURCE
+    mozilla-schema-generator generate-glean-pings \
+        --pretty \
+        --generic-schema \
+        --mps-branch $MPS_BRANCH_SOURCE \
+        --out-dir $MPS_SCHEMAS_DIR
+
     find . -name "*.schema.json" -type f -exec git add {} +
 
     git commit -a -m "Interim Commit"
@@ -120,17 +125,28 @@ function commit_schemas() {
 }
 
 function generate_schemas() {
-    # Ensure we're in the correct directory
-    cd $BASE_DIR/mozilla-pipeline-schemas/$MPS_SCHEMAS_DIR
+    # Assuming we're at the root of the schema repository, move into the schemas
+    # directory
+    pushd .
+    cd $MPS_SCHEMAS_DIR
 
     # Generate concrete JSON schemas that contain per-probe fields.
     # These are used only as the basis for generating BQ schemas;
     # we publish JSON schemas exactly as they appear in the source branch so
     # that the pipeline doesn't rely on per-probe types when validating pings.
     # For Glean pings, we copy the generic Glean schema into place later on.
-    mozilla-schema-generator generate-main-ping --out-dir ./telemetry --mps-branch $MPS_BRANCH_SOURCE
-    mozilla-schema-generator generate-common-pings --common-pings-config $COMMON_PINGS_PATH --mps-branch $MPS_BRANCH_SOURCE --out-dir ./telemetry
-    mozilla-schema-generator generate-glean-pings --mps-branch $MPS_BRANCH_SOURCE --out-dir .
+    mozilla-schema-generator generate-main-ping \
+        --mps-branch $MPS_BRANCH_SOURCE \
+        --out-dir ./telemetry
+
+    mozilla-schema-generator generate-common-pings \
+        --common-pings-config $COMMON_PINGS_PATH \
+        --mps-branch $MPS_BRANCH_SOURCE \
+        --out-dir ./telemetry
+
+    mozilla-schema-generator generate-glean-pings \
+        --mps-branch $MPS_BRANCH_SOURCE \
+        --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
@@ -164,6 +180,7 @@ function generate_schemas() {
 
     # Copy aliased BQ schemas into place
     alias_schemas $ALIASES_PATH .
+    popd
 }
 
 function main() {
@@ -172,13 +189,13 @@ function main() {
     # Setup ssh key and git config
     setup_git_ssh
 
-    # Pull in all schemas from MPS and change directory
+    # Pull in all schemas from MPS and change directory to the root of the
+    # schema repository
     clone_and_configure_mps
 
     generate_schemas
 
     # Push to branch of MPS
-    cd ../
     commit_schemas
     git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
 }
