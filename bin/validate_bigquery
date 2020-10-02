@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+import click
+from pathlib import Path
+from git import Repo
+from shutil import copyfile
+import json
+import difflib
+
+BASE_DIR = Path("/app").resolve()
+
+
+@click.group()
+def validate():
+    pass
+
+
+def compute_compact_columns(document):
+    def traverse(prefix, columns):
+        res = []
+        for node in columns:
+            name = node["name"] + (".[]" if node["mode"] == "REPEATED" else "")
+            dtype = node["type"]
+            if dtype == "RECORD":
+                res += traverse(f"{prefix}.{name}", node["fields"])
+            else:
+                res += [f"{prefix}.{name} {dtype}"]
+        return res
+
+    res = traverse("root", document)
+    return sorted(res)
+
+
+@validate.command()
+@click.option(
+    "--repository",
+    type=click.Path(exists=True, file_okay=False),
+    default=BASE_DIR / "mozilla-pipeline-schemas",
+)
+@click.option(
+    "--artifact",
+    type=click.Path(file_okay=False),
+    default=BASE_DIR / "validate_schema_evolution",
+)
+def copy(repository, artifact):
+    """Copy BigQuery schemas to a directory as an intermediary step for schema
+    evolution checks."""
+    src = Path(repository)
+    repo = Repo(repository)
+    dst = Path(artifact) / repo.head.commit.name_rev.replace(" ", "_")
+    dst.mkdir(parents=True, exist_ok=True)
+    schemas = sorted(src.glob("**/*.bq"))
+    if not schemas:
+        raise click.ClickException("no schemas found")
+    for path in schemas:
+        namespace = path.parts[-3]
+        doc = path.parts[-1]
+        qualified = f"{namespace}.{doc}"
+        click.echo(qualified)
+        copyfile(path, dst / qualified)
+
+        # also generate something easy to diff
+        cols = compute_compact_columns(json.loads(path.read_text()))
+        compact_filename = ".".join(qualified.split(".")[:-1]) + ".txt"
+        (dst / compact_filename).write_text("\n".join(cols))
+
+
+@validate.command()
+@click.option("--head", type=str, default="local-working-branch")
+@click.option("--base", type=str, default="generated-schemas")
+@click.option(
+    "--repository",
+    type=click.Path(exists=True, file_okay=False),
+    default=BASE_DIR / "mozilla-pipeline-schemas",
+)
+@click.option(
+    "--artifact",
+    type=click.Path(file_okay=False),
+    default=BASE_DIR / "validate_schema_evolution",
+)
+def local(head, base, repository, artifact):
+    """Validate schemas using a heuristic from the compact schemas."""
+    repo = Repo(repository)
+    head_rev = repo.rev_parse(head).name_rev.replace(" ", "_")
+    base_rev = repo.rev_parse(base).name_rev.replace(" ", "_")
+    artifact_path = Path(artifact)
+
+    assert (artifact_path / head_rev).exists()
+    assert (artifact_path / base_rev).exists()
+
+    status = 0
+
+    # look at the compact schemas
+    head_files = (artifact_path / head_rev).glob("*.txt")
+    base_files = (artifact_path / base_rev).glob("*.txt")
+
+    a = set([p.name for p in head_files])
+    b = set([p.name for p in base_files])
+
+    # error condition
+    base_only = b - a
+    if len(base_only) > 0:
+        click.echo("files removed from the base revision")
+        click.echo("\n".join(base_only))
+        status = 1
+
+    # informative only
+    head_only = a - b
+    if len(head_only) > 0:
+        click.echo("files added since the base revision")
+        click.echo("\n".join(head_only))
+
+    for schema_name in a & b:
+        base = artifact_path / base_rev / schema_name
+        head = artifact_path / head_rev / schema_name
+        diff = "\n".join(
+            difflib.unified_diff(
+                base.read_text().split("\n"),
+                head.read_text().split("\n"),
+                fromfile=base.as_posix(),
+                tofile=head.as_posix(),
+            )
+        ).strip()
+        if not diff:
+            # no difference detected
+            continue
+        print(diff)
+
+
+if __name__ == "__main__":
+    validate()
