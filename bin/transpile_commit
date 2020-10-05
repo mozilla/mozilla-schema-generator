@@ -2,9 +2,11 @@
 # Utility functions for processing schemas.
 set -e
 
-# mozilla-schema-generator resources are relative to this script
-# http://mywiki.wooledge.org/BashFAQ/028
-BASE_DIR="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
+# NOTE: mozilla-schema-generator resources are relative to this script. See
+# http://mywiki.wooledge.org/BashFAQ/028 on uses of BASH_SOURCE. This needs to
+# be converted into an absolute path due to directory changes in the main
+# script.
+BASE_DIR="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 DISALLOWLIST="$BASE_DIR/disallowlist"
 ALIASES_PATH="$BASE_DIR/aliases.json"
 COMMON_PINGS_PATH="$BASE_DIR/common_pings.json"

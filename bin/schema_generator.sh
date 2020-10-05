@@ -57,7 +57,7 @@ function setup_mps() {
     # schema generation.
     pushd .
 
-    [[ -d mozilla-pipeline-schemas ]] && rm -r mozilla-pipeline-schemas
+    [[ -d mozilla-pipeline-schemas ]] && rm -rf mozilla-pipeline-schemas
     git clone "$MPS_REPO_URL"
     cd mozilla-pipeline-schemas
     git checkout "$MPS_BRANCH_SOURCE"
@@ -67,13 +67,16 @@ function setup_mps() {
 }
 
 function main() {
-    # the base directory in the docker container
-    cd /app
-    setup_git
-    setup_mps
-
     # shellcheck disable=SC1090
     source "${BASH_SOURCE%/*}/transpile_commit"
+    
+    pushd .
+    # the base directory in the docker container
+    cd /app
+    if ! stat "$HOME/.ssh/id_ed25519"; then
+        setup_git
+    fi
+    setup_mps
 
     generate_schemas \
         ./mozilla-pipeline-schemas \
@@ -81,10 +84,12 @@ function main() {
 
     commit_schemas \
         ./mozilla-pipeline-schemas \
-        "$MPS_BRANCH_SOURCE"
+        "$MPS_BRANCH_SOURCE" \
         "$MPS_BRANCH_PUBLISH"
 
+    cd mozilla-pipeline-schemas
     git push || git push --set-upstream origin "$MPS_BRANCH_PUBLISH"
+    popd
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
