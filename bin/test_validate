@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# set -e
+set -x
+
+BIN="$(realpath ${BASH_SOURCE%/*})"
+function validate_bigquery {
+    python3 "${BIN}/validate_bigquery" "$@"
+}
+# shellcheck disable=SC1090
+source "${BIN}/generate_commit"
+
+MPS_ROOT=/app/mozilla-pipeline-schemas
+mps_branch_source=${1:-master}
+mps_branch_publish=${2:-test-generated-schemas}
+mps_branch_base=${3:-base-revision}
+
+# Generate a new head for tracking the upstream revision of the publish branch.
+pushd .
+cd $MPS_ROOT
+git checkout "$mps_branch_publish"
+git branch -D "$mps_branch_base" || :
+git checkout -b "$mps_branch_base"
+popd
+validate_bigquery copy
+
+# Generate schemas from the master branch. This commits to the local publish
+# branch.
+generate_commit $MPS_ROOT "$mps_branch_source" "$mps_branch_publish"
+validate_bigquery copy
+
+# Run the test.
+validate_bigquery local --head "$mps_branch_publish" --base "$mps_branch_base"
