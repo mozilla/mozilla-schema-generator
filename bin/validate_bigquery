@@ -69,6 +69,7 @@ def copy(head, repository, artifact):
 def check_evolution(base, head, verbose=False):
     def nop(*args, **kwargs):
         pass
+
     log = print if verbose else nop
 
     a, b = set(base), set(head)
@@ -77,15 +78,19 @@ def check_evolution(base, head, verbose=False):
     base_only = a - b
     if len(base_only) > 0:
         log("items removed from the base")
-        log("\n".join(base_only))
+        log("\n".join([f"-{x}" for x in base_only]))
+        log("")
+        # set the status
         status = 1
 
     # informative only
     head_only = b - a
     if len(head_only) > 0:
         log("items added to the base")
-        log("\n".join(head_only))
+        log("\n".join([f"+{x}" for x in head_only]))
+        log("")
     return status
+
 
 @validate.command()
 @click.option("--head", type=str, default="local-working-branch")
@@ -131,18 +136,23 @@ def local(head, base, repository, artifact):
         base_data = base.read_text().split("\n")
         head_data = head.read_text().split("\n")
         diff = "\n".join(
-            difflib.unified_diff(
-                base_data,
-                head_data,
-                fromfile=base.as_posix(),
-                tofile=head.as_posix(),
-            )
-        ).strip()
+            # control lines contain a newline at the end
+            [
+                line.strip()
+                for line in difflib.unified_diff(
+                    base_data,
+                    head_data,
+                    fromfile=base.as_posix(),
+                    tofile=head.as_posix(),
+                    n=1,
+                )
+            ]
+        )
         if not diff:
             # no difference detected
             continue
         # check if this is an error condition
-        print(diff)
+        print(diff + "\n")
         status |= check_evolution(base_data, head_data)
 
     if not status:

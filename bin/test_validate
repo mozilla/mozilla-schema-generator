@@ -23,6 +23,9 @@ mps_branch_temp="base-revision"
 # Generate a new head for tracking the upstream revision of the publish branch.
 pushd .
 cd $MPS_ROOT
+# check out the publish branch locally
+git checkout "$mps_branch_publish"
+# now move into the base branch
 git checkout "$mps_branch_base"
 git branch -D "$mps_branch_temp" || :
 git checkout -b "$mps_branch_temp"

@@ -160,7 +160,7 @@ function generate_commit {
         exit 1
     fi
     git checkout "$mps_branch_source"
-    # delete the branch and no-op if it doesn't exist
+    # delete the working branch and no-op if it doesn't exist
     git branch -D "$mps_branch_working" || :
     git checkout -b "$mps_branch_working"
     generate_schemas "$mps_root" "$mps_branch_source"
