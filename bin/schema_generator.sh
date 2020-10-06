@@ -23,6 +23,7 @@ set -x
 MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
 MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
 MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
+BIN="$(realpath ${BASH_SOURCE%/*})"
 
 
 function setup_git() {
@@ -60,15 +61,45 @@ function setup_mps() {
     git clone "$MPS_REPO_URL"
     cd mozilla-pipeline-schemas
     git fetch --all
+    git checkout "$MPS_BRANCH_PUBLISH"
     git checkout "$MPS_BRANCH_SOURCE"
 
     popd
 }
 
-function main() {
+function validate_bigquery {
+    python3 "${BIN}/validate_bigquery" "$@"
+}
+
+function validate_generate_commit() {
+    local mps_root=$1
+    local mps_branch_source=$2
+    local mps_branch_publish=$3
+    local mps_branch_base=${4:-$mps_branch_publish}
+    local mps_branch_temp="base-revision"
     # shellcheck disable=SC1090
-    source "${BASH_SOURCE%/*}/generate_commit"
-    
+    source "${BIN}/generate_commit"
+
+    # We copy the base branch into a new temporary head, since it could point to
+    # the publish branch. Because the publish branch is the branch with the new
+    # commits, we can't simply reuse the branch head since it will move.
+    pushd .
+    cd "$mps_root"
+    git checkout "$mps_branch_publish"
+    git checkout "$mps_branch_base"
+    git branch -D "$mps_branch_temp" || :
+    git checkout -b "$mps_branch_temp"
+    popd
+
+    validate_bigquery copy
+    # Generate schemas, commits results to the publish branch
+    generate_commit "$mps_root" "$mps_branch_source" "$mps_branch_publish"
+    validate_bigquery copy
+    # Run the test.
+    validate_bigquery local --head "$mps_branch_publish" --base "$mps_branch_temp"
+}
+
+function main() {
     pushd .
     # the base directory in the docker container
     cd /app
@@ -77,7 +108,7 @@ function main() {
     fi
     setup_mps
 
-    generate_commit \
+    validate_generate_commit \
         /app/mozilla-pipeline-schemas \
         "$MPS_BRANCH_SOURCE" \
         "$MPS_BRANCH_PUBLISH"
