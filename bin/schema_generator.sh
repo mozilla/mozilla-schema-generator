@@ -23,7 +23,6 @@ set -x
 MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
 MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
 MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
-MPS_BRANCH_WORKING="local-working-branch"
 
 
 function setup_git() {
@@ -60,15 +59,15 @@ function setup_mps() {
     [[ -d mozilla-pipeline-schemas ]] && rm -rf mozilla-pipeline-schemas
     git clone "$MPS_REPO_URL"
     cd mozilla-pipeline-schemas
+    git fetch --all
     git checkout "$MPS_BRANCH_SOURCE"
-    git checkout -b $MPS_BRANCH_WORKING
 
     popd
 }
 
 function main() {
     # shellcheck disable=SC1090
-    source "${BASH_SOURCE%/*}/transpile_commit"
+    source "${BASH_SOURCE%/*}/generate_commit"
     
     pushd .
     # the base directory in the docker container
@@ -78,12 +77,8 @@ function main() {
     fi
     setup_mps
 
-    generate_schemas \
-        ./mozilla-pipeline-schemas \
-        "$MPS_BRANCH_SOURCE"
-
-    commit_schemas \
-        ./mozilla-pipeline-schemas \
+    generate_commit \
+        /app/mozilla-pipeline-schemas \
         "$MPS_BRANCH_SOURCE" \
         "$MPS_BRANCH_PUBLISH"
 

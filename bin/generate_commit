@@ -146,3 +146,24 @@ function commit_schemas() {
     
     popd
 }
+
+function generate_commit {
+    local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
+    local mps_branch_source=${2:-master}
+    local mps_branch_publish=${3:-generated-schemas}
+    local mps_branch_working=${4:-local-working-branch}
+
+    pushd .
+    cd "$mps_root"
+    if ! git remote -v | grep "mozilla-pipeline-schemas"; then
+        echo "not inside of a mozilla-pipeline-schemas git repository"
+        exit 1
+    fi
+    git checkout "$mps_branch_source"
+    # delete the branch and no-op if it doesn't exist
+    git branch -D "$mps_branch_working" || :
+    git checkout -b "$mps_branch_working"
+    generate_schemas "$mps_root" "$mps_branch_source"
+    commit_schemas "$mps_root" "$mps_branch_source" "$mps_branch_publish"
+    popd
+}
