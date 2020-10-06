@@ -11,16 +11,21 @@ function validate_bigquery {
 source "${BIN}/generate_commit"
 
 MPS_ROOT=/app/mozilla-pipeline-schemas
+# source for the schemas, for testing use something like master~20
 mps_branch_source=${1:-master}
+# the branch to commit the bigquery schemas into
 mps_branch_publish=${2:-test-generated-schemas}
-mps_branch_base=${3:-base-revision}
+# the branch that is used to compare against the generated schemas
+mps_branch_base=${3:-$mps_branch_publish}
+# temporary branch for comparisons
+mps_branch_temp="base-revision"
 
 # Generate a new head for tracking the upstream revision of the publish branch.
 pushd .
 cd $MPS_ROOT
-git checkout "$mps_branch_publish"
-git branch -D "$mps_branch_base" || :
-git checkout -b "$mps_branch_base"
+git checkout "$mps_branch_base"
+git branch -D "$mps_branch_temp" || :
+git checkout -b "$mps_branch_temp"
 popd
 validate_bigquery copy
 
@@ -30,4 +35,4 @@ generate_commit $MPS_ROOT "$mps_branch_source" "$mps_branch_publish"
 validate_bigquery copy
 
 # Run the test.
-validate_bigquery local --head "$mps_branch_publish" --base "$mps_branch_base"
+validate_bigquery local --head "$mps_branch_publish" --base "$mps_branch_temp"
