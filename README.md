@@ -146,19 +146,28 @@ Limitations and Splitting](#bigquery-limitations-and-splitting) for more info.
 ## Development and Testing
 
 Install requirements:
-```
+
+```bash
 make install-requirements
 ```
 
-Run tests:
+Ensure that the mozilla-pipeline-schemas submodule has been checked out:
+
+```bash
+git submodule init
+git submodule update --remote
 ```
+
+Run tests:
+
+```bash
 make test
 ```
 
 Publish generated schemas to [mozilla-generated-schemas/test-generated-schemas](https://github.com/mozilla-services/mozilla-pipeline-schemas/tree/test-generated-schemas)
 run:
 
-```
+```bash
 git fetch origin
 
 git checkout <branch-to-test>
