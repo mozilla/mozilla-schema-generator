@@ -7,11 +7,13 @@ import json
 import difflib
 import sys
 
+
 BASE_DIR = Path("/app").resolve()
 
 
 @click.group()
 def validate():
+    """Click command group."""
     pass
 
 
@@ -73,7 +75,7 @@ def check_evolution(base, head, verbose=False):
     log = print if verbose else nop
 
     a, b = set(base), set(head)
-    status = 0
+    is_error = 0
     # error condition
     base_only = a - b
     if len(base_only) > 0:
@@ -81,7 +83,7 @@ def check_evolution(base, head, verbose=False):
         log("\n".join([f"-{x}" for x in base_only]))
         log("")
         # set the status
-        status = 1
+        is_error = 1
 
     # informative only
     head_only = b - a
@@ -89,7 +91,7 @@ def check_evolution(base, head, verbose=False):
         log("items added to the base")
         log("\n".join([f"+{x}" for x in head_only]))
         log("")
-    return status
+    return is_error
 
 
 @validate.command()
@@ -119,7 +121,7 @@ def local(head, base, repository, artifact):
     assert (artifact_path / head_rev).exists()
     assert (artifact_path / base_rev).exists()
 
-    status = 0
+    is_error = 0
 
     # look at the compact schemas
     head_files = (artifact_path / head_rev).glob("*.txt")
@@ -128,7 +130,7 @@ def local(head, base, repository, artifact):
     a = set([p.name for p in base_files])
     b = set([p.name for p in head_files])
 
-    status |= check_evolution(a, b, verbose=True)
+    is_error |= check_evolution(a, b, verbose=True)
 
     for schema_name in a & b:
         base = artifact_path / base_rev / schema_name
@@ -153,14 +155,14 @@ def local(head, base, repository, artifact):
             continue
         # check if this is an error condition
         print(diff + "\n")
-        status |= check_evolution(base_data, head_data)
+        is_error |= check_evolution(base_data, head_data)
 
-    if not status:
+    if not is_error:
         click.echo("no incompatible changes detected")
     else:
         click.echo("found incompatible changes")
 
-    sys.exit(status)
+    sys.exit(is_error)
 
 
 if __name__ == "__main__":

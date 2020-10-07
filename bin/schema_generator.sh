@@ -67,10 +67,6 @@ function setup_mps() {
     popd
 }
 
-function validate_bigquery {
-    python3 "${BIN}/validate_bigquery" "$@"
-}
-
 function validated_generate_commit() {
     # Generate and commit schemas from the source branch into the publish
     # branch, and validate the resulting commit against a base branch with
@@ -94,12 +90,12 @@ function validated_generate_commit() {
     git checkout -b "$mps_branch_temp"
     popd
 
-    validate_bigquery copy
+    validate-bigquery copy
     # Generate schemas, commits results to the publish branch
     generate_commit "$mps_root" "$mps_branch_source" "$mps_branch_publish"
-    validate_bigquery copy
+    validate-bigquery copy
     # Run the test.
-    validate_bigquery local --head "$mps_branch_publish" --base "$mps_branch_temp"
+    validate-bigquery local --head "$mps_branch_publish" --base "$mps_branch_temp"
 }
 
 function main() {

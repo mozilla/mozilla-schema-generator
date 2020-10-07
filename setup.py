@@ -33,6 +33,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mozilla-schema-generator=mozilla_schema_generator.__main__:main',
+            'validate-bigquery=mozilla_schema_generator.validate_bigquery:validate'
         ],
     },
     include_package_data=True,
