@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 
 import gitdb
@@ -94,7 +93,6 @@ def test_checkout_copy_schema_revisions(tmp_path, tmp_git):
 
 
 def test_checkout_copy_schema_revisions_fails_dirty(tmp_path, tmp_git):
-    repo = Repo(tmp_git)
     head_ref = "generated-schemas"
     base_ref = "generated-schemas~10"
     (tmp_git / "schemas/telemetry/main/main.4.schema.json").write_text("dirty")
