@@ -12,11 +12,16 @@ ALIASES_PATH="$BASE_DIR/aliases.json"
 COMMON_PINGS_PATH="$BASE_DIR/common_pings.json"
 
 
-function generate_schemas() {
-    # Assuming we're at the root of the schema repository, move into the schemas
-    # directory
+function _generate_schemas() {
+    # Generate JSON Schemas for documents like the main ping and glean pings
+    # using the probe-info service to fill in unstructured portions of the
+    # payload with the concrete column names. These JSON Schemas are then
+    # transpiled into a BigQuery schema using the jsonschema-transpiler.
+
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
     local mps_branch_source=${2:-master}
+
+    # Set the working directory to the schemas folder.
     pushd .
     cd "$mps_root/schemas"
     if ! git remote -v | grep "mozilla-pipeline-schemas"; then
@@ -99,11 +104,12 @@ function _create_changelog() {
         --date=iso
 }
 
-function commit_schemas() {
+function _commit_schemas() {
+    # Commit schemas in the current branch to the publish branch.
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
     local mps_branch_source=${2:-master}
     local mps_branch_publish=${3:-generated-schemas}
-    
+
     pushd .
     cd "$mps_root"
     if ! git remote -v | grep "mozilla-pipeline-schemas"; then
@@ -143,11 +149,14 @@ function commit_schemas() {
         --message "Auto-push from schema generation [ci skip]" \
         --message "$(_create_changelog "$mps_branch_source" "$mps_branch_publish")" \
         || echo "Nothing to commit"
-    
+
     popd
 }
 
 function generate_commit {
+    # Generate and commit schemas from a source branch into a local publish
+    # branch. The repository will have it's HEAD at tip of the publish branch,
+    # ready to be pushed to a remote.
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
     local mps_branch_source=${2:-master}
     local mps_branch_publish=${3:-generated-schemas}
@@ -163,7 +172,7 @@ function generate_commit {
     # delete the working branch and no-op if it doesn't exist
     git branch -D "$mps_branch_working" || :
     git checkout -b "$mps_branch_working"
-    generate_schemas "$mps_root" "$mps_branch_source"
-    commit_schemas "$mps_root" "$mps_branch_source" "$mps_branch_publish"
+    _generate_schemas "$mps_root" "$mps_branch_source"
+    _commit_schemas "$mps_root" "$mps_branch_source" "$mps_branch_publish"
     popd
 }

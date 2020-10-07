@@ -71,7 +71,10 @@ function validate_bigquery {
     python3 "${BIN}/validate_bigquery" "$@"
 }
 
-function validate_generate_commit() {
+function validated_generate_commit() {
+    # Generate and commit schemas from the source branch into the publish
+    # branch, and validate the resulting commit against a base branch with
+    # generated schemas.
     local mps_root=$1
     local mps_branch_source=$2
     local mps_branch_publish=$3
@@ -103,12 +106,10 @@ function main() {
     pushd .
     # the base directory in the docker container
     cd /app
-    if ! stat "$HOME/.ssh/id_ed25519"; then
-        setup_git
-    fi
+    setup_git
     setup_mps
 
-    validate_generate_commit \
+    validated_generate_commit \
         /app/mozilla-pipeline-schemas \
         "$MPS_BRANCH_SOURCE" \
         "$MPS_BRANCH_PUBLISH"
