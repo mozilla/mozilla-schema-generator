@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-import click
-from pathlib import Path
-from git import Repo
-from shutil import copyfile
-import json
 import difflib
+import json
 import sys
+from pathlib import Path
+from shutil import copyfile
+from typing import Tuple
 
+import click
+from git import Repo
 
 BASE_DIR = Path("/app").resolve()
-
-
-@click.group()
-def validate():
-    """Click command group."""
-    pass
 
 
 def compute_compact_columns(document):
@@ -31,41 +26,6 @@ def compute_compact_columns(document):
 
     res = traverse("root", document)
     return sorted(res)
-
-
-@validate.command()
-@click.option("--head", default="HEAD")
-@click.option(
-    "--repository",
-    type=click.Path(exists=True, file_okay=False),
-    default=BASE_DIR / "mozilla-pipeline-schemas",
-)
-@click.option(
-    "--artifact",
-    type=click.Path(file_okay=False),
-    default=BASE_DIR / "validate_schema_evolution",
-)
-def copy(head, repository, artifact):
-    """Copy BigQuery schemas to a directory as an intermediary step for schema
-    evolution checks."""
-    src = Path(repository)
-    repo = Repo(repository)
-    dst = Path(artifact) / repo.rev_parse(head).name_rev.replace(" ", "_")
-    dst.mkdir(parents=True, exist_ok=True)
-    schemas = sorted(src.glob("**/*.bq"))
-    if not schemas:
-        raise click.ClickException("no schemas found")
-    for path in schemas:
-        namespace = path.parts[-3]
-        doc = path.parts[-1]
-        qualified = f"{namespace}.{doc}"
-        click.echo(qualified)
-        copyfile(path, dst / qualified)
-
-        # also generate something easy to diff
-        cols = compute_compact_columns(json.loads(path.read_text()))
-        compact_filename = ".".join(qualified.split(".")[:-1]) + ".txt"
-        (dst / compact_filename).write_text("\n".join(cols))
 
 
 def check_evolution(base, head, verbose=False):
@@ -94,6 +54,63 @@ def check_evolution(base, head, verbose=False):
     return is_error
 
 
+def copy_schemas(head: str, repository: Path, artifact: Path) -> Path:
+    """Copy BigQuery schemas to a directory as an intermediary step for schema
+    evolution checks."""
+    src = Path(repository)
+    repo = Repo(repository)
+    dst = Path(artifact) / repo.rev_parse(head).name_rev.replace(" ", "_")
+    dst.mkdir(parents=True, exist_ok=True)
+    schemas = sorted(src.glob("**/*.bq"))
+    if not schemas:
+        raise ValueError("no schemas found")
+    for path in schemas:
+        namespace = path.parts[-3]
+        doc = path.parts[-1]
+        qualified = f"{namespace}.{doc}"
+        click.echo(qualified)
+        copyfile(path, dst / qualified)
+
+        # also generate something easy to diff
+        cols = compute_compact_columns(json.loads(path.read_text()))
+        compact_filename = ".".join(qualified.split(".")[:-1]) + ".txt"
+        (dst / compact_filename).write_text("\n".join(cols))
+    return dst
+
+
+def checkout_copy_schemas_revisions(
+    head: str, base: str, repository: Path, artifact: Path
+) -> Tuple[Path, Path]:
+    """Checkout two revisions of the schema repository into the artifact
+    directory. This returns paths to the head and the base directories."""
+    repo = Repo(repository)
+    if repo.is_dirty():
+        raise ValueError("the repo is dirty, stash any changes and try again")
+    head_path = None
+    base_path = None
+    # get the head to the closest symbolic reference
+    current_ref = repo.git.rev_parse("HEAD", abbrev_ref=True)
+    # note: if we try using --abbrev-ref on something like
+    # `generated-schemas~1`, we may end up with an empty string. We should
+    # fallback to the commit-hash if used.
+    head_rev = repo.rev_parse(head).hexsha
+    base_rev = repo.rev_parse(base).hexsha
+    try:
+        repo.git.checkout(head_rev)
+        head_path = copy_schemas(head_rev, repository, artifact)
+        repo.git.checkout(base_rev)
+        base_path = copy_schemas(base_rev, repository, artifact)
+    finally:
+        repo.git.checkout(current_ref)
+    return head_path, base_path
+
+
+@click.group()
+def validate():
+    """Click command group."""
+    pass
+
+
 @validate.command()
 @click.option("--head", type=str, default="local-working-branch")
 @click.option("--base", type=str, default="generated-schemas")
@@ -107,25 +124,16 @@ def check_evolution(base, head, verbose=False):
     type=click.Path(file_okay=False),
     default=BASE_DIR / "validate_schema_evolution",
 )
-def local(head, base, repository, artifact):
+def local_validation(head, base, repository, artifact):
     """Validate schemas using a heuristic from the compact schemas."""
-    repo = Repo(repository)
-
-    # NOTE: we are using the revision + branch name. If the local-working-branch
-    # is overwritten, it is possible that the specific name-rev no longer
-    # exists.
-    head_rev = repo.rev_parse(head).name_rev.replace(" ", "_")
-    base_rev = repo.rev_parse(base).name_rev.replace(" ", "_")
-    artifact_path = Path(artifact)
-
-    assert (artifact_path / head_rev).exists()
-    assert (artifact_path / base_rev).exists()
-
+    head_path, base_path = checkout_copy_schemas_revisions(
+        head, base, repository, artifact
+    )
     is_error = 0
 
     # look at the compact schemas
-    head_files = (artifact_path / head_rev).glob("*.txt")
-    base_files = (artifact_path / base_rev).glob("*.txt")
+    head_files = (head_path).glob("*.txt")
+    base_files = (base_path).glob("*.txt")
 
     a = set([p.name for p in base_files])
     b = set([p.name for p in head_files])
@@ -133,8 +141,8 @@ def local(head, base, repository, artifact):
     is_error |= check_evolution(a, b, verbose=True)
 
     for schema_name in a & b:
-        base = artifact_path / base_rev / schema_name
-        head = artifact_path / head_rev / schema_name
+        base = base_path / schema_name
+        head = head_path / schema_name
         base_data = base.read_text().split("\n")
         head_data = head.read_text().split("\n")
         diff = "\n".join(
