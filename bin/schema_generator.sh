@@ -90,12 +90,11 @@ function validated_generate_commit() {
     git checkout -b "$mps_branch_temp"
     popd
 
-    validate-bigquery copy
     # Generate schemas, commits results to the publish branch
     generate_commit "$mps_root" "$mps_branch_source" "$mps_branch_publish"
-    validate-bigquery copy
-    # Run the test.
-    validate-bigquery local --head "$mps_branch_publish" --base "$mps_branch_temp"
+    validate-bigquery local-validation \
+        --head "$mps_branch_publish" \
+        --base "$mps_branch_temp"
 }
 
 function main() {
