@@ -1,3 +1,4 @@
 [submodule "tests/resources/mozilla-pipeline-schemas"]
 	path = tests/resources/mozilla-pipeline-schemas
 	url = git@github.com:mozilla-services/mozilla-pipeline-schemas.git
+	branch = generated-schemas
