@@ -72,7 +72,7 @@ def test_check_evolution():
 
 
 def test_copy_schemas(tmp_path, tmp_git):
-    dst = copy_schemas("head", tmp_git, tmp_path)
+    dst = copy_schemas("HEAD", tmp_git, tmp_path)
     bq = list(dst.glob("*.bq"))
     txt = list(dst.glob("*.txt"))
     assert len(bq) > 0, "no bq schemas detected"
