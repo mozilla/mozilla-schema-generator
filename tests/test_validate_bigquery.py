@@ -17,6 +17,9 @@ from mozilla_schema_generator.validate_bigquery import (
 @pytest.fixture()
 def tmp_git(tmp_path):
     src = Path(__file__).parent / "resources" / "mozilla-pipeline-schemas"
+    src_repo = Repo(src)
+    src_repo.git.checkout("master")
+    src_repo.git.checkout("generated-schemas")
     Git(tmp_path).clone(src)
     path = tmp_path / "mozilla-pipeline-schemas"
     repo = Repo(path)
@@ -29,6 +32,8 @@ def test_tmp_git(tmp_git):
     repo = Repo(tmp_git)
     assert not repo.bare
     assert repo.head.ref.name == "generated-schemas"
+    repo.git.checkout("master")
+    assert repo.head.ref.name == "master"
 
 
 def test_compute_compact_columns():
