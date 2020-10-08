@@ -138,6 +138,7 @@ def local_validation(head, base, repository, artifact):
     a = set([p.name for p in base_files])
     b = set([p.name for p in head_files])
 
+    # check that we're not removing any schemas
     is_error |= check_evolution(a, b, verbose=True)
 
     for schema_name in a & b:
