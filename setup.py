@@ -21,7 +21,7 @@ readme = open('README.md').read()
 setup(
     name='mozilla-schema-generator',
     python_requires='>=3.6.0',
-    version='0.1.4',
+    version='0.2.0',
     description='Create full representations of schemas using the probe info service.',
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -33,6 +33,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mozilla-schema-generator=mozilla_schema_generator.__main__:main',
+            'validate-bigquery=mozilla_schema_generator.validate_bigquery:validate'
         ],
     },
     include_package_data=True,
@@ -41,6 +42,7 @@ setup(
         'jsonschema',
         'pyyaml',
         'requests',
+        'gitpython',
     ],
     license='MIT',
     zip_safe=False,

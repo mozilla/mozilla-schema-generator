@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# Utility functions for processing schemas.
+set -e
+
+# NOTE: mozilla-schema-generator resources are relative to this script. See
+# http://mywiki.wooledge.org/BashFAQ/028 on uses of BASH_SOURCE. This needs to
+# be converted into an absolute path due to directory changes in the main
+# script.
+BASE_DIR="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+DISALLOWLIST="$BASE_DIR/disallowlist"
+ALIASES_PATH="$BASE_DIR/aliases.json"
+COMMON_PINGS_PATH="$BASE_DIR/common_pings.json"
+
+
+function _generate_schemas() {
+    # Generate JSON Schemas for documents like the main ping and glean pings
+    # using the probe-info service to fill in unstructured portions of the
+    # payload with the concrete column names. These JSON Schemas are then
+    # transpiled into a BigQuery schema using the jsonschema-transpiler.
+
+    local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
+    local mps_branch_source=${2:-master}
+
+    # Set the working directory to the schemas folder.
+    pushd .
+    cd "$mps_root/schemas"
+    if ! git remote -v | grep "mozilla-pipeline-schemas"; then
+        echo "not inside of a mozilla-pipeline-schemas git repository"
+        exit 1
+    fi
+
+    # Generate concrete JSON schemas that contain per-probe fields.
+    # These are used only as the basis for generating BQ schemas;
+    # we publish JSON schemas exactly as they appear in the source branch so
+    # that the pipeline doesn't rely on per-probe types when validating pings.
+    # For Glean pings, we copy the generic Glean schema into place later on.
+    mozilla-schema-generator generate-main-ping \
+        --mps-branch "$mps_branch_source" \
+        --out-dir ./telemetry
+
+    mozilla-schema-generator generate-common-pings \
+        --common-pings-config "$COMMON_PINGS_PATH" \
+        --mps-branch "$mps_branch_source" \
+        --out-dir ./telemetry
+
+    mozilla-schema-generator generate-glean-pings \
+        --mps-branch "$mps_branch_source" \
+        --out-dir .
+
+    # Remove all non-json schemas (e.g. parquet)
+    find . -not -name "*.schema.json" -type f -exec rm {} +
+
+    # Add metadata fields to all json schemas
+    # schema directory structure is enforced by regex at compile-time
+    # shellcheck disable=SC2044
+    for schema in $(find . -name "*.schema.json" -type f); do
+        metadata_merge metadata/ "$schema"
+    done
+
+    # Add transpiled BQ schemas
+    find . -type f -name "*.schema.json" | while read -r fname; do
+        # This schema is AWS-specific, fails transpilation, and should be ignored
+        if [[ $fname =~ metadata/sources ]] ; then
+            continue
+        fi
+        bq_out=${fname/schema.json/bq}
+        mkdir -p "$(dirname "$bq_out")"
+        jsonschema-transpiler \
+            --resolve drop \
+            --type bigquery \
+            --normalize-case \
+            --force-nullable \
+            --tuple-struct \
+                "$fname" > "$bq_out"
+    done
+
+    # Remove BigQuery schemas that are in the disallow list
+    find . -name '*.bq' | grep -f "$DISALLOWLIST" | xargs rm -f
+
+    # Copy aliased BQ schemas into place
+    alias_schemas "$ALIASES_PATH" .
+    popd
+}
+
+function _create_changelog() {
+    # Generate output for referencing to the changeset in the source branch.
+    # Useful references for --format and --pretty
+    # https://stackoverflow.com/questions/25563455/how-do-i-get-last-commit-date-from-git-repository
+    # https://stackoverflow.com/questions/1441010/the-shortest-possible-output-from-git-log-containing-author-and-date
+    # https://git-scm.com/docs/git-log/1.8.0#git-log---daterelativelocaldefaultisorfcshortraw
+    local mps_branch_source=${1:-master}
+    local mps_branch_publish=${2:-generated-schemas}
+    local start_date
+    # NOTES: Since this function is looking at commit dates (such as rebases),
+    # it's best to enforce squash/rebase commits onto the master branch. If this
+    # isn't enforced, it's possible to miss out on certain commits to the
+    # generated branch. Another solution is to generate a tag on master before
+    # the generator is run. However, the heuristic of using the latest commit
+    # date works well enough.
+    start_date=$(git log "${mps_branch_publish}" -1 --format=%cd --date=iso)
+    git log "${mps_branch_source}" \
+        --since="$start_date" \
+        --pretty=format:"%h%x09%cd%x09%s" \
+        --date=iso
+}
+
+function _commit_schemas() {
+    # Commit schemas in the current branch to the publish branch.
+    local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
+    local mps_branch_source=${2:-master}
+    local mps_branch_publish=${3:-generated-schemas}
+
+    pushd .
+    cd "$mps_root"
+    if ! git remote -v | grep "mozilla-pipeline-schemas"; then
+        echo "not inside of a mozilla-pipeline-schemas git repository"
+        exit 1
+    fi
+
+    # the current branch is the working branch
+    local mps_branch_working
+    mps_branch_working=$(git rev-parse --abbrev-ref HEAD)
+
+    # This method will keep a changelog of releases. If we delete and newly
+    # checkout branches everytime, that will contain a changelog of changes.
+    # Assumes the current directory is the root of the repository.
+    # Note that in this step we throw out all the temporary modifications we've
+    # made to the JSON schemas.
+    find . -name "*.bq" -type f -exec git add {} +
+    git checkout ./*.schema.json
+
+    # Add Glean JSON schemas with generic schema
+    mozilla-schema-generator generate-glean-pings \
+        --pretty \
+        --generic-schema \
+        --mps-branch "$mps_branch_source" \
+        --out-dir schemas
+
+    find . -name "*.schema.json" -type f -exec git add {} +
+
+    git commit -a -m "Interim Commit"
+
+    git checkout "$mps_branch_publish" || git checkout -b "$mps_branch_publish"
+
+    # Keep only the schemas dir
+    find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+    git checkout "$mps_branch_working" -- schemas
+    git commit --all \
+        --message "Auto-push from schema generation [ci skip]" \
+        --message "$(_create_changelog "$mps_branch_source" "$mps_branch_publish")" \
+        || echo "Nothing to commit"
+
+    popd
+}
+
+function generate_commit {
+    # Generate and commit schemas from a source branch into a local publish
+    # branch. The repository will have it's HEAD at tip of the publish branch,
+    # ready to be pushed to a remote.
+    local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
+    local mps_branch_source=${2:-master}
+    local mps_branch_publish=${3:-generated-schemas}
+    local mps_branch_working=${4:-local-working-branch}
+
+    pushd .
+    cd "$mps_root"
+    if ! git remote -v | grep "mozilla-pipeline-schemas"; then
+        echo "not inside of a mozilla-pipeline-schemas git repository"
+        exit 1
+    fi
+    git checkout "$mps_branch_source"
+    # delete the working branch and no-op if it doesn't exist
+    git branch -D "$mps_branch_working" || :
+    git checkout -b "$mps_branch_working"
+    _generate_schemas "$mps_root" "$mps_branch_source"
+    _commit_schemas "$mps_root" "$mps_branch_source" "$mps_branch_publish"
+    popd
+}

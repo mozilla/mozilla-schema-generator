@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# A script for manually testing the validated schema generation function in the main
+# schema generator script.
+#
+# Arguments:
+#   $1  The source branch to use a base for generated schemas. For testing, you
+#       may use something like `master~5` to use the 5th revision from the head
+#       of master.
+#   $2  The publish branch where commits are made with generated schemas. This
+#       will typically be `test-generated-schemas` or `generated-schemas`.
+#   $3  The base branch to use for validation. This is set to $2 by default, but
+#       may take on a value like `generated-schemas~5`
+#
+
+set -x
+
+BIN="$(realpath ${BASH_SOURCE%/*})"
+# shellcheck disable=SC1090
+source "${BIN}/schema_generator.sh"
+
+MPS_ROOT=/app/mozilla-pipeline-schemas
+mps_branch_source=${1:-$MPS_BRANCH_SOURCE}
+mps_branch_publish=${2:-$MPS_BRANCH_PUBLISH}
+mps_branch_base=${3:-$mps_branch_publish}
+
+validated_generate_commit \
+    $MPS_ROOT \
+    "$mps_branch_source" \
+    "$mps_branch_publish" \
+    "$mps_branch_base"
