@@ -12,6 +12,7 @@
 #   MPS_BRANCH_SOURCE:  The source branch for generating schemas e.g. master
 #   MPS_BRANCH_PUBLISH: The destination branch for publishing schemas
 #                       e.g. generated-schemas
+#   MPS_VALIDATE_BQ:    Set to 'false' to disable the validation step
 #
 # Example usage:
 #   export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
@@ -23,6 +24,7 @@ set -x
 MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
 MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
 MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
+MPS_VALIDATE_BQ=${MPS_VALIDATE_BQ:-"true"}
 BIN="$(realpath ${BASH_SOURCE%/*})"
 
 
@@ -92,9 +94,12 @@ function validated_generate_commit() {
 
     # Generate schemas, commits results to the publish branch
     generate_commit "$mps_root" "$mps_branch_source" "$mps_branch_publish"
-    validate-bigquery local-validation \
-        --head "$mps_branch_publish" \
-        --base "$mps_branch_temp"
+
+    if [ "$MPS_VALIDATE_BQ" != "false" ]; then
+        validate-bigquery local-validation \
+            --head "$mps_branch_publish" \
+            --base "$mps_branch_temp"
+    fi
 }
 
 function main() {
