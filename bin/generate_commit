@@ -87,10 +87,7 @@ function _generate_schemas() {
     popd
 
     # Copy all BQ schemas from schemas/ to appropriate paths under bq/
-    # TODO: Remove the exemption for xfocsp-error-report/xfocsp-error-report
-    # once ops logic has adapted to the bq/ directory structure.
     find schemas/ -name '*.bq' | \
-        grep -v xfocsp-error-report/xfocsp-error-report | \
         xargs copy_to_bq_folder
 
 }
@@ -155,24 +152,25 @@ function _commit_schemas() {
     # This method will keep a changelog of releases. If we delete and newly
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository.
-    # Note that in this step we throw out all the temporary modifications we've
-    # made to the JSON schemas.
     find . -name "*.bq" -type f -exec git add {} +
 
-    # Commit Glean JSON schemas and symlinks under bq/ dir
-    find . -name "*.schema.json" -exec git add {} +
+    # Throw out all the temporary modifications we've made to the JSON schemas.
+    git checkout ./*.schema.json
 
-    # Add Glean JSON schemas with generic schema
+    # Generate and stage Glean generic JSON schemas
     mozilla-schema-generator generate-glean-pings \
         --pretty \
         --generic-schema \
         --mps-branch "$mps_branch_source" \
         --out-dir schemas
+    find schemas/ -name "*.schema.json" -type f -exec git add {} +
 
     _create_readme
 
-    find . -name "*.schema.json" -type f -exec git add {} +
+    # Stage BQ schemas and JSON schema symlinks under bq/ dir
     find . -name "*.md" -type f -exec git add {} +
+    find bq/ -name "*.schema.json" -exec git add {} +
+    find bq/ -name "*.bq" -exec git add {} +
 
     git commit -a -m "Interim Commit"
 
