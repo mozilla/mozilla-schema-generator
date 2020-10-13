@@ -52,7 +52,8 @@ def process_path(source_path):
         shutil.copy(source_bq_path, dest_bq_path)
         dest_json_path = dest_dataset_dir / f"{bq_table}.schema.json"
         if not dest_json_path.exists():
-            dest_json_path.symlink_to(source_json_path)
+            relative_json_path = Path("../..") / source_json_path
+            dest_json_path.symlink_to(relative_json_path)
     else:
         print(f"Not copying {source_bq_path} into {BQ_DIR}")
 
