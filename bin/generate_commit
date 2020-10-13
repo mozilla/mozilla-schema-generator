@@ -84,12 +84,11 @@ function _generate_schemas() {
     # Copy aliased BQ schemas into place
     alias_schemas "$ALIASES_PATH" .
 
-    popd
-
     # Copy all BQ schemas from schemas/ to appropriate paths under bq/
-    find schemas/ -name '*.bq' | \
+    find $mps_root/schemas/ -name '*.bq' | \
         xargs copy_to_bq_folder
 
+    popd
 }
 
 function _create_changelog() {
