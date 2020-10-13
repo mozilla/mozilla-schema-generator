@@ -3,11 +3,8 @@
 import click
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePath
 import shutil
-
-ROOT_DIR = Path(__file__).parent.parent
-BQ_DIR = ROOT_DIR / "bq"
 
 
 @click.command()
@@ -29,13 +26,19 @@ def main(source_paths):
 
 def process_path(source_path):
     source_path = Path(source_path)
-    source_json_path = source_path.parent / (source_path.stem + '.schema.json')
-    source_bq_path = source_path.parent / (source_path.stem + '.bq')
+    stem = '.'.join(source_path.name.split('.')[:2])
+    source_json_path = source_path.parent / (stem + '.schema.json')
+    source_bq_path = source_path.parent / (stem + '.bq')
+    doctype_dir = source_path.parent
+    namespace_dir = doctype_dir.parent
+    schemas_dir = namespace_dir.parent
+    root_dir = schemas_dir.parent
+    bq_dir = root_dir / "bq"
 
     if source_json_path.exists() and source_bq_path.exists():
         print(f"Processing {source_bq_path} for copying to bq/")
     else:
-        print(f"Not copying {source_path} into {BQ_DIR} due to missing schema")
+        print(f"Not copying {source_path} into {bq_dir} due to missing schema")
         return
 
     with open(source_json_path, "r") as f:
@@ -45,17 +48,17 @@ def process_path(source_path):
     bq_dataset_family = meta.get("bq_dataset_family", None)
     bq_table = meta.get("bq_table", None)
     if bq_dataset_family and bq_table:
-        dest_dataset_dir = source_path.parent.parent.parent.parent / "bq" / bq_dataset_family
+        dest_dataset_dir = bq_dir / bq_dataset_family
         dest_dataset_dir.mkdir(parents=True, exist_ok=True)
         dest_bq_path = dest_dataset_dir / f"{bq_table}.bq"
         print(f"Copying {source_bq_path} to {dest_bq_path}")
         shutil.copy(source_bq_path, dest_bq_path)
         dest_json_path = dest_dataset_dir / f"{bq_table}.schema.json"
         if not dest_json_path.exists():
-            relative_json_path = Path("../..") / source_json_path
+            relative_json_path = PurePath("../..") / source_json_path.relative_to(root_dir)
             dest_json_path.symlink_to(relative_json_path)
     else:
-        print(f"Not copying {source_bq_path} into {BQ_DIR}")
+        print(f"Not copying {source_bq_path} into {bq_dir}")
 
 
 if __name__ == "__main__":
