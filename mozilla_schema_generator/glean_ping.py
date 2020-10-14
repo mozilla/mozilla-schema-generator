@@ -27,7 +27,7 @@ class GleanPing(GenericPing):
     repos_url = GenericPing.probe_info_base_url + "/glean/repositories"
     dependencies_url_template = GenericPing.probe_info_base_url + "/glean/{}/dependencies"
 
-    default_dependencies = ['glean']
+    default_dependencies = ['glean-core']
 
     def __init__(self, repo, app_id, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
