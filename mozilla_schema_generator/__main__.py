@@ -65,6 +65,8 @@ def common_options(func):
                     "mozilla-pipeline-schemas to reference"
                 ),
                 required=False,
+                type=str,
+                default="master",
             ),
         ],
     )
