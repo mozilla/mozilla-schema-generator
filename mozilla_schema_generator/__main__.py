@@ -23,42 +23,60 @@ CONFIGS_DIR = ROOT_DIR / "configs"
 SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
 
 
+def _apply_options(func, options):
+    """Apply options to a command."""
+    for option in options:
+        func = option(func)
+    return func
+
+
+def common_options(func):
+    """Common options for schema generator commands."""
+    return _apply_options(
+        func,
+        [
+            click.option(
+                "--out-dir",
+                help=(
+                    "The directory to write the schema files to. "
+                    "If not provided, writes the schemas to stdout."
+                ),
+                type=click.Path(dir_okay=True, file_okay=False, writable=True),
+                required=False,
+            ),
+            click.option(
+                "--split",
+                is_flag=True,
+                help=("If provided, splits the schema into " "smaller sub-schemas"),
+            ),
+            click.option(
+                "--pretty",
+                is_flag=True,
+                help=(
+                    "If specified, pretty-prints the JSON "
+                    "schemas that are outputted. Otherwise "
+                    "the schemas will be on one line."
+                ),
+            ),
+            click.option(
+                "--mps-branch",
+                help=(
+                    "If specified, the source branch of "
+                    "mozilla-pipeline-schemas to reference"
+                ),
+                required=False,
+            ),
+        ],
+    )
+
+
 @click.command()
 @click.argument(
     "config",
     type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
     default=CONFIGS_DIR / "main.yaml",
 )
-@click.option(
-    "--out-dir",
-    help=(
-        "The directory to write the schema files to. "
-        "If not provided, writes the schemas to stdout."
-    ),
-    type=click.Path(dir_okay=True, file_okay=False, writable=True),
-    required=False,
-)
-@click.option(
-    "--split",
-    is_flag=True,
-    help=("If provided, splits the schema into " "smaller sub-schemas"),
-)
-@click.option(
-    "--pretty",
-    is_flag=True,
-    help=(
-        "If specified, pretty-prints the JSON "
-        "schemas that are outputted. Otherwise "
-        "the schemas will be on one line."
-    ),
-)
-@click.option(
-    "--mps-branch",
-    help=(
-        "If specified, the source branch of " "mozilla-pipeline-schemas to reference"
-    ),
-    required=False,
-)
+@common_options
 def generate_main_ping(config, out_dir, split, pretty, mps_branch):
     schema_generator = MainPing(mps_branch=mps_branch)
     if out_dir:
@@ -78,29 +96,7 @@ def generate_main_ping(config, out_dir, split, pretty, mps_branch):
     type=click.Path(dir_okay=True, file_okay=False, writable=False, exists=True),
     default=CONFIGS_DIR,
 )
-@click.option(
-    "--out-dir",
-    help=(
-        "The directory to write the schema files to. "
-        "If not provided, writes the schemas to stdout."
-    ),
-    type=click.Path(dir_okay=True, file_okay=False, writable=True),
-    required=False,
-)
-@click.option(
-    "--split",
-    is_flag=True,
-    help=("If provided, splits the schema into " "smaller sub-schemas"),
-)
-@click.option(
-    "--pretty",
-    is_flag=True,
-    help=(
-        "If specified, pretty-prints the JSON "
-        "schemas that are outputted. Otherwise "
-        "the schemas will be on one line."
-    ),
-)
+@common_options
 @click.option(
     "--common-pings-config",
     default="common_pings.json",
@@ -109,15 +105,8 @@ def generate_main_ping(config, out_dir, split, pretty, mps_branch):
         "of pings in the common ping format."
     ),
 )
-@click.option(
-    "--mps-branch",
-    help=(
-        "If specified, the source branch of " "mozilla-pipeline-schemas to reference"
-    ),
-    required=False,
-)
 def generate_common_pings(
-    config_dir, out_dir, split, pretty, common_pings_config, mps_branch
+    config_dir, out_dir, split, pretty, mps_branch, common_pings_config
 ):
     if split:
         raise NotImplementedError("Splitting of common pings is not yet supported.")
@@ -155,29 +144,7 @@ def generate_common_pings(
     type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
     default=CONFIGS_DIR / "glean.yaml",
 )
-@click.option(
-    "--out-dir",
-    help=(
-        "The directory to write the schema files to. "
-        "If not provided, writes the schemas to stdout."
-    ),
-    type=click.Path(dir_okay=True, file_okay=False, writable=True),
-    required=False,
-)
-@click.option(
-    "--split",
-    is_flag=True,
-    help=("If provided, splits the schema into " "smaller sub-schemas"),
-)
-@click.option(
-    "--pretty",
-    is_flag=True,
-    help=(
-        "If specified, pretty-prints the JSON "
-        "schemas that are outputted. Otherwise "
-        "the schemas will be on one line."
-    ),
-)
+@common_options
 @click.option(
     "--repo",
     help=(
@@ -197,15 +164,8 @@ def generate_common_pings(
         "every application's glean pings."
     ),
 )
-@click.option(
-    "--mps-branch",
-    help=(
-        "If specified, the source branch of " "mozilla-pipeline-schemas to reference"
-    ),
-    required=False,
-)
 def generate_glean_pings(
-    config, out_dir, split, pretty, repo, generic_schema, mps_branch
+    config, out_dir, split, pretty, mps_branch, repo, generic_schema
 ):
     if split:
         raise NotImplementedError("Splitting of Glean pings is not yet supported.")
