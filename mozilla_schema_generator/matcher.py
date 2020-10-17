@@ -68,9 +68,6 @@ class Matcher(object):
         if isinstance(probe_v, set):
             probe_v = list(probe_v)
 
-        if probe_v is None:
-            return False
-
         # Not a match if this key isn't in the probe definition
         if probe_v is None:
             return False
