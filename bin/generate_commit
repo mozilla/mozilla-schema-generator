@@ -108,6 +108,18 @@ function _create_changelog() {
         --date=iso
 }
 
+function _create_readme(){
+    
+    if [ -e README.md ]; then
+        echo "File README.md already exists!"
+    else
+        echo "iam here"
+        echo "### Title1 $1" > README.md
+        echo "#### Description/ summary: $2" >> README.md
+        echo "#### commit log for the last month: $3" >> README.md
+    fi
+}
+
 function _commit_schemas() {
     # Commit schemas in the current branch to the publish branch.
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
@@ -141,6 +153,7 @@ function _commit_schemas() {
         --out-dir schemas
 
     find . -name "*.schema.json" -type f -exec git add {} +
+    find . -name "README.md" -type f -exec git add {} +
 
     git commit -a -m "Interim Commit"
 
