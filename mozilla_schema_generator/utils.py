@@ -5,9 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-from typing import Any, Tuple
-
 from itertools import chain
+from typing import Any, Tuple
 
 
 def _get(_dict: dict, key: Tuple[str]) -> Any:

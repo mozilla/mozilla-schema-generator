@@ -12,6 +12,7 @@ import json
 import pathlib
 import shutil
 import subprocess
+
 import pytest
 
 
@@ -40,21 +41,23 @@ class TestSchemaAliasing(object):
 
     def write_aliases(self, aliases):
         path = pathlib.Path(self.test_aliases_path)
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(aliases, f)
 
         return path
 
     def test_aliasing_same_namespace(self):
         test_doctype = "test-doctype"
-        aliases_path = self.write_aliases({
-            self.source_namespace: {
-                test_doctype: {
-                    "source-namespace": self.source_namespace,
-                    "source-doctype": self.source_doctype
+        aliases_path = self.write_aliases(
+            {
+                self.source_namespace: {
+                    test_doctype: {
+                        "source-namespace": self.source_namespace,
+                        "source-doctype": self.source_doctype,
+                    }
                 }
             }
-        })
+        )
 
         res = subprocess.run(("./bin/alias_schemas", str(aliases_path), self.base_dir))
 
@@ -66,14 +69,16 @@ class TestSchemaAliasing(object):
     def test_aliasing_new_namespace(self):
         test_namespace = "test-namespace"
         test_doctype = "test-doctype"
-        aliases_path = self.write_aliases({
-            test_namespace: {
-                test_doctype: {
-                    "source-namespace": self.source_namespace,
-                    "source-doctype": self.source_doctype
+        aliases_path = self.write_aliases(
+            {
+                test_namespace: {
+                    test_doctype: {
+                        "source-namespace": self.source_namespace,
+                        "source-doctype": self.source_doctype,
+                    }
                 }
             }
-        })
+        )
 
         res = subprocess.run(("./bin/alias_schemas", str(aliases_path), self.base_dir))
 
@@ -92,19 +97,28 @@ class TestSchemaAliasing(object):
         test_path = pathlib.Path(self.base_dir)
         assert len(list(test_path.iterdir())) == 1
         assert len(list((test_path / self.source_namespace).iterdir())) == 1
-        assert len(list((test_path / self.source_namespace / self.source_doctype).iterdir())) == 2
+        assert (
+            len(
+                list(
+                    (test_path / self.source_namespace / self.source_doctype).iterdir()
+                )
+            )
+            == 2
+        )
 
     def test_missing_source_errors(self):
         test_namespace = "test-namespace"
         test_doctype = "test-doctype"
-        aliases_path = self.write_aliases({
-            test_namespace: {
-                test_doctype: {
-                    "source-namespace": "missing-namespace",
-                    "source-doctype": self.source_doctype
+        aliases_path = self.write_aliases(
+            {
+                test_namespace: {
+                    test_doctype: {
+                        "source-namespace": "missing-namespace",
+                        "source-doctype": self.source_doctype,
+                    }
                 }
             }
-        })
+        )
 
         res = subprocess.run(("./bin/alias_schemas", str(aliases_path), self.base_dir))
 
@@ -113,14 +127,16 @@ class TestSchemaAliasing(object):
     def test_improper_name_errors(self):
         test_namespace = "@test-namespace"
         test_doctype = "test-doctype"
-        aliases_path = self.write_aliases({
-            test_namespace: {
-                test_doctype: {
-                    "source-namespace": "missing-namespace",
-                    "source-doctype": self.source_doctype
+        aliases_path = self.write_aliases(
+            {
+                test_namespace: {
+                    test_doctype: {
+                        "source-namespace": "missing-namespace",
+                        "source-doctype": self.source_doctype,
+                    }
                 }
             }
-        })
+        )
 
         res = subprocess.run(("./bin/alias_schemas", str(aliases_path), self.base_dir))
         assert res.returncode != 0

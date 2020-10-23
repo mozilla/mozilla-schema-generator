@@ -6,14 +6,15 @@
 
 from __future__ import annotations
 
-from .utils import _get, prepend_properties
 import queue
 from collections import defaultdict
-# TODO: s/probes/probe
-from .probes import Probe
+from typing import Dict, List, Tuple
+
 from .matcher import Matcher
 
-from typing import Dict, List, Tuple
+# TODO: s/probes/probe
+from .probes import Probe
+from .utils import _get, prepend_properties
 
 
 class Config(object):
@@ -70,10 +71,7 @@ class Config(object):
         Split this config into multiple configs.
         """
         splits = self._get_splits()
-        return [
-            Config(name, matchers=matchers)
-            for name, matchers in splits.items()
-        ]
+        return [Config(name, matchers=matchers) for name, matchers in splits.items()]
 
     def get_schema_elements(self, probes: List[Probe]) -> List[Tuple[tuple, Probe]]:
         """

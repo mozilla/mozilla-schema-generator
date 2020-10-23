@@ -4,8 +4,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from .probes import Probe
 from typing import Any
+
+from .probes import Probe
 
 
 class Matcher(object):
@@ -30,8 +31,11 @@ class Matcher(object):
         self.table_group = table_group or match_obj.get(self.table_group_key)
         self.type = _type or match_obj.get(self.type_key)
 
-        self.matcher = {k: v for k, v in match_obj.items() if k not in
-                        {self.table_group_key, self.type_key}}
+        self.matcher = {
+            k: v
+            for k, v in match_obj.items()
+            if k not in {self.table_group_key, self.type_key}
+        }
 
     def get_table_group(self):
         return self.table_group
@@ -50,7 +54,9 @@ class Matcher(object):
             # Definitions are nested, check sub-fields (e.g. details)
             if isinstance(v, dict):
                 for sub_k, sub_v in v.items():
-                    if sub_k not in self.keywords and not self._matches(sub_v, probe_value[sub_k]):
+                    if sub_k not in self.keywords and not self._matches(
+                        sub_v, probe_value[sub_k]
+                    ):
                         return False
 
         return True

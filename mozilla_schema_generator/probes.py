@@ -8,11 +8,11 @@
 from __future__ import annotations
 
 import json
-
 from datetime import datetime
 from typing import Any, List
-from .utils import _get
+
 from .schema import SchemaException
+from .utils import _get
 
 
 class Probe(object):
@@ -27,12 +27,14 @@ class Probe(object):
         self.name = definition[self.name_key]
 
     def __repr__(self):
-        return json.dumps({
-            "id": self.id,
-            "type": self.type,
-            "name": self.name,
-            "description": self.description
-        })
+        return json.dumps(
+            {
+                "id": self.id,
+                "type": self.type,
+                "name": self.name,
+                "description": self.description,
+            }
+        )
 
     def get_type(self) -> str:
         return self.type
@@ -95,13 +97,17 @@ class MainProbe(Probe):
     def _set_definition(self, full_defn: dict):
         history = [d for arr in full_defn[self.history_key].values() for d in arr]
         self.definition = max(history, key=lambda x: int(x["versions"]["first"]))
-        self.definition['name'] = full_defn[self.name_key]
+        self.definition["name"] = full_defn[self.name_key]
         self._set_processes(history)
 
     def _set_processes(self, history):
         # Include all historical processes
-        processes = {p for d in history for p in d["details"].get("record_in_processes", [])}
-        processes = {sub_p for p in processes for sub_p in self.processes_map.get(p, [p])}
+        processes = {
+            p for d in history for p in d["details"].get("record_in_processes", [])
+        }
+        processes = {
+            sub_p for p in processes for sub_p in self.processes_map.get(p, [p])
+        }
         self.definition["details"]["record_in_processes"] = processes
 
     def _set_dates(self, first_added_value: dict):
@@ -190,13 +196,13 @@ class GleanProbe(Probe):
             sorted(
                 full_defn[self.history_key],
                 key=lambda x: datetime.fromisoformat(x["dates"]["last"]),
-                reverse=True
+                reverse=True,
             )
         )
 
         # The canonical definition for up-to-date schemas
         self.definition = self.definition_history[0]
-        self.definition['name'] = full_defn[self.name_key]
+        self.definition["name"] = full_defn[self.name_key]
 
     def _set_dates(self, definition: dict):
         vals = [
@@ -221,7 +227,9 @@ class GleanProbe(Probe):
 
     def get_schema(self, addtlProps: Any) -> Any:
         if addtlProps is None:
-            raise SchemaException("Additional Properties cannot be missing for Glean probes")
+            raise SchemaException(
+                "Additional Properties cannot be missing for Glean probes"
+            )
 
         if self.description:
             addtlProps["description"] = self.description
