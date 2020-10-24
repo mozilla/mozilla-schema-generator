@@ -108,7 +108,6 @@ def checkout_copy_schemas_revisions(
 @click.group()
 def validate():
     """Click command group."""
-    pass
 
 
 @validate.command()

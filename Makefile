@@ -28,6 +28,7 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 
 format:
+	autoflake -r -i --remove-all-unused-imports mozilla_schema_generator tests
 	isort mozilla_schema_generator tests ./*.py
 	black mozilla_schema_generator tests ./*.py
 
