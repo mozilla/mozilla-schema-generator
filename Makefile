@@ -4,6 +4,7 @@ help:
 	@echo "  clean-build - remove build artifacts"
 	@echo "  clean-pyc - remove Python file artifacts"
 	@echo "  lint - check style with flake8, isort and black"
+	@echo "  format - autoformat with autoflake, isort and black"
 	@echo "  test - run tests quickly with the default Python"
 	@echo "  coverage - check code coverage quickly"
 	@echo "  coverage-report - open the coverage report in your browser"
