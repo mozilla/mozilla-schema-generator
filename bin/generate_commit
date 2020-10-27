@@ -109,15 +109,13 @@ function _create_changelog() {
 }
 
 function _create_readme(){
-    
-    if [ -e README.md ]; then
-        echo "File README.md already exists!"
-    else
-        echo "iam here"
-        echo "### Title1 $1" > README.md
-        echo "#### Description/ summary: $2" >> README.md
-        echo "#### commit log for the last month: $3" >> README.md
-    fi
+    local title=$1
+    local summary=$2
+    local logs=$3
+    cat << EOF > testREADME.md
+    Title: "$title"
+    Summary : "$summary"
+EOF
 }
 
 function _commit_schemas() {
@@ -151,9 +149,10 @@ function _commit_schemas() {
         --generic-schema \
         --mps-branch "$mps_branch_source" \
         --out-dir schemas
+    _create_readme
 
     find . -name "*.schema.json" -type f -exec git add {} +
-    find . -name "README.md" -type f -exec git add {} +
+    find . -name "*.md" -type f -exec git add {} +
 
     git commit -a -m "Interim Commit"
 
