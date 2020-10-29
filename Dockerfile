@@ -13,7 +13,7 @@ RUN groupadd --gid ${USER_ID} ${GROUP_ID} && \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        file gcc libwww-perl && \
+        file gcc tree libwww-perl && \
     apt-get autoremove -y && \
     apt-get clean
 
