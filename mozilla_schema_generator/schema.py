@@ -7,10 +7,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Tuple
-from .utils import _get
-from json import JSONEncoder
 import copy
+from json import JSONEncoder
+from typing import Any, Tuple
+
+from .utils import _get
 
 
 class SchemaException(Exception):
@@ -30,7 +31,6 @@ class SchemaEncoder(JSONEncoder):
 
 # TODO: s/Schema/JSONSchema
 class Schema(object):
-
     def __init__(self, schema: dict):
         self.schema = schema
 
@@ -91,7 +91,9 @@ class Schema(object):
 
                 try:
                     elem = _get(self.schema, subkey)
-                    if not elem.get("properties") and not elem.get("additionalProperties", False):
+                    if not elem.get("properties") and not elem.get(
+                        "additionalProperties", False
+                    ):
                         self._delete_key(subkey)
                 except KeyError:
                     break
@@ -130,16 +132,21 @@ class Schema(object):
             # Sometimes the "properties" field is empty...
             if "properties" in schema and schema["properties"]:
                 # A ROW type with a known set of fields
-                return sum((
-                    Schema._get_schema_size(p, key=key + (n,))
-                    for n, p in schema["properties"].items()))
+                return sum(
+                    (
+                        Schema._get_schema_size(p, key=key + (n,))
+                        for n, p in schema["properties"].items()
+                    )
+                )
 
             # A MAP type with key and value groups
             return 2
 
         if schema["type"] == "array":
             if "items" not in schema:
-                raise Exception("Missing items for array schema element at key " + "/".join(key))
+                raise Exception(
+                    "Missing items for array schema element at key " + "/".join(key)
+                )
             # Arrays are repeated fields, get its size
             return Schema._get_schema_size(schema["items"], key=key + ("arr-items",))
 

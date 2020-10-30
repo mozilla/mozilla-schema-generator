@@ -7,14 +7,14 @@
 import pytest
 import yaml
 
-from .test_utils import LocalMainPing, env, probes, schema  # noqa F401
+from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.main_ping import MainPing
 from mozilla_schema_generator.schema import SchemaException
-from mozilla_schema_generator.config import Config
+
+from .test_utils import LocalMainPing, env, probes, schema  # noqa F401
 
 
 class TestPing(object):
-
     def test_env_max_size(self, schema, env, probes):  # noqa F811
         ping = LocalMainPing(schema, env, probes)
 
@@ -27,9 +27,9 @@ class TestPing(object):
             config = Config("main", yaml.load(f))
             ping = MainPing()
 
-            max_size = (
-              ping.generate_schema(config, max_size=MainPing.default_max_size)['main'][0].get_size()
-            )
+            max_size = ping.generate_schema(config, max_size=MainPing.default_max_size)[
+                "main"
+            ][0].get_size()
 
             with pytest.raises(SchemaException):
                 ping.generate_schema(config, max_size=max_size - 1)

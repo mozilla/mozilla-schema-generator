@@ -4,12 +4,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import pprint
+
 import pytest
+
 from mozilla_schema_generator.generic_ping import GenericPing
 from mozilla_schema_generator.probes import MainProbe
 from mozilla_schema_generator.schema import Schema
-
-import pprint
 
 """
 *******************
@@ -23,40 +24,24 @@ def schema():
     return {
         "type": "object",
         "properties": {
-            "env": {
-                "type": "string"
-            },
-            "top_level": {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "object"
-                }
-            },
+            "env": {"type": "string"},
+            "top_level": {"type": "object", "additionalProperties": {"type": "object"}},
             "nested": {
                 "type": "object",
                 "properties": {
                     "second_level": {
                         "type": "object",
-                        "additionalProperties": {
-                            "type": "object"
-                        }
+                        "additionalProperties": {"type": "object"},
                     }
-                }
-            }
-        }
+                },
+            },
+        },
     }
 
 
 @pytest.fixture
 def env():
-    return {
-        "type": "object",
-        "properties": {
-            "env": {
-                "type": "string"
-            }
-        }
-    }
+    return {"type": "object", "properties": {"env": {"type": "string"}}}
 
 
 @pytest.fixture
@@ -65,11 +50,9 @@ def probes():
         "histogram/second_level_probe": {
             "name": "second_level_probe",
             "type": "histogram",
-            "first_added": {
-                "nightly": "2019-01-02 00:00:00"
-            },
+            "first_added": {"nightly": "2019-01-02 00:00:00"},
             "history": {
-                'nightly': [
+                "nightly": [
                     {
                         "description": "Remember the Canterbury",
                         "second_level": True,
@@ -80,16 +63,14 @@ def probes():
                         },
                     }
                 ]
-            }
+            },
         },
         "histogram/test_probe": {
             "name": "test_probe",
             "type": "histogram",
-            "first_added": {
-                "nightly": "2019-01-01 00:00:00"
-            },
+            "first_added": {"nightly": "2019-01-01 00:00:00"},
             "history": {
-                'nightly': [
+                "nightly": [
                     {
                         "description": "Remember the Canterbury",
                         "second_level": False,
@@ -100,8 +81,8 @@ def probes():
                         },
                     }
                 ]
-            }
-        }
+            },
+        },
     }
 
 
@@ -113,7 +94,6 @@ def probes():
 
 
 class LocalMainPing(GenericPing):
-
     def __init__(self, schema, env, probes):
         self.schema = Schema(schema)
         self.env = Schema(env)
@@ -130,7 +110,9 @@ class LocalMainPing(GenericPing):
 
     def generate_schema(self, config, **kwargs):
         schemas = super().generate_schema(config, **kwargs)
-        return {k: [s.schema for s in schema_list] for k, schema_list in schemas.items()}
+        return {
+            k: [s.schema for s in schema_list] for k, schema_list in schemas.items()
+        }
 
 
 """
@@ -170,7 +152,7 @@ def get_differences(a, b, path="", sep=" / "):
         for k in b_not_a:
             res.append(("In Actual, not in Expected", path + sep + k))
 
-        for k in (a_keys & b_keys):
+        for k in a_keys & b_keys:
             res = res + get_differences(a[k], b[k], path + sep + k)
 
     return res
@@ -186,6 +168,6 @@ def print_and_test(expected, result):
     pp.pprint(result)
 
     print("\nDifferences:")
-    print('\n'.join([' - '.join(v) for v in get_differences(expected, result)]))
+    print("\n".join([" - ".join(v) for v in get_differences(expected, result)]))
 
-    assert(result == expected)
+    assert result == expected

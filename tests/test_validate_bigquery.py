@@ -4,6 +4,7 @@ import gitdb
 import pytest
 from click.testing import CliRunner
 from git import Git, Repo
+
 from mozilla_schema_generator.validate_bigquery import (
     check_evolution,
     checkout_copy_schemas_revisions,

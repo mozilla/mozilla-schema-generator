@@ -3,7 +3,8 @@
 help:
 	@echo "  clean-build - remove build artifacts"
 	@echo "  clean-pyc - remove Python file artifacts"
-	@echo "  lint - check style with flake8"
+	@echo "  lint - check style with flake8, isort and black"
+	@echo "  format - autoformat with autoflake, isort and black"
 	@echo "  test - run tests quickly with the default Python"
 	@echo "  coverage - check code coverage quickly"
 	@echo "  coverage-report - open the coverage report in your browser"
@@ -27,8 +28,15 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 
+format:
+	autoflake -r -i --remove-all-unused-imports mozilla_schema_generator tests
+	isort mozilla_schema_generator tests ./*.py
+	black mozilla_schema_generator tests ./*.py
+
 lint:
 	flake8 mozilla_schema_generator tests --max-line-length 100
+	isort --check mozilla_schema_generator tests ./*.py
+	black --check mozilla_schema_generator tests ./*.py
 
 test:
 	py.test -v

@@ -5,11 +5,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import json
-from .generic_ping import GenericPing
-from .schema import Schema
-from .probes import MainProbe
-from .utils import prepend_properties
 from typing import List
+
+from .generic_ping import GenericPing
+from .probes import MainProbe
+from .schema import Schema
+from .utils import prepend_properties
 
 
 class CommonPing(GenericPing):
@@ -19,8 +20,10 @@ class CommonPing(GenericPing):
     # ONLY DECREMENT, or the schema will change in an incompatible way!
     MIN_FX_VERSION = 30
 
-    env_url = ("https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
-               "/{branch}/templates/include/telemetry/environment.1.schema.json")
+    env_url = (
+        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+        "/{branch}/templates/include/telemetry/environment.1.schema.json"
+    )
     probes_url = GenericPing.probe_info_base_url + "/firefox/all/main/all_probes"
 
     def __init__(self, schema_url, **kwargs):
@@ -48,14 +51,18 @@ class CommonPing(GenericPing):
             return {**dtype, **dict(description=comment)}
 
         if schema.property_exists(prepend_properties(("environment", "addons"))):
-            active_addons = (prepend_properties(("environment", "addons", "activeAddons"))
-                             + ("additionalProperties", "properties"))
+            active_addons = prepend_properties(
+                ("environment", "addons", "activeAddons")
+            ) + ("additionalProperties", "properties")
             schema.set_schema_elem(active_addons + ("foreignInstall",), integer)
             schema.set_schema_elem(active_addons + ("version",), string)
             schema.set_schema_elem(active_addons + ("userDisabled",), integer)
             schema.set_schema_elem(
-                prepend_properties(("environment", "addons", "theme", "foreignInstall")),
-                integer)
+                prepend_properties(
+                    ("environment", "addons", "theme", "foreignInstall")
+                ),
+                integer,
+            )
             schema.set_schema_elem(
                 prepend_properties(("environment", "addons", "activeGMPlugins"))
                 + ("additionalProperties", "properties", "applyBackgroundUpdates"),
@@ -65,20 +72,19 @@ class CommonPing(GenericPing):
                 ),
             )
 
-        user_prefs = (prepend_properties(("environment", "settings", "userPrefs")))
+        user_prefs = prepend_properties(("environment", "settings", "userPrefs"))
         if schema.property_exists(user_prefs):
-            desc = ("User preferences - limited to an allowlist defined in "
-                    "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`")
+            desc = (
+                "User preferences - limited to an allowlist defined in "
+                "`toolkit/components/telemetry/app/TelemetryEnvironment.jsm`"
+            )
             schema.set_schema_elem(user_prefs, with_description(string_map, desc))
 
         return schema
 
     def get_env(self):
         env_property = json.loads("{" + self._get_json_str(self.env_url) + "}")
-        env = {
-            "type": "object",
-            "properties": env_property
-        }
+        env = {"type": "object", "properties": env_property}
 
         return self._update_env(Schema(env))
 
@@ -86,11 +92,15 @@ class CommonPing(GenericPing):
         probes = self._get_json(self.probes_url)
 
         filtered = {
-            pname: pdef for pname, pdef in probes.items()
+            pname: pdef
+            for pname, pdef in probes.items()
             if "nightly" in pdef["first_added"]
         }
 
         # This will be made much better with PEP 572
         main_probes = [MainProbe(_id, defn) for _id, defn in filtered.items()]
-        return [p for p in main_probes
-                if int(p.definition["versions"]["last"]) > self.MIN_FX_VERSION]
+        return [
+            p
+            for p in main_probes
+            if int(p.definition["versions"]["last"]) > self.MIN_FX_VERSION
+        ]

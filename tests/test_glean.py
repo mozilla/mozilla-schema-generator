@@ -4,15 +4,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import yaml
+from typing import Dict, List
+
 import pytest
 import requests
-from .test_utils import print_and_test
+import yaml
+
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
 
-from typing import Dict, List
+from .test_utils import print_and_test
 
 
 @pytest.fixture
@@ -33,7 +35,6 @@ class NoProbeGleanPing(glean_ping.GleanPing):
 
 
 class TestGleanPing(object):
-
     def test_env_size(self, glean):
         assert glean.get_env().get_size() > 0
 
@@ -48,8 +49,10 @@ class TestGleanPing(object):
             assert "ping_info" in schema["properties"]
             assert "client_info" in schema["properties"]
 
-            labeled_counters = _get(schema, prepend_properties(("metrics", "labeled_counter")))
-            assert "glean.error.invalid_label" in labeled_counters['properties']
+            labeled_counters = _get(
+                schema, prepend_properties(("metrics", "labeled_counter"))
+            )
+            assert "glean.error.invalid_label" in labeled_counters["properties"]
 
             if name == "baseline":
                 # Device should be included, since it's a standard metric
@@ -68,9 +71,9 @@ class TestGleanPing(object):
         for name, schema in final_schemas.items():
             generic_schema = glean.get_schema().schema
             generic_schema["mozPipelineMetadata"] = {
-                'bq_dataset_family': 'org_mozilla_glean',
-                'bq_metadata_format': 'structured',
-                'bq_table': name.replace("-", "_") + '_v1',
+                "bq_dataset_family": "org_mozilla_glean",
+                "bq_metadata_format": "structured",
+                "bq_table": name.replace("-", "_") + "_v1",
             }
             print_and_test(generic_schema, schema)
 

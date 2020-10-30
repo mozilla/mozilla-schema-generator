@@ -4,8 +4,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import yaml
 import pytest
+import yaml
+
 from mozilla_schema_generator import main_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
@@ -24,7 +25,6 @@ def config():
 
 
 class TestMainPing(object):
-
     def test_env_size(self, main):
         assert main.get_env().get_size() > 0
 
@@ -33,23 +33,35 @@ class TestMainPing(object):
 
         assert "environment" in schema["properties"]
         assert "payload" in schema["properties"]
-        assert _get(schema, prepend_properties(("environment", "settings", "userPrefs"))) \
-            == {
+        assert _get(
+            schema, prepend_properties(("environment", "settings", "userPrefs"))
+        ) == {
             "type": "object",
             "description": "User preferences - limited to an allowlist defined in `toolkit/components/telemetry/app/TelemetryEnvironment.jsm`",  # NOQA
             "additionalProperties": {"type": "string"},
         }
-        assert "extension" in \
-            _get(schema, prepend_properties(("payload", "processes")))["properties"]
+        assert (
+            "extension"
+            in _get(schema, prepend_properties(("payload", "processes")))["properties"]
+        )
 
     def test_min_probe_version(self, main):
         probes = main.get_probes()
-        assert max([int(p.definition["versions"]["last"]) for p in probes]) >= main.MIN_FX_VERSION
+        assert (
+            max([int(p.definition["versions"]["last"]) for p in probes])
+            >= main.MIN_FX_VERSION
+        )
 
     def test_split_schema(self, main, config):
         schema = main.generate_schema(config, split=True)
 
-        expected = {"histograms", "scalars", "keyed_histograms", "keyed_scalars", "extra"}
+        expected = {
+            "histograms",
+            "scalars",
+            "keyed_histograms",
+            "keyed_scalars",
+            "extra",
+        }
         assert set(schema.keys()) == expected
 
         for k, schemas in schema.items():

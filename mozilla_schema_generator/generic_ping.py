@@ -6,20 +6,21 @@
 
 import datetime
 import json
-import requests
 import pathlib
 import re
-
-from .schema import Schema, SchemaException
-from .probes import Probe
-from .config import Config
 from typing import Dict, List
+
+import requests
+
+from .config import Config
+from .probes import Probe
+from .schema import Schema, SchemaException
 
 
 class GenericPing(object):
 
-    probe_info_base_url = 'https://probeinfo.telemetry.mozilla.org'
-    default_encoding = 'utf-8'
+    probe_info_base_url = "https://probeinfo.telemetry.mozilla.org"
+    default_encoding = "utf-8"
     default_max_size = 9900  # 10k col limit in BQ
     extra_schema_key = "extra"
     cache_dir = pathlib.Path(".probe_cache")
@@ -36,10 +37,13 @@ class GenericPing(object):
         return Schema(self._get_json(self.env_url))
 
     def get_probes(self) -> List[Probe]:
-        return [Probe(_id, defn) for _id, defn in self._get_json(self.probes_url).items()]
+        return [
+            Probe(_id, defn) for _id, defn in self._get_json(self.probes_url).items()
+        ]
 
-    def generate_schema(self, config: Config, *, split: bool = None, max_size: int = None) \
-            -> Dict[str, List[Schema]]:
+    def generate_schema(
+        self, config: Config, *, split: bool = None, max_size: int = None
+    ) -> Dict[str, List[Schema]]:
         schema = self.get_schema()
         env = self.get_env()
 
@@ -51,11 +55,15 @@ class GenericPing(object):
             max_size = self.default_max_size
 
         if env.get_size() >= max_size:
-            raise SchemaException("Environment must be smaller than max_size {}".format(max_size))
+            raise SchemaException(
+                "Environment must be smaller than max_size {}".format(max_size)
+            )
 
         # TODO: Allow splits of extra schema, if necessary
         if schema.get_size() >= max_size:
-            raise SchemaException("Schema must be smaller than max_size {}".format(max_size))
+            raise SchemaException(
+                "Schema must be smaller than max_size {}".format(max_size)
+            )
 
         if split:
             configs = config.split()
@@ -64,21 +72,27 @@ class GenericPing(object):
             env = schema
 
         schemas = {
-            c.name: self.make_schemas(env, probes, c, split, max_size)
-            for c in configs
+            c.name: self.make_schemas(env, probes, c, split, max_size) for c in configs
         }
 
         if split:
-            schemas[self.extra_schema_key] = self.make_extra_schema(schema, probes, configs)
+            schemas[self.extra_schema_key] = self.make_extra_schema(
+                schema, probes, configs
+            )
 
-        if any(schema.get_size() > max_size for _, s in schemas.items() for schema in s):
-            raise SchemaException("Schema must be smaller or equal max_size {}".format(max_size))
+        if any(
+            schema.get_size() > max_size for _, s in schemas.items() for schema in s
+        ):
+            raise SchemaException(
+                "Schema must be smaller or equal max_size {}".format(max_size)
+            )
 
         return schemas
 
     @staticmethod
-    def make_schemas(env: Schema, probes: List[Probe], config: Config,
-                     split: bool, max_size: int) -> List[Schema]:
+    def make_schemas(
+        env: Schema, probes: List[Probe], config: Config, split: bool, max_size: int
+    ) -> List[Schema]:
         """
         Fill in probes based on the config, and keep only the env
         parts of the schema. Throw away everything else.
@@ -101,28 +115,33 @@ class GenericPing(object):
                 final_schema = env.clone()
 
             final_schema.set_schema_elem(
-                schema_key + ("properties", probe.name),
-                probe_schema.schema)
+                schema_key + ("properties", probe.name), probe_schema.schema
+            )
 
         # Remove all additionalProperties (#22)
         schemas.append(final_schema)
         for s in schemas:
             for key in config.get_match_keys():
                 try:
-                    s.delete_group_from_schema(key + ("propertyNames",), propagate=False)
+                    s.delete_group_from_schema(
+                        key + ("propertyNames",), propagate=False
+                    )
                 except KeyError:
                     pass
 
                 try:
-                    s.delete_group_from_schema(key + ("additionalProperties",), propagate=True)
+                    s.delete_group_from_schema(
+                        key + ("additionalProperties",), propagate=True
+                    )
                 except KeyError:
                     pass
 
         return schemas
 
     @staticmethod
-    def make_extra_schema(schema: Schema, probes: List[Probe],
-                          configs: List[Config]) -> List[Schema]:
+    def make_extra_schema(
+        schema: Schema, probes: List[Probe], configs: List[Config]
+    ) -> List[Schema]:
         """
         Given the list of probes and the configuration,
         return the schema that has everything but those sections that we
@@ -148,8 +167,8 @@ class GenericPing(object):
     @staticmethod
     def _slugify(text: str) -> str:
         """Get a valid slug from an arbitrary string"""
-        value = re.sub(r'[^\w\s-]', '', text.lower()).strip()
-        return re.sub(r'[-\s]+', '-', value)
+        value = re.sub(r"[^\w\s-]", "", text.lower()).strip()
+        return re.sub(r"[-\s]+", "-", value)
 
     @staticmethod
     def _present_in_cache(url: str) -> bool:
@@ -168,7 +187,7 @@ class GenericPing(object):
 
     @staticmethod
     def _get_json_str(url: str) -> str:
-        no_param_url = re.sub(r'\?.*', '', url)
+        no_param_url = re.sub(r"\?.*", "", url)
 
         if GenericPing._present_in_cache(no_param_url):
             return GenericPing._retrieve_from_cache(no_param_url)
@@ -196,5 +215,5 @@ class GenericPing(object):
             # For probe-info-service requests, add
             # random query param to force cloudfront
             # to bypass the cache
-            url += f'?t={datetime.datetime.utcnow().isoformat()}'
+            url += f"?t={datetime.datetime.utcnow().isoformat()}"
         return json.loads(GenericPing._get_json_str(url))
