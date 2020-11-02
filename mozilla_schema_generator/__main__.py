@@ -178,17 +178,16 @@ def generate_glean_pings(
     repos = GleanPing.get_repos()
 
     if repo is not None:
-        repos = [(r_name, r_id) for r_name, r_id in repos if r_id == repo]
+        repos = [r for r in repos if r["app_id"] == repo]
 
     with open(config, "r") as f:
         config_data = yaml.safe_load(f)
 
     config = Config("glean", config_data)
 
-    for repo_name, repo_id in repos:
+    for repo in repos:
         write_schema(
-            repo_name,
-            repo_id,
+            repo,
             config,
             out_dir,
             split,
@@ -199,13 +198,13 @@ def generate_glean_pings(
 
 
 def write_schema(
-    repo, repo_id, config, out_dir, split, pretty, generic_schema, mps_branch
+    repo, config, out_dir, split, pretty, generic_schema, mps_branch
 ):
-    schema_generator = GleanPing(repo, repo_id, mps_branch=mps_branch)
+    schema_generator = GleanPing(repo, mps_branch=mps_branch)
     schemas = schema_generator.generate_schema(
         config, split=False, generic_schema=generic_schema
     )
-    dump_schema(schemas, out_dir and out_dir.joinpath(repo_id), pretty)
+    dump_schema(schemas, out_dir and out_dir.joinpath(repo["app_id"]), pretty)
 
 
 def dump_schema(schemas, out_dir, pretty, *, version=1):
