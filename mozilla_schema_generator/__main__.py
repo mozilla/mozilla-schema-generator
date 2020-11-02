@@ -197,9 +197,7 @@ def generate_glean_pings(
         )
 
 
-def write_schema(
-    repo, config, out_dir, split, pretty, generic_schema, mps_branch
-):
+def write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch):
     schema_generator = GleanPing(repo, mps_branch=mps_branch)
     schemas = schema_generator.generate_schema(
         config, split=False, generic_schema=generic_schema

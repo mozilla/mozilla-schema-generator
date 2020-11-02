@@ -169,9 +169,7 @@ class GleanPing(GenericPing):
                 expiration["delete_after_days"] = int(retention_days)
                 pipeline_meta["expiration_policy"] = expiration
 
-            defaults = {
-                "mozPipelineMetadata": pipeline_meta
-            }
+            defaults = {"mozPipelineMetadata": pipeline_meta}
 
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema()
@@ -192,8 +190,4 @@ class GleanPing(GenericPing):
         Retrieve metadata for all non-library Glean repositories
         """
         repos = GleanPing._get_json(GleanPing.repos_url)
-        return [
-            repo
-            for repo in repos
-            if "library_names" not in repo
-        ]
+        return [repo for repo in repos if "library_names" not in repo]
