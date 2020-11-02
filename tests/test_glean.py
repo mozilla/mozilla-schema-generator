@@ -19,7 +19,7 @@ from .test_utils import print_and_test
 
 @pytest.fixture
 def glean():
-    return glean_ping.GleanPing({"name": "glean", "app_id:": "org-mozilla-glean"})
+    return glean_ping.GleanPing({"name": "glean", "app_id": "org-mozilla-glean"})
 
 
 @pytest.fixture
