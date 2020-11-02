@@ -39,13 +39,14 @@ class GleanPing(GenericPing):
         "glean_client_info",
     }
 
-    def __init__(self, repo, app_id, **kwargs):  # TODO: Make env-url optional
+    def __init__(self, repo, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
-        self.app_id = app_id
+        self.repo_name = repo["name"]
+        self.app_id = repo["app_id"]
         super().__init__(
             self.schema_url,
             self.schema_url,
-            self.probes_url_template.format(repo),
+            self.probes_url_template.format(self.repo_name),
             **kwargs,
         )
 
@@ -57,10 +58,10 @@ class GleanPing(GenericPing):
         # map those back to the name of the repository in the repository file.
         try:
             dependencies = self._get_json(
-                self.dependencies_url_template.format(self.repo)
+                self.dependencies_url_template.format(self.repo_name)
             )
         except HTTPError:
-            logging.info(f"For {self.repo}, using default Glean dependencies")
+            logging.info(f"For {self.repo_name}, using default Glean dependencies")
             return self.default_dependencies
 
         dependency_library_names = list(dependencies.keys())
@@ -77,10 +78,10 @@ class GleanPing(GenericPing):
                 dependencies.append(repos_by_dependency_name[name])
 
         if len(dependencies) == 0:
-            logging.info(f"For {self.repo}, using default Glean dependencies")
+            logging.info(f"For {self.repo_name}, using default Glean dependencies")
             return self.default_dependencies
 
-        logging.info(f"For {self.repo}, found Glean dependencies: {dependencies}")
+        logging.info(f"For {self.repo_name}, found Glean dependencies: {dependencies}")
         return dependencies
 
     def get_probes(self) -> List[GleanProbe]:
@@ -109,7 +110,7 @@ class GleanPing(GenericPing):
                 "firefox-android-release",
             }
             if (
-                self.repo in issue_118_affected
+                self.repo_name in issue_118_affected
                 and probe.get_name() == "installation.timestamp"
             ):
                 logging.info(f"Writing column {probe.get_name()} for compatibility.")
@@ -134,7 +135,7 @@ class GleanPing(GenericPing):
         return processed
 
     def get_pings(self) -> Set[str]:
-        url = self.ping_url_template.format(self.repo)
+        url = self.ping_url_template.format(self.repo_name)
         pings = GleanPing._get_json(url).keys()
 
         for dependency in self.get_dependencies():
@@ -156,14 +157,19 @@ class GleanPing(GenericPing):
             for matcher in matchers.values():
                 matcher.matcher["send_in_pings"]["contains"] = ping
             new_config = Config(ping, matchers=matchers)
+            retention_days = self.repo.get("retention_days", None)
 
-            defaults = {
-                "mozPipelineMetadata": {
-                    "bq_dataset_family": self.app_id.replace("-", "_"),
-                    "bq_table": ping.replace("-", "_") + "_v1",
-                    "bq_metadata_format": "structured",
-                }
+            pipeline_meta = {
+                "bq_dataset_family": self.app_id.replace("-", "_"),
+                "bq_table": ping.replace("-", "_") + "_v1",
+                "bq_metadata_format": "structured",
             }
+            if retention_days is not None:
+                expiration = pipeline_meta.get("expiration_policy", {})
+                expiration["delete_after_days"] = int(retention_days)
+                pipeline_meta["expiration_policy"] = expiration
+
+            defaults = {"mozPipelineMetadata": pipeline_meta}
 
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema()
@@ -181,11 +187,7 @@ class GleanPing(GenericPing):
     @staticmethod
     def get_repos():
         """
-        Retrieve name and app_id for Glean repositories
+        Retrieve metadata for all non-library Glean repositories
         """
         repos = GleanPing._get_json(GleanPing.repos_url)
-        return [
-            (repo["name"], repo["app_id"])
-            for repo in repos
-            if "library_names" not in repo
-        ]
+        return [repo for repo in repos if "library_names" not in repo]
