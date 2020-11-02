@@ -19,7 +19,7 @@ from .test_utils import print_and_test
 
 @pytest.fixture
 def glean():
-    return glean_ping.GleanPing("glean", "org-mozilla-glean")
+    return glean_ping.GleanPing({"name": "glean", "app_id:": "org-mozilla-glean"})
 
 
 @pytest.fixture
@@ -61,7 +61,8 @@ class TestGleanPing(object):
 
     def test_get_repos(self):
         repos = glean_ping.GleanPing.get_repos()
-        assert ("fenix", "org-mozilla-fenix") in repos
+        names_ids = [(r["name"], r["app_id"]) for r in repos]
+        assert ("fenix", "org-mozilla-fenix") in names_ids
 
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
@@ -79,7 +80,7 @@ class TestGleanPing(object):
 
     def test_missing_data(self, config):
         # When there are no files, this should error
-
-        not_glean = NoProbeGleanPing("LeanGleanPingNoIding", "org-mozilla-lean")
+        repo = {"name": "LeanGleanPingNoIding", "app_id": "org-mozilla-lean"}
+        not_glean = NoProbeGleanPing(repo)
         with pytest.raises(requests.exceptions.HTTPError):
             not_glean.generate_schema(config, split=False)
