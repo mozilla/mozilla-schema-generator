@@ -84,3 +84,16 @@ class TestGleanPing(object):
         not_glean = NoProbeGleanPing(repo)
         with pytest.raises(requests.exceptions.HTTPError):
             not_glean.generate_schema(config, split=False)
+
+    def test_retention_days(self, config):
+        glean = glean_ping.GleanPing(
+            {"name": "glean", "app_id": "org-mozilla-glean", "retention_days": 90}
+        )
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            assert (
+                schema["mozPipelineMetadata"]["expiration_policy"]["delete_after_days"]
+                == 90
+            )
