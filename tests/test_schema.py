@@ -68,12 +68,7 @@ class TestSchema(object):
         expected = {
             "properties": {
                 "a": {"type": "int"},
-                "b": {
-                    "properties": {
-                        "hello": {"type": "string"},
-                    },
-                    "type": "object",
-                },
+                "b": {"properties": {"hello": {"type": "string"}}, "type": "object"},
             },
             "type": "object",
         }

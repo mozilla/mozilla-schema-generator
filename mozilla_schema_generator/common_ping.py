@@ -41,10 +41,7 @@ class CommonPing(GenericPing):
     def _update_env(self, schema):
         integer = {"type": "integer"}
         string = {"type": "string"}
-        string_map = {
-            "type": "object",
-            "additionalProperties": string,
-        }
+        string_map = {"type": "object", "additionalProperties": string}
 
         def with_description(dtype: dict, comment: str) -> dict:
             """Add a description to the types defined above."""

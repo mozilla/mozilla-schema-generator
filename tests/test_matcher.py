@@ -11,10 +11,7 @@ from mozilla_schema_generator.probes import GleanProbe, MainProbe
 class TestMatcher(object):
     def test_matches(self):
         match_obj = {
-            "details": {
-                "record_in_processes": {"contains": "main"},
-                "keyed": True,
-            },
+            "details": {"record_in_processes": {"contains": "main"}, "keyed": True},
             "table_group": "keyed_scalars",
             "type": "scalar",
         }

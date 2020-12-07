@@ -33,16 +33,10 @@ setup(
         "console_scripts": [
             "mozilla-schema-generator=mozilla_schema_generator.__main__:main",
             "validate-bigquery=mozilla_schema_generator.validate_bigquery:validate",
-        ],
+        ]
     },
     include_package_data=True,
-    install_requires=[
-        "click",
-        "jsonschema",
-        "pyyaml",
-        "requests",
-        "gitpython",
-    ],
+    install_requires=["click", "jsonschema", "pyyaml", "requests", "gitpython"],
     license="MIT",
     zip_safe=False,
     keywords="mozilla-schema-generator",
