@@ -12,6 +12,7 @@ from pathlib import Path
 import click
 import yaml
 
+from .bhr_ping import BhrPing
 from .common_ping import CommonPing
 from .config import Config
 from .glean_ping import GleanPing
@@ -88,6 +89,19 @@ def generate_main_ping(config, out_dir, split, pretty, mps_branch):
         config_data = yaml.safe_load(f)
 
     config = Config("main", config_data)
+    schemas = schema_generator.generate_schema(config, split=False)
+    # schemas introduces an extra layer to the actual schema
+    dump_schema(schemas, out_dir, pretty, version=4)
+
+
+@click.command()
+@common_options
+def generate_bhr_ping(out_dir, split, pretty, mps_branch):
+    schema_generator = BhrPing(mps_branch=mps_branch)
+    if out_dir:
+        out_dir = Path(out_dir)
+
+    config = Config("bhr", {})
     schemas = schema_generator.generate_schema(config, split=split)
     dump_schema(schemas, out_dir, pretty, version=4)
 
@@ -186,15 +200,7 @@ def generate_glean_pings(
     config = Config("glean", config_data)
 
     for repo in repos:
-        write_schema(
-            repo,
-            config,
-            out_dir,
-            split,
-            pretty,
-            generic_schema,
-            mps_branch,
-        )
+        write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch)
 
 
 def write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch):
@@ -242,6 +248,7 @@ def main(args=None):
 
 
 main.add_command(generate_main_ping)
+main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
 
