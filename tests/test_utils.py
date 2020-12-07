@@ -57,10 +57,7 @@ def probes():
                         "description": "Remember the Canterbury",
                         "second_level": True,
                         "details": {"keyed": False},
-                        "versions": {
-                            "first": "50",
-                            "last": "60",
-                        },
+                        "versions": {"first": "50", "last": "60"},
                     }
                 ]
             },
@@ -75,10 +72,7 @@ def probes():
                         "description": "Remember the Canterbury",
                         "second_level": False,
                         "details": {"keyed": False},
-                        "versions": {
-                            "first": "50",
-                            "last": "60",
-                        },
+                        "versions": {"first": "50", "last": "60"},
                     }
                 ]
             },

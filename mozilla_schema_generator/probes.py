@@ -68,19 +68,11 @@ class MainProbe(Probe):
 
     first_added_key = "first_added"
 
-    histogram_schema = {
-        "type": "string",
-    }
+    histogram_schema = {"type": "string"}
 
     parent_processes = {"main"}
 
-    child_processes = {
-        "content",
-        "gpu",
-        "extension",
-        "dynamic",
-        "socket",
-    }
+    child_processes = {"content", "gpu", "extension", "dynamic", "socket"}
 
     processes_map = {
         "all_childs": child_processes,

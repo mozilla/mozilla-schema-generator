@@ -19,9 +19,7 @@ def glean_probe_defn():
                     "first": "2019-04-12 13:44:13",
                     "last": "2019-08-08 15:34:03",
                 },
-                "send_in_pings": [
-                    "metrics",
-                ],
+                "send_in_pings": ["metrics"],
             },
             {
                 "description": "Glean test description",
@@ -29,9 +27,7 @@ def glean_probe_defn():
                     "first": "2019-08-08 15:34:14",
                     "last": "2019-08-08 15:45:14",
                 },
-                "send_in_pings": [
-                    "all-pings",
-                ],
+                "send_in_pings": ["all-pings"],
             },
         ],
         "name": "glean.error.invalid_value",
@@ -48,18 +44,14 @@ def glean_probe_defn_subset_pings():
                     "first": "2019-04-12 13:44:13",
                     "last": "2019-08-08 15:34:03",
                 },
-                "send_in_pings": [
-                    "metrics",
-                ],
+                "send_in_pings": ["metrics"],
             },
             {
                 "dates": {
                     "first": "2019-08-08 15:34:14",
                     "last": "2019-08-08 15:45:14",
                 },
-                "send_in_pings": [
-                    "baseline",
-                ],
+                "send_in_pings": ["baseline"],
             },
         ],
         "name": "glean.error.invalid_value",
@@ -138,17 +130,11 @@ def main_probe_defn():
                     "versions": {"first": "65", "last": "68"},
                 },
                 {
-                    "details": {
-                        "keyed": False,
-                        "kind": "string",
-                    },
+                    "details": {"keyed": False, "kind": "string"},
                     "versions": {"first": "61", "last": "64"},
                 },
                 {
-                    "details": {
-                        "keyed": False,
-                        "kind": "string",
-                    },
+                    "details": {"keyed": False, "kind": "string"},
                     "versions": {"first": "55", "last": "60"},
                 },
             ],
@@ -172,7 +158,7 @@ def main_probe_all_childs_defn():
                     },
                     "versions": {"first": "67", "last": "70"},
                 }
-            ],
+            ]
         },
         "name": "a11y.instantiators",
         "type": "scalar",
@@ -201,7 +187,7 @@ def main_probe_all_childs_and_main_defn():
                     },
                     "versions": {"first": "62", "last": "66"},
                 },
-            ],
+            ]
         },
         "name": "a11y.instantiators",
         "type": "scalar",
@@ -223,7 +209,7 @@ def main_probe_all_defn():
                     },
                     "versions": {"first": "67", "last": "70"},
                 }
-            ],
+            ]
         },
         "name": "a11y.instantiators",
         "type": "scalar",
@@ -245,7 +231,7 @@ def main_probe_max_description_length():
                     },
                     "versions": {"first": "67", "last": "70"},
                 }
-            ],
+            ]
         },
         "name": "a11y.instantiators",
         "type": "scalar",

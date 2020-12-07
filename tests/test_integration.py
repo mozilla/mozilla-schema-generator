@@ -102,7 +102,7 @@ class TestIntegration(object):
                             "properties": {"test_probe": MainProbe.histogram_schema},
                         },
                     },
-                },
+                }
             ],
             "nested": [
                 {
@@ -231,10 +231,7 @@ class TestIntegration(object):
                         {
                             "second_level": False,
                             "details": {"keyed": False},
-                            "versions": {
-                                "first": "50",
-                                "last": "60",
-                            },
+                            "versions": {"first": "50", "last": "60"},
                         }
                     ]
                 },
