@@ -47,5 +47,11 @@
     {
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/account-ecosystem/account-ecosystem.4.schema.json",
         "config": "account_ecosystem.yaml"
+    },
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/uninstall/uninstall.4.schema.json"
+    },
+    {
+        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/dnssec-study-v1/dnssec-study-v1.4.schema.json"
     }
 ]
