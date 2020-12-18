@@ -12,7 +12,7 @@ from mozilla_schema_generator.validate_bigquery import (
     compute_compact_columns,
     copy_schemas,
     local_validation,
-    parse_deletion_allowlist,
+    parse_incompatibility_allowlist,
 )
 
 
@@ -187,10 +187,10 @@ def test_validation_fails_on_removed_ping(tmp_path, tmp_git):
     assert "found incompatible changes" in res.output
 
 
-def test_parse_deletion_allowlist(tmp_path):
+def test_parse_incompatibility_allowlist(tmp_path):
     allowlist = tmp_path / "allowlist.txt"
     allowlist.write_text("telemetry.*.4\n# comment\ntest")
-    res = parse_deletion_allowlist(allowlist)
+    res = parse_incompatibility_allowlist(allowlist)
     assert res == ["telemetry.*.4", "test"]
 
 
@@ -204,7 +204,7 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     base_ref = "generated-schemas~1"
 
     def _test(allowlist_data):
-        allowlist = tmp_path / "deletion_allowlist.txt"
+        allowlist = tmp_path / "incompatibility-allowlist.txt"
         allowlist.write_text(allowlist_data)
 
         return CliRunner().invoke(
@@ -218,7 +218,7 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
                 tmp_git.as_posix(),
                 "--artifact",
                 tmp_path.as_posix(),
-                "--deletion-allowlist",
+                "--incompatibility-allowlist",
                 allowlist.as_posix(),
             ],
         )
@@ -229,7 +229,7 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
 
     res = _test("telemetry.main.4")
     assert res.exit_code == 0, res.output
-    assert "allowing deletion" in res.output
+    assert "allowing incompatible changes" in res.output
 
     res = _test(
         """
@@ -238,7 +238,7 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     """
     )
     assert res.exit_code == 0, res.output
-    assert "allowing deletion" in res.output
+    assert "allowing incompatible changes" in res.output
 
     res = _test(
         """
@@ -255,3 +255,48 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     """
     )
     assert res.exit_code == 1, res.output
+
+
+def test_validation_succeeds_on_incompatible_schema_change_with_allowlist(
+    tmp_path, tmp_git
+):
+    # known good commit range, if we reverse the order, then we get schema incompatible changes
+    # https://github.com/mozilla-services/mozilla-pipeline-schemas/compare/485be1e...a6011d9
+    head_ref = "a6011d9"
+    base_ref = "485be1e"
+
+    def _test(allowlist_data):
+        allowlist = tmp_path / "incompatibility-allowlist.txt"
+        allowlist.write_text(allowlist_data)
+
+        return CliRunner().invoke(
+            local_validation,
+            [
+                "--head",
+                base_ref,
+                "--base",
+                head_ref,
+                "--repository",
+                tmp_git.as_posix(),
+                "--artifact",
+                tmp_path.as_posix(),
+                "--incompatibility-allowlist",
+                allowlist.as_posix(),
+            ],
+        )
+
+    res = _test("# comment")
+    assert res.exit_code == 1, res.output
+    assert "found incompatible changes" in res.output
+
+    res = _test(
+        """
+    # this test affects the main ping schemas
+    telemetry.main.*
+    telemetry.first-shutdown.*
+    telemetry.saved-session.*
+    """
+    )
+    assert res.exit_code == 0, res.output
+    assert "allowing incompatible changes" in res.output
+    assert "found incompatible changes, but continuing" in res.output

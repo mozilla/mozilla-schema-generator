@@ -105,7 +105,7 @@ def checkout_copy_schemas_revisions(
     return head_path, base_path
 
 
-def parse_deletion_allowlist(allowlist: Path) -> list:
+def parse_incompatibility_allowlist(allowlist: Path) -> list:
     res = []
     if not allowlist or not allowlist.exists():
         return res
@@ -136,12 +136,12 @@ def validate():
     default=BASE_DIR / "validate_schema_evolution",
 )
 @click.option(
-    "--deletion-allowlist",
+    "--incompatibility-allowlist",
     type=click.Path(dir_okay=False),
-    help="newline delimited globs of schemas that are allowed to be removed",
-    default=BASE_DIR / "mozilla-schema-generator/deletion-allowlist",
+    help="newline delimited globs of schemas with allowed schema incompatibilities",
+    default=BASE_DIR / "mozilla-schema-generator/incompatibility-exceptions",
 )
-def local_validation(head, base, repository, artifact, deletion_allowlist):
+def local_validation(head, base, repository, artifact, incompatibility_allowlist):
     """Validate schemas using a heuristic from the compact schemas."""
     head_path, base_path = checkout_copy_schemas_revisions(
         head, base, repository, artifact
@@ -153,21 +153,21 @@ def local_validation(head, base, repository, artifact, deletion_allowlist):
     base_files = (base_path).glob("*.txt")
 
     # also look at the exceptions
-    allowed_deletion_base_files = []
-    if deletion_allowlist:
-        for glob in parse_deletion_allowlist(Path(deletion_allowlist)):
-            allowed_deletion_base_files += list((base_path).glob(f"{glob}.txt"))
+    allowed_incompatibility_base_files = []
+    if incompatibility_allowlist:
+        for glob in parse_incompatibility_allowlist(Path(incompatibility_allowlist)):
+            allowed_incompatibility_base_files += list((base_path).glob(f"{glob}.txt"))
 
     a = set([p.name for p in base_files])
     b = set([p.name for p in head_files])
-    allowed_deletion = set([p.name for p in allowed_deletion_base_files])
+    allowed_incompatibility = set([p.name for p in allowed_incompatibility_base_files])
 
     # Check that we're not removing any schemas. If there are exceptions, we
     # remove this from the base set before checking for evolution.
-    if allowed_deletion:
-        print("allowing deletion of the following documents:")
-        print("\n".join([f"\t{x}" for x in allowed_deletion]))
-    is_error |= check_evolution((a - allowed_deletion), b, verbose=True)
+    if allowed_incompatibility:
+        print("allowing incompatible changes in the following documents:")
+        print("\n".join([f"\t{x}" for x in allowed_incompatibility]))
+    is_error |= check_evolution((a - allowed_incompatibility), b, verbose=True)
 
     for schema_name in a & b:
         base = base_path / schema_name
@@ -192,7 +192,11 @@ def local_validation(head, base, repository, artifact, deletion_allowlist):
             continue
         # check if this is an error condition
         print(diff + "\n")
-        is_error |= check_evolution(base_data, head_data)
+        err_code = check_evolution(base_data, head_data)
+        if err_code and schema_name in allowed_incompatibility:
+            print("found incompatible changes, but continuing")
+            continue
+        is_error |= err_code
 
     if not is_error:
         click.echo("no incompatible changes detected")
