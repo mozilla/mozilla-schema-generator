@@ -27,6 +27,9 @@ def tmp_git(tmp_path):
     repo = Repo(path)
     repo.git.checkout("master")
     repo.git.checkout("generated-schemas")
+    # set config for ci
+    repo.git.config("user.email", "test@test.com")
+    repo.git.config("user.name", "test")
     return path
 
 
