@@ -139,7 +139,7 @@ def validate():
     "--deletion-allowlist",
     type=click.Path(dir_okay=False),
     help="newline delimited globs of schemas that are allowed to be removed",
-    default=None,
+    default=BASE_DIR / "mozilla-schema-generator/deletion-allowlist",
 )
 def local_validation(head, base, repository, artifact, deletion_allowlist):
     """Validate schemas using a heuristic from the compact schemas."""
