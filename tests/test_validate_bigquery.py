@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import gitdb
@@ -11,6 +12,7 @@ from mozilla_schema_generator.validate_bigquery import (
     compute_compact_columns,
     copy_schemas,
     local_validation,
+    parse_deletion_allowlist,
 )
 
 
@@ -155,3 +157,98 @@ def test_local_validation_command(tmp_path, tmp_git):
     )
     assert res.exit_code == 1
     assert "found incompatible changes" in res.output
+
+
+def test_validation_fails_on_removed_ping(tmp_path, tmp_git):
+    repo = Repo(tmp_git)
+    # remove a file and commit
+    os.remove(tmp_git / "schemas/telemetry/main/main.4.bq")
+    repo.git.commit("-a", "-m", "remove main")
+
+    head_ref = "generated-schemas"
+    base_ref = "generated-schemas~1"
+    res = CliRunner().invoke(
+        local_validation,
+        [
+            "--head",
+            head_ref,
+            "--base",
+            base_ref,
+            "--repository",
+            tmp_git.as_posix(),
+            "--artifact",
+            tmp_path.as_posix(),
+        ],
+    )
+    assert res.exit_code == 1
+    assert "found incompatible changes" in res.output
+
+
+def test_parse_deletion_allowlist(tmp_path):
+    allowlist = tmp_path / "allowlist.txt"
+    allowlist.write_text("telemetry.*.4\n# comment\ntest")
+    res = parse_deletion_allowlist(allowlist)
+    assert res == ["telemetry.*.4", "test"]
+
+
+def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
+    repo = Repo(tmp_git)
+    # remove a file and commit
+    os.remove(tmp_git / "schemas/telemetry/main/main.4.bq")
+    repo.git.commit("-a", "-m", "remove main")
+
+    head_ref = "generated-schemas"
+    base_ref = "generated-schemas~1"
+
+    def _test(allowlist_data):
+        allowlist = tmp_path / "deletion_allowlist.txt"
+        allowlist.write_text(allowlist_data)
+
+        return CliRunner().invoke(
+            local_validation,
+            [
+                "--head",
+                head_ref,
+                "--base",
+                base_ref,
+                "--repository",
+                tmp_git.as_posix(),
+                "--artifact",
+                tmp_path.as_posix(),
+                "--deletion-allowlist",
+                allowlist.as_posix(),
+            ],
+        )
+
+    res = _test("# comment")
+    assert res.exit_code == 1, res.output
+    assert "found incompatible changes" in res.output
+
+    res = _test("telemetry.main.4")
+    assert res.exit_code == 0, res.output
+    assert "allowing deletion" in res.output
+
+    res = _test(
+        """
+    # test if multiline comment and whitespace at beginning
+    telemetry.main.4
+    """
+    )
+    assert res.exit_code == 0, res.output
+    assert "allowing deletion" in res.output
+
+    res = _test(
+        """
+    # valid allowlist, but perhaps too broad in terms of allowed deletions
+    telemetry.*
+    """
+    )
+    assert res.exit_code == 0, res.output
+
+    res = _test(
+        """
+    # pattern does not match
+    org_mozilla_firefox.*
+    """
+    )
+    assert res.exit_code == 1, res.output

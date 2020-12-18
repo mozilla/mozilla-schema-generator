@@ -105,6 +105,18 @@ def checkout_copy_schemas_revisions(
     return head_path, base_path
 
 
+def parse_deletion_allowlist(allowlist: Path) -> list:
+    res = []
+    if not allowlist or not allowlist.exists():
+        return res
+    lines = [line.strip() for line in allowlist.read_text().split("\n")]
+    for line in lines:
+        if not line or line.startswith("#"):
+            continue
+        res.append(line)
+    return res
+
+
 @click.group()
 def validate():
     """Click command group."""
@@ -123,7 +135,13 @@ def validate():
     type=click.Path(file_okay=False),
     default=BASE_DIR / "validate_schema_evolution",
 )
-def local_validation(head, base, repository, artifact):
+@click.option(
+    "--deletion-allowlist",
+    type=click.Path(dir_okay=False),
+    help="newline delimited globs of schemas that are allowed to be removed",
+    default=None,
+)
+def local_validation(head, base, repository, artifact, deletion_allowlist):
     """Validate schemas using a heuristic from the compact schemas."""
     head_path, base_path = checkout_copy_schemas_revisions(
         head, base, repository, artifact
@@ -134,11 +152,22 @@ def local_validation(head, base, repository, artifact):
     head_files = (head_path).glob("*.txt")
     base_files = (base_path).glob("*.txt")
 
+    # also look at the exceptions
+    allowed_deletion_base_files = []
+    if deletion_allowlist:
+        for glob in parse_deletion_allowlist(Path(deletion_allowlist)):
+            allowed_deletion_base_files += list((base_path).glob(f"{glob}.txt"))
+
     a = set([p.name for p in base_files])
     b = set([p.name for p in head_files])
+    allowed_deletion = set([p.name for p in allowed_deletion_base_files])
 
-    # check that we're not removing any schemas
-    is_error |= check_evolution(a, b, verbose=True)
+    # Check that we're not removing any schemas. If there are exceptions, we
+    # remove this from the base set before checking for evolution.
+    if allowed_deletion:
+        print("allowing deletion of the following documents:")
+        print("\n".join([f"\t{x}" for x in allowed_deletion]))
+    is_error |= check_evolution((a - allowed_deletion), b, verbose=True)
 
     for schema_name in a & b:
         base = base_path / schema_name
