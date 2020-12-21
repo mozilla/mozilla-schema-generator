@@ -143,6 +143,30 @@ This specific field is for indicating which table group that section of the ping
 splitting the schema. Currently we do not split any pings. See the section on [BigQuery
 Limitations and Splitting](#bigquery-limitations-and-splitting) for more info.
 
+## Allowing schema incompatible changes
+
+On every run of the schema generator, there is a check for incompatible changes
+between the previous revision and current generated revision. A schema
+incompatible change includes a removal of a schema or a column, or a change in
+the type definition of a column.
+
+There are two methods to get around these restrictions. If you are actively
+developing the schema generator and need to introduce a schema incompatible
+change, set `MPS_VALIDATE_BQ=false`.
+
+If a schema incompatible change needs to be introduced in production (i.e.
+`generated-schemas`), then modify the `incompatibility-allowlist` at the root of
+the repository. Add documents in the form of
+`{namespace}.{doctype}.{docversion}`. Globs are allowed. For example, add the
+following line to allow remove schemas under the `my_glean_app` namespace:
+
+```bash
+my_glean_app.*
+```
+
+Once the commit has gone through successfully, this line should be removed from
+the document.
+
 ## Development and Testing
 
 Install requirements:

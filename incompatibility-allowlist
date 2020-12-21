@@ -1,0 +1,8 @@
+# The incompatibility-allowlist is meant to circumvent schema validation when
+# removing schemas from the schema repository. To use this, add a line that
+# matches the convention `{namespace}.{doctype}.{docversion}`. Globs may be used.
+# This is is only required for commits that introduce a schema deletion or allow
+# for incompatible changes in columns.
+
+# Example:
+# telemetry.untrustedModules.*
