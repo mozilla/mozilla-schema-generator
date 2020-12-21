@@ -109,20 +109,28 @@ function _create_changelog() {
 }
 
 function _create_readme() {
+    # date 28 days ago
+    start_date=$(python3 -c "import datetime as dt; print(str(dt.datetime.now()-dt.timedelta(28))[:10])")
     cat << EOF > README.md
-# \`generated-schemas\`
+# mozilla-pipeline-schemas: generated-schemas
 
-## Directory tree
+This is the [generated-schemas](https://github.com/mozilla-services/mozilla-pipeline-schemas/commits/test-generated-schemas)
+branch of [mozilla-pipeline-schemas](https://github.com/mozilla-services/mozilla-pipeline-schemas).
+See the [mps-deploys](https://protosaur.dev/mps-deploys/) dashboard for deployment status of schemas
+to [gcp-ingestion](https://github.com/mozilla/gcp-ingestion) and BigQuery.
+
+## commits in the last 28 days
 
 \`\`\`bash
-$(tree)
+$(git log master --since=${start_date} --pretty=format:"%h%x09%cd%x09%s" --date=iso)
 \`\`\`
 
-## Last 20 commits
+## directory tree
 
 \`\`\`bash
-$(_create_changelog master~20)
+$(tree -d schemas)
 \`\`\`
+
 EOF
 }
 
@@ -159,8 +167,6 @@ function _commit_schemas() {
         --out-dir schemas
 
     _create_readme
-
-    git log --since="last month" --pretty=format:'%h : %s by %an' --graph >> README.md
 
     find . -name "*.schema.json" -type f -exec git add {} +
     find . -name "*.md" -type f -exec git add {} +
