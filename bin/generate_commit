@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Utility functions for processing schemas.
-set +e
+set -e
 
 # NOTE: mozilla-schema-generator resources are relative to this script. See
 # http://mywiki.wooledge.org/BashFAQ/028 on uses of BASH_SOURCE. This needs to
@@ -108,25 +108,21 @@ function _create_changelog() {
         --date=iso
 }
 
-function _create_readme(){
-
-    local title=$1
-    local summary=$2
-    
-    local tree=$(tree )
-
+function _create_readme() {
     cat << EOF > README.md
-    ## $title
+# \`generated-schemas\`
 
-    ### Summary: 
+## Directory tree
 
-    $summary
+\`\`\`bash
+$(tree)
+\`\`\`
 
-    ### Directory tree: 
-    ${tree}
+## Last 20 commits
 
-    ### Last month's commit Logs: 
-     
+\`\`\`bash
+$(_create_changelog master~20)
+\`\`\`
 EOF
 }
 
@@ -161,23 +157,19 @@ function _commit_schemas() {
         --generic-schema \
         --mps-branch "$mps_branch_source" \
         --out-dir schemas
-    _create_readme "Generated Schemas" \
-        "Create the JSON Schema in the templates directory first. Make use of common schema components
-    from the templates/include directory where possible, including things like the telemetry environment,
-    clientId, application block, or UUID patterns. 
-    The filename should be templates/<namespace>/<doctype>/<doctype>.<version>.schema.json"
 
-    
+    _create_readme
+
     git log --since="last month" --pretty=format:'%h : %s by %an' --graph >> README.md
 
     find . -name "*.schema.json" -type f -exec git add {} +
     find . -name "*.md" -type f -exec git add {} +
-    
+
     git commit -a -m "Interim Commit"
 
     git checkout "$mps_branch_publish" || git checkout -b "$mps_branch_publish"
 
-    # Keep only the schemas dir and Readme
+    # Keep only the schemas dir and readme
     find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
     git checkout "$mps_branch_working" -- schemas README.md
     git commit --all \
