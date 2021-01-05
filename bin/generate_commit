@@ -120,7 +120,7 @@ to [gcp-ingestion](https://github.com/mozilla/gcp-ingestion) and BigQuery.
 ## Last 10 Changes
 
 \`\`\`bash
-$(git log master --pretty=format:"%h%x09%cd%x09%s" --date=iso | head -n 10)
+$(git log master --pretty=format:"%h%x09%cd%x09%s" --date=iso -n 10)
 \`\`\`
 
 ## directory tree
