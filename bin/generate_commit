@@ -117,7 +117,7 @@ branch of [mozilla-pipeline-schemas](https://github.com/mozilla-services/mozilla
 See the [mps-deploys](https://protosaur.dev/mps-deploys/) dashboard for deployment status of schemas
 to [gcp-ingestion](https://github.com/mozilla/gcp-ingestion) and BigQuery.
 
-## Last 10 Changes
+## last 10 changes
 
 \`\`\`bash
 $(git log master --pretty=format:"%h%x09%cd%x09%s" --date=iso -n 10)
