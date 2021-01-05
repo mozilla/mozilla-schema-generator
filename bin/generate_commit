@@ -109,8 +109,6 @@ function _create_changelog() {
 }
 
 function _create_readme() {
-    # date 28 days ago
-    start_date=$(python3 -c "import datetime as dt; print(str(dt.datetime.now()-dt.timedelta(28))[:10])")
     cat << EOF > README.md
 # mozilla-pipeline-schemas: generated-schemas
 
@@ -119,10 +117,10 @@ branch of [mozilla-pipeline-schemas](https://github.com/mozilla-services/mozilla
 See the [mps-deploys](https://protosaur.dev/mps-deploys/) dashboard for deployment status of schemas
 to [gcp-ingestion](https://github.com/mozilla/gcp-ingestion) and BigQuery.
 
-## commits in the last 28 days
+## Last 10 Changes
 
 \`\`\`bash
-$(git log master --since=${start_date} --pretty=format:"%h%x09%cd%x09%s" --date=iso)
+$(git log master --pretty=format:"%h%x09%cd%x09%s" --date=iso | head -n 10)
 \`\`\`
 
 ## directory tree
