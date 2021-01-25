@@ -21,7 +21,7 @@ class GenericPing(object):
 
     probe_info_base_url = "https://probeinfo.telemetry.mozilla.org"
     default_encoding = "utf-8"
-    default_max_size = 9900  # 10k col limit in BQ
+    default_max_size = 10000  # 10k col limit in BQ
     extra_schema_key = "extra"
     cache_dir = pathlib.Path(".probe_cache")
 
