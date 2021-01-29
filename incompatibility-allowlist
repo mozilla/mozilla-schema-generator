@@ -6,3 +6,6 @@
 
 # Example:
 # telemetry.untrustedModules.*
+
+# https://github.com/mozilla/probe-scraper/pull/266
+glean_js_tmp.*
