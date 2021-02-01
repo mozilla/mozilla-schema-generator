@@ -7,5 +7,5 @@
 # Example:
 # telemetry.untrustedModules.*
 
-# https://github.com/mozilla/probe-scraper/pull/266
+# Bug 1689513
 glean_js_tmp.*
