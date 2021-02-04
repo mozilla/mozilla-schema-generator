@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/master.svg?style=svg)](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/master)
+[![CircleCI](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/main.svg?style=svg)](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/main)
 
 # Mozilla Schema Generator
 
@@ -198,9 +198,9 @@ git checkout <branch-to-test>
 
 export MPS_SSH_KEY_BASE64=$(cat ~/.ssh/id_rsa | base64)
 
-# generate all schemas for current master
-git checkout master && git pull make build && make run
+# generate all schemas for current main
+git checkout main && git pull make build && make run
 
-# generate all schemas with changes and compare with master
+# generate all schemas with changes and compare with main
 git checkout <branch-to-test> make build && make run
 ```

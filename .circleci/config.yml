@@ -43,8 +43,8 @@ jobs:
       - run:
           name: Deploy to Dockerhub
           command: |
-            # Deploy master
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            # Deploy main
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
               docker login -u $DOCKER_USER -p $DOCKER_PASS
               docker tag app:build ${DOCKERHUB_REPO}:latest
               docker push ${DOCKERHUB_REPO}:latest
@@ -77,7 +77,7 @@ workflows:
             tags:
               only: /.*/
             branches:
-              only: master
+              only: main
 
   nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
     triggers:
@@ -86,6 +86,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - test
