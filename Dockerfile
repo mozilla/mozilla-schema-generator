@@ -1,7 +1,7 @@
 FROM python:3.7
 MAINTAINER Frank Bertsch <frank@mozilla.com>
 
-# Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/master/docs/building-container.md
+# Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/main/docs/building-container.md
 ARG RUST_SPEC=stable
 ARG USER_ID="10001"
 ARG GROUP_ID="app"
