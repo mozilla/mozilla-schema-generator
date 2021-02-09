@@ -137,7 +137,7 @@ def validate():
 )
 @click.option(
     "--incompatibility-allowlist",
-    type=click.Path(dir_okay=False, exists=True),
+    type=click.Path(dir_okay=False),
     help="newline delimited globs of schemas with allowed schema incompatibilities",
     default=BASE_DIR / "mozilla-schema-generator/incompatibility-allowlist",
 )
