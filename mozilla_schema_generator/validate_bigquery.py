@@ -139,7 +139,7 @@ def validate():
     "--incompatibility-allowlist",
     type=click.Path(dir_okay=False),
     help="newline delimited globs of schemas with allowed schema incompatibilities",
-    default=BASE_DIR / "mozilla-schema-generator/incompatibility-exceptions",
+    default=BASE_DIR / "mozilla-schema-generator/incompatibility-allowlist",
 )
 def local_validation(head, base, repository, artifact, incompatibility_allowlist):
     """Validate schemas using a heuristic from the compact schemas."""

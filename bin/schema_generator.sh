@@ -103,6 +103,9 @@ function validated_generate_commit() {
 }
 
 function main() {
+    # show the current package for mozilla-schema-generator
+    echo $(pip freeze | grep mozilla-schema-generator)
+
     pushd .
     # the base directory in the docker container
     cd /app
