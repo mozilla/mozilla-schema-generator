@@ -109,7 +109,9 @@ function main() {
     pushd .
     # the base directory in the docker container
     cd /app
+    set +x
     setup_git
+    set -x
     setup_mps
 
     validated_generate_commit \
