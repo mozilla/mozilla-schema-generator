@@ -23,24 +23,12 @@ metrics:
         not:
           - glean_ping_info
       type: datetime
-  enumeration:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: enumeration
   memory_distribution:
     match:
       send_in_pings:
         not:
           - glean_ping_info
       type: memory_distribution
-  number:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: number
   quantity:
     match:
       send_in_pings:
@@ -77,18 +65,6 @@ metrics:
         not:
           - glean_ping_info
       type: timing_distribution
-  usage:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: usage
-  use_counter:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: use_counter
   uuid:
     match:
       send_in_pings:
@@ -107,69 +83,9 @@ metrics:
         not:
           - glean_ping_info
       type: labeled_counter
-  labeled_datetime:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_datetime
-  labeled_enumeration:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_enumeration
-  labeled_number:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_number
-  labeled_rate:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_rate
   labeled_string:
     match:
       send_in_pings:
         not:
           - glean_ping_info
       type: labeled_string
-  labeled_string_list:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_string_list
-  labeled_timespan:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_timespan
-  labeled_timing_distribution:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_timing_distribution
-  labeled_usage:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_usage
-  labeled_use_counter:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_use_counter
-  labeled_uuid:
-    match:
-      send_in_pings:
-        not:
-          - glean_ping_info
-      type: labeled_uuid
