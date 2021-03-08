@@ -8,4 +8,4 @@
 # telemetry.untrustedModules.*
 
 # Bug 1689513
-glean_js_tmp.*
+glean-js-tmp.*
