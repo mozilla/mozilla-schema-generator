@@ -9,3 +9,7 @@
 
 # Bug 1689513
 glean-js-tmp.*
+
+# Bug 1697602
+telemetry.account-ecosystem.*
+firefox-accounts.account-ecosystem.*
