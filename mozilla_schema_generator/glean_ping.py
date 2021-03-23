@@ -30,7 +30,7 @@ class GleanPing(GenericPing):
         GenericPing.probe_info_base_url + "/glean/{}/dependencies"
     )
 
-    default_dependencies = ["glean"]
+    default_dependencies = ["glean-core"]
     ignore_pings = {
         "all-pings",
         "all_pings",

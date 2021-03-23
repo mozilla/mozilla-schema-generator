@@ -19,7 +19,7 @@ from .test_utils import print_and_test
 
 @pytest.fixture
 def glean():
-    return glean_ping.GleanPing({"name": "glean", "app_id": "org-mozilla-glean"})
+    return glean_ping.GleanPing({"name": "glean-core", "app_id": "org-mozilla-glean"})
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ class TestGleanPing(object):
 
     def test_retention_days(self, config):
         glean = glean_ping.GleanPing(
-            {"name": "glean", "app_id": "org-mozilla-glean", "retention_days": 90}
+            {"name": "glean-core", "app_id": "org-mozilla-glean", "retention_days": 90}
         )
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
 
