@@ -9,7 +9,7 @@
 #   MPS_SSH_KEY_BASE64: A base64-encoded ssh secret key with permissions to push
 #                       to mozilla-pipeline-schemas
 #   MPS_REPO_URL:       The URL to the mozilla-pipeline-schemas repository
-#   MPS_BRANCH_SOURCE:  The source branch for generating schemas e.g. master
+#   MPS_BRANCH_SOURCE:  The source branch for generating schemas e.g. main
 #   MPS_BRANCH_PUBLISH: The destination branch for publishing schemas
 #                       e.g. generated-schemas
 #   MPS_VALIDATE_BQ:    Set to 'false' to disable the validation step
@@ -22,7 +22,7 @@ set -e
 set -x
 
 MPS_REPO_URL=${MPS_REPO_URL:-"git@github.com:mozilla-services/mozilla-pipeline-schemas.git"}
-MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"master"}
+MPS_BRANCH_SOURCE=${MPS_BRANCH_SOURCE:-"main"}
 MPS_BRANCH_PUBLISH=${MPS_BRANCH_PUBLISH:-"test-generated-schemas"}
 MPS_VALIDATE_BQ=${MPS_VALIDATE_BQ:-"true"}
 BIN="$(realpath ${BASH_SOURCE%/*})"

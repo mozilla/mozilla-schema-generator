@@ -20,12 +20,12 @@ from mozilla_schema_generator.validate_bigquery import (
 def tmp_git(tmp_path):
     src = Path(__file__).parent / "resources" / "mozilla-pipeline-schemas"
     src_repo = Repo(src)
-    src_repo.git.checkout("master")
+    src_repo.git.checkout("main")
     src_repo.git.checkout("generated-schemas")
     Git(tmp_path).clone(src)
     path = tmp_path / "mozilla-pipeline-schemas"
     repo = Repo(path)
-    repo.git.checkout("master")
+    repo.git.checkout("main")
     repo.git.checkout("generated-schemas")
     # set config for ci
     repo.git.config("user.email", "test@test.com")
@@ -37,8 +37,8 @@ def test_tmp_git(tmp_git):
     repo = Repo(tmp_git)
     assert not repo.bare
     assert repo.head.ref.name == "generated-schemas"
-    repo.git.checkout("master")
-    assert repo.head.ref.name == "master"
+    repo.git.checkout("main")
+    assert repo.head.ref.name == "main"
 
 
 def test_compute_compact_columns():
@@ -116,10 +116,10 @@ def test_checkout_copy_schema_revisions_fails_and_reverts_state(tmp_path, tmp_gi
         )
     assert repo.head.ref.name == "generated-schemas"
     with pytest.raises(ValueError):
-        # no schemas found, since master branch does not have generated schemas
+        # no schemas found, since main branch does not have generated schemas
         # it's okay to have leftover files in the artifact directory
         head, base = checkout_copy_schemas_revisions(
-            "generated-schemas", "master", tmp_git, tmp_path
+            "generated-schemas", "main", tmp_git, tmp_path
         )
     assert repo.head.ref.name == "generated-schemas"
 

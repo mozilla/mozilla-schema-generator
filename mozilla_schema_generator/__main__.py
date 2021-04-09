@@ -67,7 +67,7 @@ def common_options(func):
                 ),
                 required=False,
                 type=str,
-                default="master",
+                default="main",
             ),
         ],
     )

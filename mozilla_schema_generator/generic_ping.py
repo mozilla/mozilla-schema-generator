@@ -25,7 +25,7 @@ class GenericPing(object):
     extra_schema_key = "extra"
     cache_dir = pathlib.Path(".probe_cache")
 
-    def __init__(self, schema_url, env_url, probes_url, mps_branch="master"):
+    def __init__(self, schema_url, env_url, probes_url, mps_branch="main"):
         self.schema_url = schema_url.format(branch=mps_branch)
         self.env_url = env_url.format(branch=mps_branch)
         self.probes_url = probes_url

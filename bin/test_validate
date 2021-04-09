@@ -5,8 +5,8 @@
 #
 # Arguments:
 #   $1  The source branch to use a base for generated schemas. For testing, you
-#       may use something like `master~5` to use the 5th revision from the head
-#       of master.
+#       may use something like `main~5` to use the 5th revision from the head
+#       of main.
 #   $2  The publish branch where commits are made with generated schemas. This
 #       will typically be `test-generated-schemas` or `generated-schemas`.
 #   $3  The base branch to use for validation. This is set to $2 by default, but
