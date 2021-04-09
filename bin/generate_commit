@@ -19,7 +19,7 @@ function _generate_schemas() {
     # transpiled into a BigQuery schema using the jsonschema-transpiler.
 
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
-    local mps_branch_source=${2:-master}
+    local mps_branch_source=${2:-main}
 
     # Set the working directory to the schemas folder.
     pushd .
@@ -92,13 +92,13 @@ function _create_changelog() {
     # https://stackoverflow.com/questions/25563455/how-do-i-get-last-commit-date-from-git-repository
     # https://stackoverflow.com/questions/1441010/the-shortest-possible-output-from-git-log-containing-author-and-date
     # https://git-scm.com/docs/git-log/1.8.0#git-log---daterelativelocaldefaultisorfcshortraw
-    local mps_branch_source=${1:-master}
+    local mps_branch_source=${1:-main}
     local mps_branch_publish=${2:-generated-schemas}
     local start_date
     # NOTES: Since this function is looking at commit dates (such as rebases),
-    # it's best to enforce squash/rebase commits onto the master branch. If this
+    # it's best to enforce squash/rebase commits onto the main branch. If this
     # isn't enforced, it's possible to miss out on certain commits to the
-    # generated branch. Another solution is to generate a tag on master before
+    # generated branch. Another solution is to generate a tag on main before
     # the generator is run. However, the heuristic of using the latest commit
     # date works well enough.
     start_date=$(git log "${mps_branch_publish}" -1 --format=%cd --date=iso)
@@ -129,7 +129,7 @@ EOF
 function _commit_schemas() {
     # Commit schemas in the current branch to the publish branch.
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
-    local mps_branch_source=${2:-master}
+    local mps_branch_source=${2:-main}
     local mps_branch_publish=${3:-generated-schemas}
 
     pushd .
@@ -183,7 +183,7 @@ function generate_commit {
     # branch. The repository will have it's HEAD at tip of the publish branch,
     # ready to be pushed to a remote.
     local mps_root=${1?must provide path to mozilla-pipeline-schemas repository}
-    local mps_branch_source=${2:-master}
+    local mps_branch_source=${2:-main}
     local mps_branch_publish=${3:-generated-schemas}
     local mps_branch_working=${4:-local-working-branch}
 
