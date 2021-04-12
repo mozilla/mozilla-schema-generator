@@ -17,4 +17,4 @@ firefox-accounts.account-ecosystem.*
 # Bug 1703615, commit 26d53ee
 # This commit needs to be reverted due to the schema being incorrect.
 # https://github.com/mozilla-services/mozilla-pipeline-schemas/commit/6172d894f37b4330aca87a1d8a5ff5acf85b4206
-rally-zero-one.*
+# rally-zero-one.*
