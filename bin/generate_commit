@@ -166,10 +166,11 @@ function _commit_schemas() {
 
     _create_readme
 
-    # Stage BQ schemas and JSON schema symlinks under bq/ dir
+    # Stage markdown files.
     find . -name "*.md" -type f -exec git add {} +
-    find bq/ -name "*.schema.json" -exec git add {} +
-    find bq/ -name "*.bq" -exec git add {} +
+
+    # Stage bq/ directory.
+    git add bq/
 
     git commit -a -m "Interim Commit"
 

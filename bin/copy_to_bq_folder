@@ -6,6 +6,7 @@ import os
 from pathlib import Path, PurePath
 import shutil
 
+import yaml
 
 @click.command()
 @click.argument(
@@ -47,16 +48,35 @@ def process_path(source_path):
     meta = schema_contents.get("mozPipelineMetadata", {})
     bq_dataset_family = meta.get("bq_dataset_family", None)
     bq_table = meta.get("bq_table", None)
+    bq_project = "moz-fx-data-shared-prod"
     if bq_dataset_family and bq_table:
-        dest_dataset_dir = bq_dir / bq_dataset_family
-        dest_dataset_dir.mkdir(parents=True, exist_ok=True)
-        dest_bq_path = dest_dataset_dir / f"{bq_table}.bq"
-        print(f"Copying {source_bq_path} to {dest_bq_path}")
-        shutil.copy(source_bq_path, dest_bq_path)
-        dest_json_path = dest_dataset_dir / f"{bq_table}.schema.json"
-        if not dest_json_path.exists():
-            relative_json_path = PurePath("../..") / source_json_path.relative_to(root_dir)
-            dest_json_path.symlink_to(relative_json_path)
+        dest_dataset_dir = bq_dir / bq_project / f"{bq_dataset_family}_stable"
+        dest_table_dir = dest_dataset_dir / bq_table
+        dest_table_dir.mkdir(parents=True, exist_ok=True)
+        dest_bq_path = dest_table_dir / "schema.yaml"
+        with source_bq_path.open("r") as f:
+            bq_schema = json.load(f)
+        print(f"Writing contents of {source_bq_path} to {dest_bq_path}")
+        with dest_bq_path.open("w") as f:
+            yaml.dump(bq_schema, f)
+        #shutil.copy(source_bq_path, dest_bq_path)
+        table_meta = {
+            "source_schema": source_json_path,
+            "bigquery": {
+                "time_partitioning": {
+                    "field": "submission_date",
+                    "type": "day",
+                    "require_partition_filter": True,
+                },
+                "clustering": {
+                    "fields": ["normalized_channel", "sample_id"]
+                },
+            }
+        }
+        table_meta["mozPipelineMetadata"] = meta
+        metadata_yaml_path = dest_table_dir / "metadata.yaml"
+        with metadata_yaml_path.open('w') as f:
+            yaml.dump(table_meta)
     else:
         print(f"Not copying {source_bq_path} into {bq_dir}")
 
