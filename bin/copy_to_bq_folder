@@ -58,25 +58,28 @@ def process_path(source_path):
             bq_schema = json.load(f)
         print(f"Writing contents of {source_bq_path} to {dest_bq_path}")
         with dest_bq_path.open("w") as f:
-            yaml.dump(bq_schema, f)
-        #shutil.copy(source_bq_path, dest_bq_path)
+            yaml.dump(bq_schema, f, default_flow_style=False)
         table_meta = {
-            "source_schema": source_json_path,
+            "source_schema": str(source_json_path.relative_to(schemas_dir)),
             "bigquery": {
+                "require_partition_filter": True,
                 "time_partitioning": {
                     "field": "submission_date",
                     "type": "day",
-                    "require_partition_filter": True,
                 },
                 "clustering": {
                     "fields": ["normalized_channel", "sample_id"]
                 },
             }
         }
-        table_meta["mozPipelineMetadata"] = meta
+        expiration_policy = meta.get("expiration_policy", {})
+        delete_after_days = expiration_policy.get("delete_after_days", None)
+        if delete_after_days is not None:
+            exp = str(delete_after_days * 86400 * 1000)
+            table_meta["bigquery"]["time_partitioning"]["expiration_ms"] = exp
         metadata_yaml_path = dest_table_dir / "metadata.yaml"
         with metadata_yaml_path.open('w') as f:
-            yaml.dump(table_meta)
+            yaml.dump(table_meta, f, default_flow_style=False)
     else:
         print(f"Not copying {source_bq_path} into {bq_dir}")
 
