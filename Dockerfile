@@ -31,17 +31,20 @@ RUN pip install --upgrade pip
 
 WORKDIR ${HOME}
 
-ADD requirements requirements/
+# Recursively change ownership of the application folder to the user;
+# this takes a while, so we put this step before copying in code.
+RUN chown -R ${USER_ID}:${GROUP_ID} ${HOME}
+
+COPY --chown=${USER_ID}:${GROUP_ID} requirements requirements/
 RUN pip install -r requirements/requirements.txt
 RUN pip install -r requirements/test_requirements.txt
 
-ADD . ${HOME}/mozilla-schema-generator
+COPY --chown=${USER_ID}:${GROUP_ID} . ${HOME}/mozilla-schema-generator
 ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
 
 RUN pip install --no-dependencies -e ${HOME}/mozilla-schema-generator
 
-# Drop root and change ownership of the application folder to the user
-RUN chown -R ${USER_ID}:${GROUP_ID} ${HOME}
+# Drop root
 USER ${USER_ID}
 
 ENTRYPOINT ["schema_generator.sh"]
