@@ -97,3 +97,22 @@ class TestGleanPing(object):
                 schema["mozPipelineMetadata"]["expiration_policy"]["delete_after_days"]
                 == 90
             )
+
+    def test_encryption_exists(self, config):
+        glean = glean_ping.GleanPing(
+            {
+                "name": "glean-core",
+                "app_id": "org-mozilla-glean",
+                "encryption": {"use_jwk": True},
+            }
+        )
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            jwe_mappings = schema["mozPipelineMetadata"]["jwe_mappings"]
+            assert len(jwe_mappings) == 1
+            assert set(jwe_mappings[0].keys()) == {
+                "source_field_path",
+                "decrypted_field_path",
+            }
