@@ -161,7 +161,9 @@ class GleanPing(GenericPing):
             pipeline_meta = {
                 "bq_dataset_family": self.app_id.replace("-", "_"),
                 "bq_table": ping.replace("-", "_") + "_v1",
-                "bq_metadata_format": "structured",
+                "bq_metadata_format": (
+                    "pioneer" if self.app_id.startswith("rally") else "structured"
+                ),
             }
 
             retention_days = self.repo.get("retention_days")

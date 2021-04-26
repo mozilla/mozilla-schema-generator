@@ -116,3 +116,18 @@ class TestGleanPing(object):
                 "source_field_path",
                 "decrypted_field_path",
             }
+
+    def test_rally_metadata_format(self, config):
+        glean = glean_ping.GleanPing(
+            {
+                "name": "rally-debug",
+                "app_id": "rally_debug",
+                "encryption": {"use_jwk": True},
+            }
+        )
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            metadata_format = schema["mozPipelineMetadata"]["bq_metadata_format"]
+            assert metadata_format == "pioneer"
