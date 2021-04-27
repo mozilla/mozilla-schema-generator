@@ -157,17 +157,26 @@ class GleanPing(GenericPing):
             for matcher in matchers.values():
                 matcher.matcher["send_in_pings"]["contains"] = ping
             new_config = Config(ping, matchers=matchers)
-            retention_days = self.repo.get("retention_days", None)
 
             pipeline_meta = {
                 "bq_dataset_family": self.app_id.replace("-", "_"),
                 "bq_table": ping.replace("-", "_") + "_v1",
-                "bq_metadata_format": "structured",
+                "bq_metadata_format": (
+                    "pioneer" if self.app_id.startswith("rally") else "structured"
+                ),
             }
-            if retention_days is not None:
+
+            retention_days = self.repo.get("retention_days")
+            if retention_days:
                 expiration = pipeline_meta.get("expiration_policy", {})
                 expiration["delete_after_days"] = int(retention_days)
                 pipeline_meta["expiration_policy"] = expiration
+
+            use_jwk = self.repo.get("encryption", {}).get("use_jwk")
+            if use_jwk:
+                pipeline_meta["jwe_mappings"] = [
+                    {"source_field_path": "/payload", "decrypted_field_path": ""}
+                ]
 
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
