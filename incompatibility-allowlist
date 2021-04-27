@@ -22,4 +22,4 @@ firefox-accounts.account-ecosystem.*
 # Bug 1706875
 # The rally-debug schema was commit using the structured metadata field instead
 # of the pioneer metadata schemas.
-rally-debug.*
+# rally-debug.*
