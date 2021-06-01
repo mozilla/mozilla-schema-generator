@@ -148,7 +148,7 @@ class GleanPing(GenericPing):
     def get_ping_descriptions(self) -> Dict[str, str]:
         return {
             k: v["history"][-1]["description"]
-            for k, v in self._get_ping_data().iteritems()
+            for k, v in self._get_ping_data().items()
         }
 
     def generate_schema(
