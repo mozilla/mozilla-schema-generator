@@ -134,15 +134,22 @@ class GleanPing(GenericPing):
 
         return processed
 
-    def get_pings(self) -> Set[str]:
+    def _get_ping_data(self) -> Dict[str, Dict]:
         url = self.ping_url_template.format(self.repo_name)
-        pings = GleanPing._get_json(url).keys()
-
+        ping_data = GleanPing._get_json(url)
         for dependency in self.get_dependencies():
             dependency_pings = self._get_json(self.ping_url_template.format(dependency))
-            pings |= dependency_pings.keys()
+            ping_data.update(dependency_pings)
+        return ping_data
 
-        return pings
+    def get_pings(self) -> Set[str]:
+        return self._get_ping_data().keys()
+
+    def get_ping_descriptions(self) -> Dict[str, str]:
+        return {
+            k: v["history"][-1]["description"]
+            for k, v in self._get_ping_data().iteritems()
+        }
 
     def generate_schema(
         self, config, split, generic_schema=False
