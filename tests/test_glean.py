@@ -11,7 +11,7 @@ import requests
 import yaml
 from unittest.mock import patch
 
-from mozilla_schema_generator import generic_ping, glean_ping
+from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.utils import _get, prepend_properties
 
