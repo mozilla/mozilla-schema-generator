@@ -5,11 +5,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from typing import Dict, List
+from unittest.mock import patch
 
 import pytest
 import requests
 import yaml
-from unittest.mock import patch
 
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
