@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from typing import Dict, List
+from unittest.mock import patch
 
 import pytest
 import requests
@@ -63,6 +64,20 @@ class TestGleanPing(object):
         repos = glean_ping.GleanPing.get_repos()
         names_ids = [(r["name"], r["app_id"]) for r in repos]
         assert ("fenix", "org-mozilla-fenix") in names_ids
+
+    def test_pings(self, glean):
+        # FIXME: this only tests the case where a repo has no dependencies-- ideally
+        # we would test the dependency resolution algorithm as well
+        RETURN_VALUES = [{"foo": {"history": [{"description": "baz"}]}}, {}, {}, {}]
+        with patch.object(
+            glean_ping.GleanPing,
+            "_get_json",
+            side_effect=RETURN_VALUES + RETURN_VALUES,
+        ):
+            assert set(glean.get_pings()) == {
+                "foo",
+            }
+            assert glean.get_ping_descriptions() == {"foo": "baz"}
 
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
