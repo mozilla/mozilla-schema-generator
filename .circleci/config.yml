@@ -30,8 +30,8 @@ jobs:
             make test
             make coverage
       - run:
-          name:
-            pip install pdoc
+          name: Install pdocs
+          command: pip install pdoc
       - run:
           name: Build docs
           command: pdoc -o _html generator
