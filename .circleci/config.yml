@@ -128,7 +128,7 @@ workflows:
             - docs-build
           filters:
             branches:
-              only: docs
+              only: main
 
       - deploy:
           requires:
