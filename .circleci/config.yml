@@ -30,11 +30,11 @@ jobs:
             make test
             make coverage
       - run:
-          name: Install pdocs
-          command: pip install pdoc
-      - run:
           name: Build docs
-          command: pdoc -o _html generator
+          command: |
+            . venv/bin/activate
+            pip install pdoc
+            pdoc -o _html generator
       - persist_to_workspace:
           root: docs/_build
           paths: _html
