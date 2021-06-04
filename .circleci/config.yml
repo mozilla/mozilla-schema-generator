@@ -29,12 +29,24 @@ jobs:
             make lint
             make test
             make coverage
+
+  docs-build:
+    docker: *docker
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update --remote
       - run:
           name: Build docs
           command: |
+            python3 -m virtualenv venv
             . venv/bin/activate
+            make install-requirements
             pip install pdoc
-            pdoc -o _html generator
+            pdoc -o _html mozilla_pipeline_schemas
       - persist_to_workspace:
           root: docs/_build
           paths: _html
@@ -97,9 +109,15 @@ workflows:
             tags:
               only: /.*/
 
+      - docs-build:
+          filters:
+            tags:
+              only: /.*/
+
       - docs-deploy:
           requires:
             - test
+            - docs-build
           filters:
             branches:
               only: docs
