@@ -48,7 +48,7 @@ jobs:
             pip install pdoc
             pdoc -o _html mozilla_schema_generator
       - persist_to_workspace:
-          root: docs/_build
+          root: docs
           paths: _html
 
   docs-deploy:
@@ -57,7 +57,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: docs/_build
+          at: docs
       - run:
           name: Install and configure dependencies
           command: |
