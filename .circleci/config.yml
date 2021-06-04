@@ -46,7 +46,7 @@ jobs:
             . venv/bin/activate
             make install-requirements
             pip install pdoc
-            pdoc -o /tmp/_html mozilla_schema_generator
+            pdoc -o /tmp/_html ./mozilla_schema_generator
       - persist_to_workspace:
           root: /tmp
           paths: _html
