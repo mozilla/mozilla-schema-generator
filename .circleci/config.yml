@@ -11,7 +11,7 @@ version: 2
 
 jobs:
   test:
-    docker: # run the steps with Docker
+    docker: &docker
       - image: circleci/python:3.7.2
     steps:
       - checkout
@@ -29,6 +29,52 @@ jobs:
             make lint
             make test
             make coverage
+
+  docs-build:
+    docker: *docker
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update --remote
+      - run:
+          name: Build docs
+          command: |
+            python3 -m virtualenv venv
+            . venv/bin/activate
+            make install-requirements
+            pip install pdoc
+            pdoc -o /tmp/_html ./mozilla_schema_generator
+      - persist_to_workspace:
+          root: /tmp
+          paths: _html
+
+  docs-deploy:
+    docker:
+      - image: node:14
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update --remote
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install and configure dependencies
+          command: |
+            npm install -g --silent gh-pages@3.0.0
+            git config user.email "ci-build-docs@mozilla.com"
+            git config user.name "ci-build-docs"
+      - add_ssh_keys:
+          fingerprints:
+            - "2d:8d:b3:4c:6d:56:0d:9c:b1:8d:99:8c:b0:de:4b:56"
+      - run:
+          name: Deploy docs to gh-pages branch
+          command: gh-pages --message "[skip ci] updates" --dist /tmp/_html
 
   deploy:
     docker:
@@ -70,6 +116,19 @@ workflows:
           filters:
             tags:
               only: /.*/
+
+      - docs-build:
+          filters:
+            tags:
+              only: /.*/
+
+      - docs-deploy:
+          requires:
+            - test
+            - docs-build
+          filters:
+            branches:
+              only: main
 
       - deploy:
           requires:
