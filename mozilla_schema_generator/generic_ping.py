@@ -6,6 +6,7 @@
 
 import datetime
 import json
+import os
 import pathlib
 import re
 from typing import Dict, List
@@ -23,7 +24,7 @@ class GenericPing(object):
     default_encoding = "utf-8"
     default_max_size = 11000  # https://bugzilla.mozilla.org/show_bug.cgi?id=1688633
     extra_schema_key = "extra"
-    cache_dir = pathlib.Path(".probe_cache")
+    cache_dir = pathlib.Path(os.environ.get("MSG_PROBE_CACHE_DIR", ".probe_cache"))
 
     def __init__(self, schema_url, env_url, probes_url, mps_branch="main"):
         self.schema_url = schema_url.format(branch=mps_branch)
