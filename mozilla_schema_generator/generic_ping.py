@@ -223,6 +223,6 @@ class GenericPing(object):
             url += f"?t={datetime.datetime.utcnow().isoformat()}"
         try:
             return json.loads(GenericPing._get_json_str(url))
-        except JSONDecodeError as e:
+        except JSONDecodeError:
             logging.error("Unable to process JSON for url: %s", url)
-            raise e
+            raise
