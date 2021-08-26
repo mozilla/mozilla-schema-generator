@@ -6,9 +6,11 @@
 
 import datetime
 import json
+import logging
 import os
 import pathlib
 import re
+from json.decoder import JSONDecodeError
 from typing import Dict, List
 
 import requests
@@ -16,6 +18,8 @@ import requests
 from .config import Config
 from .probes import Probe
 from .schema import Schema, SchemaException
+
+logger = logging.getLogger(__name__)
 
 
 class GenericPing(object):
@@ -217,4 +221,8 @@ class GenericPing(object):
             # random query param to force cloudfront
             # to bypass the cache
             url += f"?t={datetime.datetime.utcnow().isoformat()}"
-        return json.loads(GenericPing._get_json_str(url))
+        try:
+            return json.loads(GenericPing._get_json_str(url))
+        except JSONDecodeError as e:
+            logging.error("Unable to process JSON for url: %s", url)
+            raise e
