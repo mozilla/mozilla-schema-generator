@@ -177,8 +177,7 @@ class GenericPing(object):
 
     @staticmethod
     def _add_to_cache(url: str, val: str):
-        if not GenericPing.cache_dir.exists():
-            GenericPing.cache_dir.mkdir(parents=True)
+        GenericPing.cache_dir.mkdir(parents=True, exist_ok=True)
 
         (GenericPing.cache_dir / GenericPing._slugify(url)).write_text(val)
 
