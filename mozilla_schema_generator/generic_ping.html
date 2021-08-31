@@ -99,9 +99,11 @@
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">json.decoder</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
@@ -109,6 +111,8 @@
 <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span> <span class="nn">.probes</span> <span class="kn">import</span> <span class="n">Probe</span>
 <span class="kn">from</span> <span class="nn">.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">SchemaException</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">GenericPing</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -309,7 +313,11 @@
             <span class="c1"># random query param to force cloudfront</span>
             <span class="c1"># to bypass the cache</span>
             <span class="n">url</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;?t=</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">GenericPing</span><span class="o">.</span><span class="n">_get_json_str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">GenericPing</span><span class="o">.</span><span class="n">_get_json_str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to process JSON for url: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">raise</span>
 </pre></div>
 
         </details>
@@ -524,7 +532,11 @@
             <span class="c1"># random query param to force cloudfront</span>
             <span class="c1"># to bypass the cache</span>
             <span class="n">url</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;?t=</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">GenericPing</span><span class="o">.</span><span class="n">_get_json_str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">GenericPing</span><span class="o">.</span><span class="n">_get_json_str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to process JSON for url: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">raise</span>
 </pre></div>
 
         </details>
