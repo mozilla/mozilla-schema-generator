@@ -46,6 +46,9 @@
                                 <a class="variable" href="#Probe.history_key">history_key</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Probe.in_source_key">in_source_key</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Probe.get_type">get_type</a>
                         </li>
                         <li>
@@ -115,6 +118,9 @@
                                 <a class="variable" href="#GleanProbe.first_added_key">first_added_key</a>
                         </li>
                         <li>
+                                <a class="function" href="#GleanProbe.is_in_source">is_in_source</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#GleanProbe.get_first_added">get_first_added</a>
                         </li>
                         <li>
@@ -167,6 +173,7 @@
     <span class="n">type_key</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
     <span class="n">name_key</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>
     <span class="n">history_key</span> <span class="o">=</span> <span class="s2">&quot;history&quot;</span>
+    <span class="n">in_source_key</span> <span class="o">=</span> <span class="s2">&quot;in-source&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">definition</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">identifier</span>
@@ -306,6 +313,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_dates</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_definition</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_description</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_source_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">definition</span><span class="p">)</span>
 
         <span class="n">defn_pings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
@@ -358,6 +366,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="nf">is_in_source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span>
+
     <span class="k">def</span> <span class="nf">get_first_added</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_added</span>
 
@@ -395,6 +406,7 @@
     <span class="n">type_key</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span>
     <span class="n">name_key</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span>
     <span class="n">history_key</span> <span class="o">=</span> <span class="s2">&quot;history&quot;</span>
+    <span class="n">in_source_key</span> <span class="o">=</span> <span class="s2">&quot;in-source&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">definition</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">identifier</span>
@@ -485,6 +497,15 @@
                                             <div class="attr variable"><a class="headerlink" href="#Probe.history_key">#&nbsp;&nbsp</a>
 
         <span class="name">history_key</span><span class="default_value"> = &#39;history&#39;</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="Probe.in_source_key" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Probe.in_source_key">#&nbsp;&nbsp</a>
+
+        <span class="name">in_source_key</span><span class="default_value"> = &#39;in-source&#39;</span>
     </div>
 
     
@@ -776,7 +797,7 @@
                             <div id="MainProbe.child_processes" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MainProbe.child_processes">#&nbsp;&nbsp</a>
 
-        <span class="name">child_processes</span><span class="default_value"> = {&#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;, &#39;extension&#39;}</span>
+        <span class="name">child_processes</span><span class="default_value"> = {&#39;extension&#39;, &#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;}</span>
     </div>
 
     
@@ -785,7 +806,7 @@
                             <div id="MainProbe.processes_map" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#MainProbe.processes_map">#&nbsp;&nbsp</a>
 
-        <span class="name">processes_map</span><span class="default_value"> = {&#39;all_childs&#39;: {&#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;, &#39;extension&#39;}, &#39;all_children&#39;: {&#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;, &#39;extension&#39;}, &#39;all&#39;: {&#39;content&#39;, &#39;socket&#39;, &#39;dynamic&#39;, &#39;gpu&#39;, &#39;extension&#39;, &#39;main&#39;}}</span>
+        <span class="name">processes_map</span><span class="default_value"> = {&#39;all_childs&#39;: {&#39;extension&#39;, &#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;}, &#39;all_children&#39;: {&#39;extension&#39;, &#39;dynamic&#39;, &#39;content&#39;, &#39;socket&#39;, &#39;gpu&#39;}, &#39;all&#39;: {&#39;extension&#39;, &#39;socket&#39;, &#39;gpu&#39;, &#39;main&#39;, &#39;dynamic&#39;, &#39;content&#39;}}</span>
     </div>
 
     
@@ -878,6 +899,7 @@
                                 <dd id="MainProbe.type_key" class="variable"><a href="#Probe.type_key">type_key</a></dd>
                 <dd id="MainProbe.name_key" class="variable"><a href="#Probe.name_key">name_key</a></dd>
                 <dd id="MainProbe.history_key" class="variable"><a href="#Probe.history_key">history_key</a></dd>
+                <dd id="MainProbe.in_source_key" class="variable"><a href="#Probe.in_source_key">in_source_key</a></dd>
                 <dd id="MainProbe.get_type" class="function"><a href="#Probe.get_type">get_type</a></dd>
                 <dd id="MainProbe.get_name" class="function"><a href="#Probe.get_name">get_name</a></dd>
                 <dd id="MainProbe.get_description" class="function"><a href="#Probe.get_description">get_description</a></dd>
@@ -907,6 +929,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_dates</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_definition</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_description</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_source_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">definition</span><span class="p">)</span>
 
         <span class="n">defn_pings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
@@ -959,6 +982,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="nf">is_in_source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span>
+
     <span class="k">def</span> <span class="nf">get_first_added</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_added</span>
 
@@ -994,6 +1020,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_dates</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_definition</span><span class="p">(</span><span class="n">definition</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_description</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span> <span class="o">=</span> <span class="n">definition</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_source_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">definition</span><span class="p">)</span>
 
         <span class="n">defn_pings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
@@ -1028,6 +1055,25 @@
 
         <span class="name">first_added_key</span><span class="default_value"> = &#39;first_added&#39;</span>
     </div>
+
+    
+
+                            </div>
+                            <div id="GleanProbe.is_in_source" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#GleanProbe.is_in_source">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">is_in_source</span><span class="signature">(self) -&gt; bool</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_in_source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_source</span>
+</pre></div>
+
+        </details>
 
     
 
@@ -1104,6 +1150,7 @@
                                 <dd id="GleanProbe.type_key" class="variable"><a href="#Probe.type_key">type_key</a></dd>
                 <dd id="GleanProbe.name_key" class="variable"><a href="#Probe.name_key">name_key</a></dd>
                 <dd id="GleanProbe.history_key" class="variable"><a href="#Probe.history_key">history_key</a></dd>
+                <dd id="GleanProbe.in_source_key" class="variable"><a href="#Probe.in_source_key">in_source_key</a></dd>
                 <dd id="GleanProbe.get_type" class="function"><a href="#Probe.get_type">get_type</a></dd>
                 <dd id="GleanProbe.get_name" class="function"><a href="#Probe.get_name">get_name</a></dd>
                 <dd id="GleanProbe.get_description" class="function"><a href="#Probe.get_description">get_description</a></dd>
