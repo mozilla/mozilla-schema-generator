@@ -117,6 +117,7 @@ class TestGleanPing(object):
         glean = glean_ping.GleanPing(
             {
                 "name": "glean-core",
+                "in-source": True,
                 "app_id": "org-mozilla-glean",
                 "encryption": {"use_jwk": True},
             }
@@ -136,6 +137,7 @@ class TestGleanPing(object):
         glean = glean_ping.GleanPing(
             {
                 "name": "rally-debug",
+                "in-source": True,
                 "app_id": "rally_debug",
                 "encryption": {"use_jwk": True},
             }

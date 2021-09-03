@@ -32,6 +32,7 @@ def glean_probe_defn():
         ],
         "name": "glean.error.invalid_value",
         "type": "labeled_counter",
+        "in-source": True,
     }
 
 
@@ -56,6 +57,7 @@ def glean_probe_defn_subset_pings():
         ],
         "name": "glean.error.invalid_value",
         "type": "labeled_counter",
+        "in-source": True,
     }
 
 
@@ -248,6 +250,7 @@ class TestProbe(object):
         probe = GleanProbe("scalar/test_probe", glean_probe_defn, pings=pings)
         assert probe.definition["send_in_pings"] == set(pings)
         assert probe.description == "Glean test description"
+        assert probe.is_in_source()
 
     def test_glean_subset_of_pings(self, glean_probe_defn_subset_pings):
         pings = ["ping1", "ping2", "ping3"]

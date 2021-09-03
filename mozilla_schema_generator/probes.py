@@ -20,6 +20,7 @@ class Probe(object):
     type_key = "type"
     name_key = "name"
     history_key = "history"
+    in_source_key = "in-source"
 
     def __init__(self, identifier: str, definition: dict):
         self.id = identifier
@@ -159,6 +160,7 @@ class GleanProbe(Probe):
         self._set_dates(definition)
         self._set_definition(definition)
         self._set_description(self.definition)
+        self._in_source = definition.get(self.in_source_key, False)
         super().__init__(identifier, definition)
 
         defn_pings = set(
@@ -210,6 +212,9 @@ class GleanProbe(Probe):
             self.description = definition["description"]
         else:
             self.description = None
+
+    def is_in_source(self) -> bool:
+        return self._in_source
 
     def get_first_added(self) -> datetime:
         return self.first_added
