@@ -32,7 +32,7 @@ def glean_probe_defn():
         ],
         "name": "glean.error.invalid_value",
         "type": "labeled_counter",
-        "in-source": True
+        "in-source": True,
     }
 
 
@@ -57,7 +57,7 @@ def glean_probe_defn_subset_pings():
         ],
         "name": "glean.error.invalid_value",
         "type": "labeled_counter",
-        "in-source": True
+        "in-source": True,
     }
 
 
