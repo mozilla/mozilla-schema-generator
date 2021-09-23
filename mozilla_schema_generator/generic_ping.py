@@ -183,7 +183,12 @@ class GenericPing(object):
     def _add_to_cache(url: str, val: str):
         GenericPing.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        (GenericPing.cache_dir / GenericPing._slugify(url)).write_text(val)
+        cache_file = GenericPing.cache_dir / GenericPing._slugify(url)
+        try:
+            with open(cache_file, "x") as f:
+                f.write(val)
+        except FileExistsError:
+            pass
 
     @staticmethod
     def _retrieve_from_cache(url: str) -> str:
