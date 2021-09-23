@@ -183,7 +183,14 @@ class GenericPing(object):
     def _add_to_cache(url: str, val: str):
         GenericPing.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        (GenericPing.cache_dir / GenericPing._slugify(url)).write_text(val)
+        cache_file = GenericPing.cache_dir / GenericPing._slugify(url)
+        # protect against multiple writers to the cache:
+        # https://github.com/mozilla/mozilla-schema-generator/pull/210
+        try:
+            with open(cache_file, "x") as f:
+                f.write(val)
+        except FileExistsError:
+            pass
 
     @staticmethod
     def _retrieve_from_cache(url: str) -> str:
