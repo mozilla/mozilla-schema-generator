@@ -210,7 +210,7 @@ def generate_glean_pings(
         - glean_matched_metrics_in_config
         - KNOWN_UNMATCHED_GLEAN_TYPES
     )
-    if len(new_unmatched_glean_types):
+    if new_unmatched_glean_types:
         raise click.ClickException(
             "Unknown metric types in Glean Schema: {}. Please add them to {}".format(
                 ", ".join(new_unmatched_glean_types), config
