@@ -197,10 +197,36 @@ def generate_glean_pings(
     with open(config, "r") as f:
         config_data = yaml.safe_load(f)
 
-    config = Config("glean", config_data)
+    # validate that the config has mappings for every single metric type specified in the
+    # Glean schema (see: https://bugzilla.mozilla.org/show_bug.cgi?id=1739239)
+    glean_schema = GleanPing(repos[0]).get_schema()
+    glean_matched_metrics_in_config = set(config_data["metrics"].keys())
+    glean_metrics_in_schema = set(
+        glean_schema.get(["properties", "metrics", "properties"]).keys()
+    )
+    KNOWN_UNMATCHED_GLEAN_TYPES = {"url", "text", "labeled_rate", "jwe"}
+    new_unmatched_glean_types = (
+        glean_metrics_in_schema
+        - glean_matched_metrics_in_config
+        - KNOWN_UNMATCHED_GLEAN_TYPES
+    )
+    if len(new_unmatched_glean_types):
+        raise click.ClickException(
+            "Unknown metric types in Glean Schema: {}. Please add them to {}".format(
+                ", ".join(new_unmatched_glean_types), config
+            )
+        )
 
     for repo in repos:
-        write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch)
+        write_schema(
+            repo,
+            Config("glean", config_data),
+            out_dir,
+            split,
+            pretty,
+            generic_schema,
+            mps_branch,
+        )
 
 
 def write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch):
