@@ -148,3 +148,36 @@ class TestGleanPing(object):
         for name, schema in final_schemas.items():
             metadata_format = schema["mozPipelineMetadata"]["bq_metadata_format"]
             assert metadata_format == "pioneer"
+
+    def test_bug_1737656_affected(self, config):
+        glean = glean_ping.GleanPing(
+            {
+                # This ping exists in the static list of affected pings.
+                "name": "rally-debug",
+                "in-source": True,
+                "app_id": "rally_debug",
+            }
+        )
+        schemas = glean.generate_schema(config, split=False)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            metrics_text = schema["properties"]["metrics"]["properties"]["text"]
+            assert metrics_text is not None
+            assert type(metrics_text.get("additionalProperties")) is dict
+
+    def test_bug_1737656_unaffected(self, config):
+        glean = glean_ping.GleanPing(
+            {
+                # This ping does not exist in the static list of affected pings.
+                "name": "glean-core",
+                "in-source": True,
+                "app_id": "org-mozilla-glean",
+            }
+        )
+        schemas = glean.generate_schema(config, split=False)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        for name, schema in final_schemas.items():
+            metrics_text = schema["properties"]["metrics"]["properties"].get("text")
+            assert metrics_text is None

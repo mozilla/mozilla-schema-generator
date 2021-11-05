@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import logging
+from pathlib import Path
 from typing import Dict, List, Set
 
 from requests import HTTPError
@@ -13,6 +14,9 @@ from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
 from .schema import Schema
+
+ROOT_DIR = Path(__file__).parent
+BUG_1737656_TXT = ROOT_DIR / "configs" / "bug_1737656_affected.txt"
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +42,9 @@ class GleanPing(GenericPing):
         "glean_ping_info",
         "glean_client_info",
     }
+
+    with open(BUG_1737656_TXT, "r") as f:
+        bug_1737656_affected_tables = [l.strip() for l in f.readlines() if l.strip()]
 
     def __init__(self, repo, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
@@ -157,13 +164,6 @@ class GleanPing(GenericPing):
         schemas = {}
 
         for ping in pings:
-            matchers = {
-                loc: m.clone(new_table_group=ping) for loc, m in config.matchers.items()
-            }
-            for matcher in matchers.values():
-                matcher.matcher["send_in_pings"]["contains"] = ping
-            new_config = Config(ping, matchers=matchers)
-
             pipeline_meta = {
                 "bq_dataset_family": self.app_id.replace("-", "_"),
                 "bq_table": ping.replace("-", "_") + "_v1",
@@ -183,6 +183,30 @@ class GleanPing(GenericPing):
                 pipeline_meta["jwe_mappings"] = [
                     {"source_field_path": "/payload", "decrypted_field_path": ""}
                 ]
+
+            matchers = {
+                loc: m.clone(new_table_group=ping) for loc, m in config.matchers.items()
+            }
+
+            # Four newly introduced metric types were incorrectly deployed
+            # as repeated key/value structs in all Glean ping tables existing prior
+            # to November 2021. We maintain the incorrect fields for existing tables
+            # by disabling the associated matchers, but all new Glean pings will have
+            # the matchers enabled, meaning these jwe, labeled_rate, text, and url types
+            # will only show up in the schema if the ping is defined to contain metrics
+            # of those types.
+            # See https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
+            bq_identifier = "{bq_dataset_family}.{bq_table}".format(**pipeline_meta)
+            if bq_identifier in self.bug_1737656_affected_tables:
+                matchers = {
+                    loc: m
+                    for loc, m in matchers.items()
+                    if not m.matcher.get("bug_1737656_affected")
+                }
+
+            for matcher in matchers.values():
+                matcher.matcher["send_in_pings"]["contains"] = ping
+            new_config = Config(ping, matchers=matchers)
 
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
