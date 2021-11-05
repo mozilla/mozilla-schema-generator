@@ -206,8 +206,7 @@ def generate_glean_pings(
         glean_schema.get(["properties", "metrics", "properties"]).keys()
     )
     new_unmatched_glean_types = (
-        glean_metrics_in_schema
-        - glean_matched_metrics_in_config
+        glean_metrics_in_schema - glean_matched_metrics_in_config
     )
     if new_unmatched_glean_types:
         raise click.ClickException(
