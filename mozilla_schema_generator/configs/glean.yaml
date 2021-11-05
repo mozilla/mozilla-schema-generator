@@ -89,3 +89,31 @@ metrics:
         not:
           - glean_ping_info
       type: labeled_string
+  labeled_rate:
+    match:
+      bug_1737656_affected: true
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_rate
+  jwe:
+    match:
+      bug_1737656_affected: true
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: jwe
+  text:
+    match:
+      bug_1737656_affected: true
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: text
+  url:
+    match:
+      bug_1737656_affected: true
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: url
