@@ -22,7 +22,6 @@ from .schema import SchemaEncoder
 ROOT_DIR = Path(__file__).parent
 CONFIGS_DIR = ROOT_DIR / "configs"
 SCHEMA_NAME_RE = re.compile(r".+/([a-zA-Z0-9_-]+)\.([0-9]+)\.schema\.json")
-KNOWN_UNMATCHED_GLEAN_TYPES = {"url", "text", "labeled_rate", "jwe"}
 
 
 def _apply_options(func, options):
@@ -209,7 +208,6 @@ def generate_glean_pings(
     new_unmatched_glean_types = (
         glean_metrics_in_schema
         - glean_matched_metrics_in_config
-        - KNOWN_UNMATCHED_GLEAN_TYPES
     )
     if new_unmatched_glean_types:
         raise click.ClickException(
