@@ -95,24 +95,53 @@ metrics:
       send_in_pings:
         not:
           - glean_ping_info
-      type: labeled_rate
+      type: not_a_real_type
+
+  # Metric types affected by bug 1737656;
+  # The jwe, labeled_rate, url, and text types were deployed to BigQuery tables
+  # with incorrect structure, so we've had to rename these types in BQ tables;
+  # we use a "2" suffix for the fields in BQ.
   jwe:
     match:
       bug_1737656_affected: true
       send_in_pings:
         not:
           - glean_ping_info
-      type: jwe
+      type: not_a_real_type
+  labeled_rate2:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_rate
   text:
     match:
       bug_1737656_affected: true
       send_in_pings:
         not:
           - glean_ping_info
-      type: text
+      type: not_a_real_type
   url:
     match:
       bug_1737656_affected: true
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: not_a_real_type
+  jwe2:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: jwe
+  text2:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: text
+  url2:
+    match:
       send_in_pings:
         not:
           - glean_ping_info
