@@ -57,6 +57,20 @@ class GleanPing(GenericPing):
             **kwargs,
         )
 
+    def get_schema(self) -> Schema:
+        schema = super().get_schema()
+
+        # We need to inject placeholders for the url2, text2, etc. types as part
+        # of mitigation for https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
+        for metric_name in ["labeled_rate", "jwe", "url", "text"]:
+            metric1 = schema.get(("properties", "metrics", "properties", metric_name)).copy()
+            metric1 = schema.set_schema_elem(
+                ("properties", "metrics", "properties", metric_name + "2"),
+                metric1,
+            )
+
+        return schema
+
     def get_dependencies(self):
         # Get all of the library dependencies for the application that
         # are also known about in the repositories file.

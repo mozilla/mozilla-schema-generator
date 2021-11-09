@@ -13,6 +13,7 @@ import yaml
 
 from mozilla_schema_generator import glean_ping
 from mozilla_schema_generator.config import Config
+from mozilla_schema_generator.probes import GleanProbe
 from mozilla_schema_generator.utils import _get, prepend_properties
 
 from .test_utils import print_and_test
@@ -33,6 +34,27 @@ def config():
 class NoProbeGleanPing(glean_ping.GleanPing):
     def get_probes(self) -> List[Dict]:
         return []
+
+
+class GleanPingWithUrlMetric(glean_ping.GleanPing):
+    def get_probes(self) -> List[GleanProbe]:
+        probe_defn = {
+            "history": [
+                {
+                    "description": "Glean URL test description",
+                    "dates": {
+                        "first": "2019-04-12 13:44:13",
+                        "last": "2019-08-08 15:34:03",
+                    },
+                    "send_in_pings": ["metrics"],
+                },
+            ],
+            "name": "my_url",
+            "type": "url",
+            "in-source": False,
+        }
+        probe = GleanProbe("metrics", probe_defn, pings=["metrics"])
+        return [p for p in super().get_probes()] + [probe]
 
 
 class TestGleanPing(object):
@@ -181,3 +203,21 @@ class TestGleanPing(object):
         for name, schema in final_schemas.items():
             metrics_text = schema["properties"]["metrics"]["properties"].get("text")
             assert metrics_text is None
+
+    def test_url_to_url2(self, config):
+        glean = GleanPingWithUrlMetric(
+            {
+                # This ping does not exist in the static list of affected pings.
+                "name": "glean-core",
+                "in-source": False,
+                "app_id": "org-mozilla-glean",
+            }
+        )
+        schemas = glean.generate_schema(config, split=False)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schema = final_schemas.get("metrics")
+        assert list(
+            (schema["properties"]["metrics"]["properties"]["url2"]["properties"].keys())
+        ) == ["my_url"]
+        assert "url" not in schema["properties"]["metrics"]["properties"].keys()
