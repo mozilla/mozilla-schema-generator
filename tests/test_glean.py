@@ -107,7 +107,7 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
-            generic_schema = glean.get_schema().schema
+            generic_schema = glean.get_schema(generic_schema=True).schema
             generic_schema["mozPipelineMetadata"] = {
                 "bq_dataset_family": "org_mozilla_glean",
                 "bq_metadata_format": "structured",
@@ -217,7 +217,8 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         schema = final_schemas.get("metrics")
+        assert "url" not in schema["properties"]["metrics"]["properties"].keys()
+        assert "url2" in schema["properties"]["metrics"]["properties"].keys()
         assert list(
             (schema["properties"]["metrics"]["properties"]["url2"]["properties"].keys())
         ) == ["my_url"]
-        assert "url" not in schema["properties"]["metrics"]["properties"].keys()

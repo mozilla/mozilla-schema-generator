@@ -57,8 +57,16 @@ class GleanPing(GenericPing):
             **kwargs,
         )
 
-    def get_schema(self) -> Schema:
+    def get_schema(self, generic_schema=False) -> Schema:
+        """
+        Fetch schema via URL.
+
+        Unless *generic_schema* is set to true, this function makes some modifications
+        to allow some workarounds for proper injection of metrics.
+        """
         schema = super().get_schema()
+        if generic_schema:
+            return schema
 
         # We need to inject placeholders for the url2, text2, etc. types as part
         # of mitigation for https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
@@ -227,7 +235,7 @@ class GleanPing(GenericPing):
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
             if generic_schema:  # Use the generic glean ping schema
-                schema = self.get_schema()
+                schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
                 schemas[new_config.name] = [schema]
             else:
