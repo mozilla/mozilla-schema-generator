@@ -215,10 +215,11 @@ class GleanPing(GenericPing):
             # Four newly introduced metric types were incorrectly deployed
             # as repeated key/value structs in all Glean ping tables existing prior
             # to November 2021. We maintain the incorrect fields for existing tables
-            # by disabling the associated matchers, but all new Glean pings will have
-            # the matchers enabled, meaning these jwe, labeled_rate, text, and url types
-            # will only show up in the schema if the ping is defined to contain metrics
-            # of those types.
+            # by disabling the associated matchers.
+            # Note that each of these types now has a "2" matcher ("text2", "url2", etc.)
+            # defined that will allow metrics of these types to be injected into proper
+            # structs. The gcp-ingestion repository includes logic to rewrite these
+            # metrics under the "2" names.
             # See https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
             bq_identifier = "{bq_dataset_family}.{bq_table}".format(**pipeline_meta)
             if bq_identifier in self.bug_1737656_affected_tables:
