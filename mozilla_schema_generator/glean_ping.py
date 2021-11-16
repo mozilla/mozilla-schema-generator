@@ -57,6 +57,30 @@ class GleanPing(GenericPing):
             **kwargs,
         )
 
+    def get_schema(self, generic_schema=False) -> Schema:
+        """
+        Fetch schema via URL.
+
+        Unless *generic_schema* is set to true, this function makes some modifications
+        to allow some workarounds for proper injection of metrics.
+        """
+        schema = super().get_schema()
+        if generic_schema:
+            return schema
+
+        # We need to inject placeholders for the url2, text2, etc. types as part
+        # of mitigation for https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
+        for metric_name in ["labeled_rate", "jwe", "url", "text"]:
+            metric1 = schema.get(
+                ("properties", "metrics", "properties", metric_name)
+            ).copy()
+            metric1 = schema.set_schema_elem(
+                ("properties", "metrics", "properties", metric_name + "2"),
+                metric1,
+            )
+
+        return schema
+
     def get_dependencies(self):
         # Get all of the library dependencies for the application that
         # are also known about in the repositories file.
@@ -191,10 +215,11 @@ class GleanPing(GenericPing):
             # Four newly introduced metric types were incorrectly deployed
             # as repeated key/value structs in all Glean ping tables existing prior
             # to November 2021. We maintain the incorrect fields for existing tables
-            # by disabling the associated matchers, but all new Glean pings will have
-            # the matchers enabled, meaning these jwe, labeled_rate, text, and url types
-            # will only show up in the schema if the ping is defined to contain metrics
-            # of those types.
+            # by disabling the associated matchers.
+            # Note that each of these types now has a "2" matcher ("text2", "url2", etc.)
+            # defined that will allow metrics of these types to be injected into proper
+            # structs. The gcp-ingestion repository includes logic to rewrite these
+            # metrics under the "2" names.
             # See https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
             bq_identifier = "{bq_dataset_family}.{bq_table}".format(**pipeline_meta)
             if bq_identifier in self.bug_1737656_affected_tables:
@@ -211,7 +236,7 @@ class GleanPing(GenericPing):
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
             if generic_schema:  # Use the generic glean ping schema
-                schema = self.get_schema()
+                schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
                 schemas[new_config.name] = [schema]
             else:

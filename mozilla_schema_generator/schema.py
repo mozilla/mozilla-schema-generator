@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import copy
 from json import JSONEncoder
-from typing import Any, Tuple
+from typing import Any, Iterable
 
 from .utils import _get
 
@@ -34,7 +34,7 @@ class Schema(object):
     def __init__(self, schema: dict):
         self.schema = schema
 
-    def set_schema_elem(self, key: Tuple[str], elem: Any, *, propagate=True) -> dict:
+    def set_schema_elem(self, key: Iterable[str], elem: Any, *, propagate=True) -> dict:
         """
         @param key: The key set
         @param elem: The value to set the key to
@@ -56,7 +56,7 @@ class Schema(object):
 
         new_elem[key[-1]] = elem
 
-    def get(self, key: Tuple[str]) -> Any:
+    def get(self, key: Iterable[str]) -> Any:
         return _get(self.schema, key)
 
     def get_size(self) -> int:
@@ -65,14 +65,14 @@ class Schema(object):
     def clone(self) -> Schema:
         return Schema(copy.deepcopy(self.schema))
 
-    def _delete_key(self, key: Tuple[str]):
+    def _delete_key(self, key: Iterable[str]):
         try:
             elem = _get(self.schema, key[:-1])
             del elem[key[-1]]
         except KeyError:
             return
 
-    def delete_group_from_schema(self, key: Tuple[str], *, propagate=True):
+    def delete_group_from_schema(self, key: Iterable[str], *, propagate=True):
         """
         @param key: The key to remove
         @param propagate: If True, then removes any parents of the deleted key
@@ -98,7 +98,7 @@ class Schema(object):
                 except KeyError:
                     break
 
-    def property_exists(self, key: Tuple[str]) -> bool:
+    def property_exists(self, key: Iterable[str]) -> bool:
         """
         @param key: The key to check for existence
         """
