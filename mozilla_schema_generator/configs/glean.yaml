@@ -90,7 +90,7 @@ metrics:
           - glean_ping_info
       type: labeled_string
 
-  # Metric types affected by bug 1737656;
+  # Metric types affected by https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
   # The jwe, labeled_rate, url, and text types were deployed to BigQuery tables
   # with incorrect structure, so we've had to rename these types in BQ tables;
   # we use a "2" suffix for the fields in BQ.
