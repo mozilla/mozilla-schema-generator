@@ -50,6 +50,19 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths: _html
+    post-artifacts:
+      docker:
+        - image: circleci/node:8.10.0
+      steps:
+        - checkout
+        - attach_workspace:
+            at: /tmp
+        - run: npm i circle-github-bot
+        - run: .circleci/post-artifact.js
+        - store_artifacts:
+            path: /tmp/integration
+            destination: /app/integration
+
 
   docs-deploy:
     docker:
