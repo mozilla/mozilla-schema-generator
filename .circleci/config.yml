@@ -112,7 +112,7 @@ jobs:
       - run: &checkout_upstream
           name: Checkout upstream
           command: |
-            git remote add upstream https://github.com/mozilla-services/mozilla-schema-generator.git
+            git remote add upstream https://github.com/mozilla/mozilla-schema-generator.git
             git fetch --all
       - setup_remote_docker:
           docker_layer_caching: true
