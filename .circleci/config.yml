@@ -214,6 +214,6 @@ workflows:
               only:
                 - main
 
-  jobs:
-    - test
+    jobs:
+      - test
 
