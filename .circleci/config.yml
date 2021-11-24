@@ -124,8 +124,8 @@ jobs:
           name: Generate schema-diff artifact
           command: |
             mkdir /tmp/integration
-            docker run --env MPS_SSH_KEY_BASE64=$MPS_SSH_KEY_BASE64 --entrypoint /app/mozilla-schema-generator/bin/generate_schema_diff_log.sh moz-schema-generator
-            docker cp moz-schema-generator:/app/schema.diff /tmp/integration/schema.diff
+            docker run --env MPS_SSH_KEY_BASE64=$MPS_SSH_KEY_BASE64 --name moz_schema_gen --entrypoint /app/mozilla-schema-generator/bin/generate_schema_diff_log.sh moz-schema-generator
+            docker cp moz_schema_gen:/app/schema.diff /tmp/integration/schema.diff
       - persist_to_workspace:
           root: /tmp
           paths:
