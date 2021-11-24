@@ -10,99 +10,99 @@ version: 2
 #####################################################
 
 jobs:
-  test:
-    docker: &docker
-      - image: circleci/python:3.7.2
-    steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - run:
-          name: Run tests
-          command: |
-            python3 -m virtualenv venv
-            . venv/bin/activate
-            make install-requirements
-            make lint
-            make test
-            make coverage
+  # test:
+  #   docker: &docker
+  #     - image: circleci/python:3.7.2
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: "Pull Submodules"
+  #         command: |
+  #           git submodule init
+  #           git submodule update --remote
+  #     - run:
+  #         name: Run tests
+  #         command: |
+  #           python3 -m virtualenv venv
+  #           . venv/bin/activate
+  #           make install-requirements
+  #           make lint
+  #           make test
+  #           make coverage
 
-  docs-build:
-    docker: *docker
-    steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - run:
-          name: Build docs
-          command: |
-            python3 -m virtualenv venv
-            . venv/bin/activate
-            make install-requirements
-            pip install pdoc
-            pdoc -o /tmp/_html ./mozilla_schema_generator
-      - persist_to_workspace:
-          root: /tmp
-          paths: _html
+  # docs-build:
+  #   docker: *docker
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: "Pull Submodules"
+  #         command: |
+  #           git submodule init
+  #           git submodule update --remote
+  #     - run:
+  #         name: Build docs
+  #         command: |
+  #           python3 -m virtualenv venv
+  #           . venv/bin/activate
+  #           make install-requirements
+  #           pip install pdoc
+  #           pdoc -o /tmp/_html ./mozilla_schema_generator
+  #     - persist_to_workspace:
+  #         root: /tmp
+  #         paths: _html
 
-  docs-deploy:
-    docker:
-      - image: node:14
-    steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Install and configure dependencies
-          command: |
-            npm install -g --silent gh-pages@3.0.0
-            git config user.email "ci-build-docs@mozilla.com"
-            git config user.name "ci-build-docs"
-      - add_ssh_keys:
-          fingerprints:
-            - "2d:8d:b3:4c:6d:56:0d:9c:b1:8d:99:8c:b0:de:4b:56"
-      - run:
-          name: Deploy docs to gh-pages branch
-          command: gh-pages --message "[skip ci] updates" --dist /tmp/_html
+  # docs-deploy:
+  #   docker:
+  #     - image: node:14
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: "Pull Submodules"
+  #         command: |
+  #           git submodule init
+  #           git submodule update --remote
+  #     - attach_workspace:
+  #         at: /tmp
+  #     - run:
+  #         name: Install and configure dependencies
+  #         command: |
+  #           npm install -g --silent gh-pages@3.0.0
+  #           git config user.email "ci-build-docs@mozilla.com"
+  #           git config user.name "ci-build-docs"
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "2d:8d:b3:4c:6d:56:0d:9c:b1:8d:99:8c:b0:de:4b:56"
+  #     - run:
+  #         name: Deploy docs to gh-pages branch
+  #         command: gh-pages --message "[skip ci] updates" --dist /tmp/_html
 
-  deploy:
-    docker:
-      - image: docker:20.10.2
-    working_directory: ~/mozilla/mozilla-schema-generator
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 20.10.2
-      - run: |
-          printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' "$CIRCLE_SHA1" "$CIRCLE_TAG" "$CIRCLE_PROJECT_USERNAME" "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_BUILD_URL" > version.json
-      - run: docker build -t app:build .
-      - run:
-          name: Deploy to Dockerhub
-          command: |
-            # Deploy main
-            if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag app:build ${DOCKERHUB_REPO}:latest
-              docker push ${DOCKERHUB_REPO}:latest
-            elif  [ ! -z "${CIRCLE_TAG}" ]; then
-            # Deploy a release tag...
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              echo "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-              docker tag app:build "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-              docker images
-              docker push "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-            fi
+  # deploy:
+  #   docker:
+  #     - image: docker:20.10.2
+  #   working_directory: ~/mozilla/mozilla-schema-generator
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         version: 20.10.2
+  #     - run: |
+  #         printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' "$CIRCLE_SHA1" "$CIRCLE_TAG" "$CIRCLE_PROJECT_USERNAME" "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_BUILD_URL" > version.json
+  #     - run: docker build -t app:build .
+  #     - run:
+  #         name: Deploy to Dockerhub
+  #         command: |
+  #           # Deploy main
+  #           if [ "${CIRCLE_BRANCH}" == "main" ]; then
+  #             docker login -u $DOCKER_USER -p $DOCKER_PASS
+  #             docker tag app:build ${DOCKERHUB_REPO}:latest
+  #             docker push ${DOCKERHUB_REPO}:latest
+  #           elif  [ ! -z "${CIRCLE_TAG}" ]; then
+  #           # Deploy a release tag...
+  #             docker login -u $DOCKER_USER -p $DOCKER_PASS
+  #             echo "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
+  #             docker tag app:build "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
+  #             docker images
+  #             docker push "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
+  #           fi
 
   schema-diff:
     docker:
@@ -168,32 +168,32 @@ workflows:
   version: 2
   commit:
     jobs:
-      - test:
-          filters:
-            tags:
-              only: /.*/
+      # - test:
+      #     filters:
+      #       tags:
+      #         only: /.*/
 
-      - docs-build:
-          filters:
-            tags:
-              only: /.*/
+      # - docs-build:
+      #     filters:
+      #       tags:
+      #         only: /.*/
 
-      - docs-deploy:
-          requires:
-            - test
-            - docs-build
-          filters:
-            branches:
-              only: main
+      # - docs-deploy:
+      #     requires:
+      #       - test
+      #       - docs-build
+      #     filters:
+      #       branches:
+      #         only: main
 
-      - deploy:
-          requires:
-            - test
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: main
+      # - deploy:
+      #     requires:
+      #       - test
+      #     filters:
+      #       tags:
+      #         only: /.*/
+      #       branches:
+      #         only: main
 
       - schema-diff:
           requires:
@@ -208,15 +208,15 @@ workflows:
             requires:
               - schema-diff
 
-  nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - main
+  # nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 0 * * *"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - main
 
-    jobs:
-      - test
+  #   jobs:
+  #     - test
 
