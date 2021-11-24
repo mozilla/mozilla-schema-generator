@@ -196,8 +196,8 @@ workflows:
       #         only: main
 
       - schema-diff:
-          requires:
-            - test
+          # requires:
+          #   - test
           filters:
             tags:
               only: /.*/
