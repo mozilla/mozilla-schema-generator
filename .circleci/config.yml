@@ -121,26 +121,10 @@ jobs:
           name: Build Docker image
           command: docker build --pull -t moz-schema-generator .
       - run:
-          name: Test Code
-          command: docker run --env MPS_SSH_KEY_BASE64=$MPS_SSH_KEY_BASE64 moz-schema-generator
-      # - run:
-      #     name: Verify that all generated schemas are committed
-      #     command: docker run -w /app mps scripts/assert-consistent-schemas
-      # - run:
-      #     name: Verify set version in telemetry namespace is correct
-      #     command: docker run -w /app mps scripts/assert-telemetry-version
-      # - run:
-      #     name: Generate diff artifacts for bigquery
-      #     command: |
-      #       # compare a branch against the main branch, or against the previous
-      #       # commit if we're already on the main branch
-      #       base=upstream/main
-      #       if [[ "$CIRCLE_BRANCH" == "main" ]]; then
-      #         base=HEAD~1
-      #       fi
-      #       docker run --name mps -w /app mps \
-      #         mps bigquery diff --base-ref "$base"
-      #       docker cp mps:/app/integration /tmp/integration
+          name: Generate schema-diff artifact
+          command: |
+            docker run --env MPS_SSH_KEY_BASE64=$MPS_SSH_KEY_BASE64 --entrypoint /app/mozilla-schema-generator/bin/generate_schema_diff_log.sh moz-schema-generator
+            docker cp moz-schema-generator:/app/schema_diff.log /tmp/integration/schema_diff.log
       - persist_to_workspace:
           root: /tmp
           paths:
