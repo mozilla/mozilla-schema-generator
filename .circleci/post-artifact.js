@@ -35,7 +35,5 @@ ${body}
 bot.comment(process.env.GH_AUTH_TOKEN, `
 ### Integration report for "${bot.env.commitMessage}"
 
-${diff("bq_schema")}
-
-${diff("compact_schema")}
+${diff("schema")}
 `);

@@ -123,12 +123,13 @@ jobs:
       - run:
           name: Generate schema-diff artifact
           command: |
+            mkdir /tmp/integration
             docker run --env MPS_SSH_KEY_BASE64=$MPS_SSH_KEY_BASE64 --entrypoint /app/mozilla-schema-generator/bin/generate_schema_diff_log.sh moz-schema-generator
             docker cp moz-schema-generator:/app/schema_diff.log /tmp/integration/schema_diff.log
       - persist_to_workspace:
           root: /tmp
           paths:
-            - integration
+            - 2
 
   post-artifacts:
     docker:
@@ -141,8 +142,8 @@ jobs:
       - run: npm i circle-github-bot
       - run: .circleci/post-artifact.js
       - store_artifacts:
-          path: /tmp/integration
-          destination: /app/integration
+          path: /tmp/integration/schema_diff.log
+          destination: /app/schema_diff.log
 
 #########################################################
 # Workflows: see https://circleci.com/docs/2.0/workflows/
