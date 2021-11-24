@@ -129,7 +129,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - 2
+            - .
 
   post-artifacts:
     docker:
@@ -143,7 +143,6 @@ jobs:
       - run: .circleci/post-artifact.js
       - store_artifacts:
           path: /tmp/integration/schema_diff.log
-          destination: /app/schema_diff.log
 
 #########################################################
 # Workflows: see https://circleci.com/docs/2.0/workflows/
