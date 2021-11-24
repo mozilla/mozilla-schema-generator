@@ -122,25 +122,25 @@ jobs:
           command: docker build --pull -t moz-schema-generator .
       - run:
           name: Test Code
-          command: docker run mps
-      - run:
-          name: Verify that all generated schemas are committed
-          command: docker run -w /app mps scripts/assert-consistent-schemas
+          command: docker run moz-schema-generator
+      # - run:
+      #     name: Verify that all generated schemas are committed
+      #     command: docker run -w /app mps scripts/assert-consistent-schemas
       # - run:
       #     name: Verify set version in telemetry namespace is correct
       #     command: docker run -w /app mps scripts/assert-telemetry-version
-      - run:
-          name: Generate diff artifacts for bigquery
-          command: |
-            # compare a branch against the main branch, or against the previous
-            # commit if we're already on the main branch
-            base=upstream/main
-            if [[ "$CIRCLE_BRANCH" == "main" ]]; then
-              base=HEAD~1
-            fi
-            docker run --name mps -w /app mps \
-              mps bigquery diff --base-ref "$base"
-            docker cp mps:/app/integration /tmp/integration
+      # - run:
+      #     name: Generate diff artifacts for bigquery
+      #     command: |
+      #       # compare a branch against the main branch, or against the previous
+      #       # commit if we're already on the main branch
+      #       base=upstream/main
+      #       if [[ "$CIRCLE_BRANCH" == "main" ]]; then
+      #         base=HEAD~1
+      #       fi
+      #       docker run --name mps -w /app mps \
+      #         mps bigquery diff --base-ref "$base"
+      #       docker cp mps:/app/integration /tmp/integration
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -153,6 +153,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp
+      - run: export GH_AUTH_TOKEN=$GH_AUTH
       - run: npm i circle-github-bot
       - run: .circleci/post-artifact.js
       - store_artifacts:
@@ -202,6 +203,8 @@ workflows:
               only: /.*/
 
       - post-artifacts:
+            context:
+              - fathom-doc-deployers
             requires:
               - schema-diff
 
