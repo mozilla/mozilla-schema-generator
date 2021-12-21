@@ -271,7 +271,7 @@
     <span class="k">if</span> <span class="n">new_unmatched_glean_types</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">click</span><span class="o">.</span><span class="n">ClickException</span><span class="p">(</span>
             <span class="s2">&quot;Unknown metric types in Glean Schema: </span><span class="si">{}</span><span class="s2">. Please add them to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_unmatched_glean_types</span><span class="p">),</span> <span class="n">config</span>
+                <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">new_unmatched_glean_types</span><span class="p">)),</span> <span class="n">config</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
