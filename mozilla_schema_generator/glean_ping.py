@@ -208,6 +208,19 @@ class GleanPing(GenericPing):
                     {"source_field_path": "/payload", "decrypted_field_path": ""}
                 ]
 
+            # DSRE-582 Reduce retention and granularity for contextual services pings;
+            # we set the same defaults as for desktop contextual-services pings per
+            # https://github.com/mozilla-services/mozilla-pipeline-schemas/blob/main
+            #   /templates/contextual-services/defaults.schema.json
+            if ping.startswith("topsites") or ping.startswith("quicksuggest"):
+                pipeline_meta["submission_timestamp_granularity"] = "seconds"
+                expiration = pipeline_meta.get("expiration_policy", {})
+                expiration["delete_after_days"] = 30
+                pipeline_meta["expiration_policy"] = expiration
+                override_attributes = pipeline_meta.get("override_attributes", {})
+                override_attributes["geo_city"] = None
+                pipeline_meta["override_attributes"] = override_attributes
+
             matchers = {
                 loc: m.clone(new_table_group=ping) for loc, m in config.matchers.items()
             }
