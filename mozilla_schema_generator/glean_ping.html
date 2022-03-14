@@ -325,9 +325,15 @@
                 <span class="n">expiration</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">expiration</span><span class="p">[</span><span class="s2">&quot;delete_after_days&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
                 <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiration</span>
-                <span class="n">override_attributes</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="c1"># build a dict representation and override geo_city</span>
+                <span class="n">override_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">override_attributes</span><span class="p">[</span><span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
                 <span class="n">override_attributes</span><span class="p">[</span><span class="s2">&quot;geo_city&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">override_attributes</span>
+                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">attribute_value</span><span class="p">}</span>
+                    <span class="k">for</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="n">attribute_value</span> <span class="ow">in</span> <span class="n">override_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">]</span>
 
             <span class="n">matchers</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">loc</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">new_table_group</span><span class="o">=</span><span class="n">ping</span><span class="p">)</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">matchers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
@@ -588,9 +594,15 @@
                 <span class="n">expiration</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">expiration</span><span class="p">[</span><span class="s2">&quot;delete_after_days&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
                 <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiration</span>
-                <span class="n">override_attributes</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="c1"># build a dict representation and override geo_city</span>
+                <span class="n">override_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">override_attributes</span><span class="p">[</span><span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
                 <span class="n">override_attributes</span><span class="p">[</span><span class="s2">&quot;geo_city&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">override_attributes</span>
+                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">attribute_value</span><span class="p">}</span>
+                    <span class="k">for</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="n">attribute_value</span> <span class="ow">in</span> <span class="n">override_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">]</span>
 
             <span class="n">matchers</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">loc</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">new_table_group</span><span class="o">=</span><span class="n">ping</span><span class="p">)</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">matchers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
@@ -734,7 +746,7 @@
                             <div id="GleanPing.ignore_pings" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#GleanPing.ignore_pings">#&nbsp;&nbsp</a>
 
-        <span class="name">ignore_pings</span><span class="default_value"> = {&#39;all-pings&#39;, &#39;all_pings&#39;, &#39;glean_client_info&#39;, &#39;default&#39;, &#39;glean_ping_info&#39;}</span>
+        <span class="name">ignore_pings</span><span class="default_value"> = {&#39;default&#39;, &#39;glean_ping_info&#39;, &#39;glean_client_info&#39;, &#39;all_pings&#39;, &#39;all-pings&#39;}</span>
     </div>
 
     
@@ -993,9 +1005,15 @@ to allow some workarounds for proper injection of metrics.</p>
                 <span class="n">expiration</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="n">expiration</span><span class="p">[</span><span class="s2">&quot;delete_after_days&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
                 <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;expiration_policy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiration</span>
-                <span class="n">override_attributes</span> <span class="o">=</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="c1"># build a dict representation and override geo_city</span>
+                <span class="n">override_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">pipeline_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">override_attributes</span><span class="p">[</span><span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attribute</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
                 <span class="n">override_attributes</span><span class="p">[</span><span class="s2">&quot;geo_city&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">override_attributes</span>
+                <span class="n">pipeline_meta</span><span class="p">[</span><span class="s2">&quot;override_attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">attribute_value</span><span class="p">}</span>
+                    <span class="k">for</span> <span class="n">attribute_key</span><span class="p">,</span> <span class="n">attribute_value</span> <span class="ow">in</span> <span class="n">override_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">]</span>
 
             <span class="n">matchers</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">loc</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">new_table_group</span><span class="o">=</span><span class="n">ping</span><span class="p">)</span> <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">matchers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
