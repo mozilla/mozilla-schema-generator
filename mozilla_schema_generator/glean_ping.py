@@ -217,9 +217,15 @@ class GleanPing(GenericPing):
                 expiration = pipeline_meta.get("expiration_policy", {})
                 expiration["delete_after_days"] = 30
                 pipeline_meta["expiration_policy"] = expiration
-                override_attributes = pipeline_meta.get("override_attributes", {})
+                # build a dict representation and override geo_city
+                override_attributes = {}
+                for attribute in pipeline_meta.get("override_attributes", []):
+                    override_attributes[attribute["name"]] = attribute["value"]
                 override_attributes["geo_city"] = None
-                pipeline_meta["override_attributes"] = override_attributes
+                pipeline_meta["override_attributes"] = [
+                    {"name": attribute_key, "value": attribute_value}
+                    for attribute_key, attribute_value in override_attributes.items()
+                ]
 
             matchers = {
                 loc: m.clone(new_table_group=ping) for loc, m in config.matchers.items()
