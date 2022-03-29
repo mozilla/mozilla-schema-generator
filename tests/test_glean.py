@@ -184,7 +184,12 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
+            # text field for rally_debug events not expected
+            if schema["mozPipelineMetadata"]["bq_dataset_family"] == "rally_debug":
+                continue
+
             metrics_text = schema["properties"]["metrics"]["properties"]["text"]
+
             assert metrics_text is not None
             assert type(metrics_text.get("additionalProperties")) is dict
 
