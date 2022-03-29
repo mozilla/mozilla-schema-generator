@@ -184,8 +184,8 @@ class TestGleanPing(object):
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
-            # text field for rally_debug events not expected
-            if schema["mozPipelineMetadata"]["bq_dataset_family"] == "rally_debug":
+            # Only this static list of pings should have the incorrect schema for text
+            if name not in ["deletion-request", "demographics", "enrollment", "study-enrollment", "study-unenrollment", "uninstall-deletion"]:
                 continue
 
             metrics_text = schema["properties"]["metrics"]["properties"]["text"]
