@@ -23,3 +23,8 @@ firefox-accounts.account-ecosystem.*
 # The rally-debug schema was commit using the structured metadata field instead
 # of the pioneer metadata schemas.
 # rally-debug.*
+
+# Bug 1762997
+# Old commits with broken schemas were fetched and half-deployed.
+# This is a companion to mozilla/probe-scraper#419
+rally-citp-search-engine-usage.*
