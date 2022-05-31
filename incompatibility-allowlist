@@ -28,3 +28,8 @@ firefox-accounts.account-ecosystem.*
 # Old commits with broken schemas were fetched and half-deployed.
 # This is a companion to mozilla/probe-scraper#419
 # rally-citp-search-engine-usage.*
+
+# Bug 1769579
+# Delete the rally-core onboarding ping, per bug comments 21 and 23
+# This is a companion to mozilla/probe-scraper#442
+rally-core.onboarding.*
