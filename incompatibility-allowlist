@@ -32,4 +32,4 @@ firefox-accounts.account-ecosystem.*
 # Bug 1769579
 # Delete the rally-core onboarding ping, per bug comments 21 and 23
 # This is a companion to mozilla/probe-scraper#442
-rally-core.onboarding.*
+# rally-core.onboarding.*
