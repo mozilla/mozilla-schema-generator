@@ -176,6 +176,79 @@ class GleanPing(GenericPing):
     def get_pings(self) -> Set[str]:
         return self._get_ping_data().keys()
 
+    @staticmethod
+    def apply_default_metadata(ping_metadata, default_metadata):
+        """apply_default_metadata recurses down into dicts nested
+        to an arbitrary depth, updating keys. The ``default_metadata`` is merged into
+        ``ping_metadata``.
+        :param ping_metadata: dict onto which the merge is executed
+        :param default_metadata: dct merged into ping_metadata
+        :return: None
+        """
+        for k, v in default_metadata.items():
+            if (
+                    k in ping_metadata
+                    and isinstance(ping_metadata[k], dict)
+                    and isinstance(default_metadata[k], dict)
+            ):
+                GleanPing.apply_default_metadata(ping_metadata[k], default_metadata[k])
+            else:
+                ping_metadata[k] = default_metadata[k]
+
+    def _get_ping_data_and_dependencies_with_default_metadata(self) -> Dict[str, Dict]:
+        # Get the ping data with the pipeline metadata
+        url = self.ping_url_template.format(self.repo_name)
+        ping_data = GleanPing._get_json(url)
+
+        # The ping endpoint for the dependency pings does not include any repo defined moz_pipeline_metadata_defaults
+        # so they need to be applied here.
+
+        # 1.  Get repo and pipeline default metadata.
+        repos = GleanPing.get_repos()
+        current_repo = next((x for x in repos if x.get("app_id") == self.app_id), None)
+        default_metadata = current_repo.get('moz_pipeline_metadata_defaults')
+
+        # 2.  Apply the default metadata to each dependency defined ping.
+        for dependency in self.get_dependencies():
+            dependency_pings = self._get_json(self.ping_url_template.format(dependency))
+            for dependency_ping in dependency_pings.values():
+                # Although it is counter intuitive to apply the default metadata on top of the existing dependency ping
+                # metadata it does set the repo specific value for bq_dataset_family instead of using the dependency id
+                # for the bq_dataset_family value.
+                GleanPing.apply_default_metadata(dependency_ping.get('moz_pipeline_metadata'), default_metadata)
+            ping_data.update(dependency_pings)
+        return ping_data
+
+    @staticmethod
+    def reorder_metadata(metadata):
+        desired_order_list = ['bq_dataset_family', 'bq_table', 'bq_metadata_format', 'submission_timestamp_granularity',
+                              'expiration_policy', 'override_attributes', 'jwe_mappings']
+        reordered_metadata = {k: metadata[k] for k in desired_order_list if k in metadata}
+
+        # re-order jwe-mappings
+        desired_order_list = ['source_field_path', 'decrypted_field_path']
+        jwe_mapping_metadata = reordered_metadata.get('jwe_mappings')
+        if jwe_mapping_metadata:
+            reordered_jwe_mapping_metadata = []
+            for mapping in jwe_mapping_metadata:
+                reordered_jwe_mapping_metadata.append({k: mapping[k] for k in desired_order_list if k in mapping})
+            reordered_metadata['jwe_mappings'] = reordered_jwe_mapping_metadata
+
+        # future proofing, in case there are other fields added at the ping top level add them to the end.
+        leftovers = {k: metadata[k] for k in set(metadata) - set(reordered_metadata)}
+        reordered_metadata = {**reordered_metadata, **leftovers}
+        return reordered_metadata
+
+    def get_pings_and_pipeline_metadata(self) -> Dict[str, Dict]:
+        pings = self._get_ping_data_and_dependencies_with_default_metadata()
+        for ping_name, ping_data in pings.items():
+            metadata = ping_data.get('moz_pipeline_metadata')
+
+            # While technically unnecessary, the dictionary elements are re-ordered to match the currently deployed
+            # order and used to verify no difference in output.
+            pings[ping_name] = GleanPing.reorder_metadata(metadata)
+        return pings
+
     def get_ping_descriptions(self) -> Dict[str, str]:
         return {
             k: v["history"][-1]["description"] for k, v in self._get_ping_data().items()
@@ -184,49 +257,10 @@ class GleanPing(GenericPing):
     def generate_schema(
         self, config, split, generic_schema=False
     ) -> Dict[str, List[Schema]]:
-        pings = self.get_pings()
+        pings = self.get_pings_and_pipeline_metadata()
         schemas = {}
 
-        for ping in pings:
-            pipeline_meta = {
-                "bq_dataset_family": self.app_id.replace("-", "_"),
-                "bq_table": ping.replace("-", "_") + "_v1",
-                "bq_metadata_format": (
-                    "pioneer" if self.app_id.startswith("rally") else "structured"
-                ),
-            }
-
-            retention_days = self.repo.get("retention_days")
-            if retention_days:
-                expiration = pipeline_meta.get("expiration_policy", {})
-                expiration["delete_after_days"] = int(retention_days)
-                pipeline_meta["expiration_policy"] = expiration
-
-            use_jwk = self.repo.get("encryption", {}).get("use_jwk")
-            if use_jwk:
-                pipeline_meta["jwe_mappings"] = [
-                    {"source_field_path": "/payload", "decrypted_field_path": ""}
-                ]
-
-            # DSRE-582 Reduce retention and granularity for contextual services pings;
-            # we set the same defaults as for desktop contextual-services pings per
-            # https://github.com/mozilla-services/mozilla-pipeline-schemas/blob/main
-            #   /templates/contextual-services/defaults.schema.json
-            if ping.startswith("topsites") or ping.startswith("quicksuggest"):
-                pipeline_meta["submission_timestamp_granularity"] = "seconds"
-                expiration = pipeline_meta.get("expiration_policy", {})
-                expiration["delete_after_days"] = 30
-                pipeline_meta["expiration_policy"] = expiration
-                # build a dict representation and override geo_city
-                override_attributes = {}
-                for attribute in pipeline_meta.get("override_attributes", []):
-                    override_attributes[attribute["name"]] = attribute["value"]
-                override_attributes["geo_city"] = None
-                pipeline_meta["override_attributes"] = [
-                    {"name": attribute_key, "value": attribute_value}
-                    for attribute_key, attribute_value in override_attributes.items()
-                ]
-
+        for ping, pipeline_meta in pings.items():
             matchers = {
                 loc: m.clone(new_table_group=ping) for loc, m in config.matchers.items()
             }
