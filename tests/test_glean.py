@@ -57,6 +57,120 @@ class GleanPingWithUrlMetric(glean_ping.GleanPing):
         return [p for p in super().get_probes()] + [probe]
 
 
+class GleanPingStub(glean_ping.GleanPing):
+    def get_dependencies(self):
+        repos = glean_ping.GleanPing.get_repos()
+        current_repo = next((x for x in repos if x.get("app_id") == self.repo_name), {})
+        return current_repo.get("dependencies", [])
+
+    def _get_dependency_pings(self, dependency):
+        return {
+            "dependency_ping": {
+                "in-source": True,
+                "moz_pipeline_metadata": {
+                    "bq_dataset_family": "glean_base",
+                    "bq_metadata_format": "structured",
+                    "bq_table": "dependency_ping_v1",
+                },
+                "name": "dependency_ping",
+            }
+        }
+
+    def _get_ping_data_without_dependencies(self) -> Dict[str, Dict]:
+        return {
+            "ping1": {
+                "in-source": True,
+                "moz_pipeline_metadata": self.ping_metadata,
+                "name": "ping1",
+            }
+        }
+
+
+class GleanPingWithExpirationPolicy(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "expiration_policy": {
+            "delete_after_days": 12,
+            "collect_through_date": "2022-06-10",
+        },
+    }
+
+
+class GleanPingWithEncryption(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "jwe_mappings": [
+            {
+                "decrypted_field_path": "",
+                "source_field_path": "/payload",
+            }
+        ],
+    }
+
+
+class GleanPingNoMetadata(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+    }
+
+
+class GleanPingWithOverrideAttributes(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "override_attributes": [{"name": "geo_city", "value": None}],
+    }
+
+
+class GleanPingWithGranularity(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "submission_timestamp_granularity": "seconds",
+    }
+
+
+class GleanPingWithMultiplePings(GleanPingStub):
+    ping1_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "expiration_policy": {"delete_after_days": 30},
+        "override_attributes": [{"name": "geo_city", "value": None}],
+        "submission_timestamp_granularity": "seconds",
+    }
+
+    ping2_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping2_v1",
+        "expiration_policy": {"delete_after_days": 45},
+        "submission_timestamp_granularity": "millis",
+    }
+
+    def _get_ping_data_without_dependencies(self) -> Dict[str, Dict]:
+        return {
+            "ping1": {
+                "in-source": True,
+                "moz_pipeline_metadata": self.ping1_metadata,
+                "name": "ping1",
+            },
+            "ping2": {
+                "in-source": True,
+                "moz_pipeline_metadata": self.ping2_metadata,
+                "name": "ping2",
+            },
+        }
+
+
 class TestGleanPing(object):
     def test_env_size(self, glean):
         assert glean.get_env().get_size() > 0
@@ -101,6 +215,10 @@ class TestGleanPing(object):
             }
             assert glean.get_ping_descriptions() == {"foo": "baz"}
 
+    # This test isn't technically a valid test since a schema glean-core would never be generated
+    # independent of a define repo.  The expected value of bq_dataset_family has been updated to
+    # reflect the new value that is assigned from the probe-scraper processing but is not be used
+    # in a generated schema.
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
         assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
@@ -109,7 +227,7 @@ class TestGleanPing(object):
         for name, schema in final_schemas.items():
             generic_schema = glean.get_schema(generic_schema=True).schema
             generic_schema["mozPipelineMetadata"] = {
-                "bq_dataset_family": "org_mozilla_glean",
+                "bq_dataset_family": "glean_core",
                 "bq_metadata_format": "structured",
                 "bq_table": name.replace("-", "_") + "_v1",
             }
@@ -122,39 +240,345 @@ class TestGleanPing(object):
         with pytest.raises(requests.exceptions.HTTPError):
             not_glean.generate_schema(config, split=False)
 
-    def test_retention_days(self, config):
-        glean = glean_ping.GleanPing(
-            {"name": "glean-core", "app_id": "org-mozilla-glean", "retention_days": 90}
-        )
+    # Unit test covering the case where repository has a default expiration_policy and there is
+    # also a ping specific expiration_policy.  The ping specific expiration_policy is applied to the
+    # ping schema and the repository default expiration_policy is applied to the dependency ping
+    # schema.
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_expiration_policy(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "expiration_policy": {
+                        "delete_after_days": 20,
+                        "collect_through_date": "2022-06-16",
+                    },
+                },
+                "name": "app1",
+            }
+        ]
+        glean = GleanPingWithExpirationPolicy({"name": "app1", "app_id": "app1"})
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
+        assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
-            assert (
-                schema["mozPipelineMetadata"]["expiration_policy"]["delete_after_days"]
-                == 90
-            )
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithExpirationPolicy.ping_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 4
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+                assert len(schema["mozPipelineMetadata"]["expiration_policy"]) == 2
+                assert (
+                    schema["mozPipelineMetadata"]["expiration_policy"][
+                        "delete_after_days"
+                    ]
+                    == 20
+                )
+                assert (
+                    schema["mozPipelineMetadata"]["expiration_policy"][
+                        "collect_through_date"
+                    ]
+                    == "2022-06-16"
+                )
 
-    def test_encryption_exists(self, config):
+    # Unit test covering the case where the repository has a default jwe_mappings and confirming
+    # it is applied to all pings
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_jwe_mappings(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "jwe_mappings": [
+                        {"decrypted_field_path": "", "source_field_path": "/payload"}
+                    ],
+                },
+                "name": "app1",
+            }
+        ]
+        glean = GleanPingWithEncryption({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        assert len(final_schemas) == 2
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithEncryption.ping_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 4
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+                jwe_mappings = schema["mozPipelineMetadata"]["jwe_mappings"]
+                assert jwe_mappings == GleanPingWithEncryption.ping_metadata.get(
+                    "jwe_mappings"
+                )
+
+    # Note that even when the repo has no metadata defaults specified the glean/repositories
+    # endpoint will add both bq_dataset_family and bq_metadata_format
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_no_metadata_defaults(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                },
+                "name": "app1",
+            }
+        ]
+
+        glean = GleanPingNoMetadata({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+
+        assert len(final_schemas) == 2
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"] == GleanPingNoMetadata.ping_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 3
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+
+    # Unit test covering the case where the repository has a default override_attributes
+    # and confirming it is applied to all pings
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_override_attributes(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "override_attributes": [{"name": "geo_city", "value": None}],
+                },
+                "name": "app1",
+            }
+        ]
+        glean = GleanPingWithOverrideAttributes({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+
+        assert len(final_schemas) == 2
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithOverrideAttributes.ping_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 4
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+                override_attr = schema["mozPipelineMetadata"]["override_attributes"]
+                assert (
+                    GleanPingWithOverrideAttributes.ping_metadata.get(
+                        "override_attributes"
+                    )
+                    == override_attr
+                )
+
+    # Unit test covering the case where the repository has a default
+    # submission_timestamp_granularity and confirming it is applied to all pings
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_submission_timestamp_granularity(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "submission_timestamp_granularity": "seconds",
+                },
+                "name": "app1",
+            }
+        ]
+
+        glean = GleanPingWithGranularity({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+
+        assert len(final_schemas) == 2
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithGranularity.ping_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 4
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+                assert schema["mozPipelineMetadata"][
+                    "submission_timestamp_granularity"
+                ] == GleanPingWithGranularity.ping_metadata.get(
+                    "submission_timestamp_granularity"
+                )
+
+    # Can reuse any other test class as long as the repo indicates there is no dependency (local
+    # test config).
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_metadata_no_dependency(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": [],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "submission_timestamp_granularity": "seconds",
+                },
+                "name": "app1",
+            }
+        ]
+
+        glean = GleanPingWithGranularity({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+
+        assert len(final_schemas) == 1
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithGranularity.ping_metadata
+                )
+
+    # Unit test covering case where 2 pings have specific metadata and default metadata is applied
+    # to the dependency ping
+    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    def test_metadata_multiple_pings(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-base"],
+                "moz_pipeline_metadata": {
+                    "ping1": GleanPingWithMultiplePings.ping1_metadata,
+                    "ping2": GleanPingWithMultiplePings.ping2_metadata,
+                },
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                    "expiration_policy": {
+                        "delete_after_days": 21,
+                    },
+                    "submission_timestamp_granularity": "seconds",
+                },
+                "name": "app1",
+            }
+        ]
+        glean = GleanPingWithMultiplePings({"name": "app1", "app_id": "app1"})
+        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        final_schemas = {k: schemas[k][0].schema for k in schemas}
+
+        assert len(final_schemas) == 3
+        for name, schema in final_schemas.items():
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithMultiplePings.ping1_metadata
+                )
+            if name == "ping2":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingWithMultiplePings.ping2_metadata
+                )
+            if name == "dependency_ping":
+                # Need to do individual comparison due to update of value based on app_id
+                assert len(schema["mozPipelineMetadata"]) == 5
+                assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
+                assert (
+                    schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
+                )
+                assert schema["mozPipelineMetadata"]["bq_table"] == "dependency_ping_v1"
+                assert (
+                    schema["mozPipelineMetadata"]["expiration_policy"][
+                        "delete_after_days"
+                    ]
+                    == 21
+                )
+                assert (
+                    schema["mozPipelineMetadata"]["submission_timestamp_granularity"]
+                    == "seconds"
+                )
+
+    # This is not a stubbed test, if it fails check if there have been changes with probe-scraper
+    # or repositories.yaml or probeinfo_api.yaml
+    def test_applying_metadata(self, config):
         glean = glean_ping.GleanPing(
             {
-                "name": "glean-core",
-                "in-source": True,
-                "app_id": "org-mozilla-glean",
-                "encryption": {"use_jwk": True},
+                "name": "rally-debug",
+                "app_id": "rally_debug",
             }
         )
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
 
         final_schemas = {k: schemas[k][0].schema for k in schemas}
         for name, schema in final_schemas.items():
-            jwe_mappings = schema["mozPipelineMetadata"]["jwe_mappings"]
-            assert len(jwe_mappings) == 1
-            assert set(jwe_mappings[0].keys()) == {
-                "source_field_path",
-                "decrypted_field_path",
-            }
+            print(name)
+            assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "rally_debug"
+            assert schema["mozPipelineMetadata"]["bq_metadata_format"] == "pioneer"
+            assert (
+                schema["mozPipelineMetadata"]["expiration_policy"]["delete_after_days"]
+                == 180
+            )
+            assert (
+                schema["mozPipelineMetadata"]["jwe_mappings"][0]["decrypted_field_path"]
+                == ""
+            )
+            assert (
+                schema["mozPipelineMetadata"]["jwe_mappings"][0]["source_field_path"]
+                == "/payload"
+            )
 
+    # Integration test relies (on ping, repositories and dependencies endpoints).
     def test_rally_metadata_format(self, config):
         glean = glean_ping.GleanPing(
             {
@@ -171,6 +595,7 @@ class TestGleanPing(object):
             metadata_format = schema["mozPipelineMetadata"]["bq_metadata_format"]
             assert metadata_format == "pioneer"
 
+    # Integration test relies on ping, repositories and dependencies endpoints.
     def test_bug_1737656_affected(self, config):
         glean = glean_ping.GleanPing(
             {
@@ -200,6 +625,7 @@ class TestGleanPing(object):
             assert metrics_text is not None
             assert type(metrics_text.get("additionalProperties")) is dict
 
+    # Integration test relies on ping, repositories and dependencies endpoints.
     def test_bug_1737656_unaffected(self, config):
         glean = glean_ping.GleanPing(
             {
@@ -217,6 +643,7 @@ class TestGleanPing(object):
             assert metrics_text is None
 
     def test_url_to_url2(self, config):
+
         glean = GleanPingWithUrlMetric(
             {
                 # This ping does not exist in the static list of affected pings.

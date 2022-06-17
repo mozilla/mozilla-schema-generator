@@ -173,6 +173,14 @@ class GleanPing(GenericPing):
             ping_data.update(dependency_pings)
         return ping_data
 
+    def _get_ping_data_without_dependencies(self) -> Dict[str, Dict]:
+        url = self.ping_url_template.format(self.repo_name)
+        ping_data = GleanPing._get_json(url)
+        return ping_data
+
+    def _get_dependency_pings(self, dependency):
+        return self._get_json(self.ping_url_template.format(dependency))
+
     def get_pings(self) -> Set[str]:
         return self._get_ping_data().keys()
 
@@ -187,9 +195,9 @@ class GleanPing(GenericPing):
         """
         for k, v in default_metadata.items():
             if (
-                    k in ping_metadata
-                    and isinstance(ping_metadata[k], dict)
-                    and isinstance(default_metadata[k], dict)
+                k in ping_metadata
+                and isinstance(ping_metadata[k], dict)
+                and isinstance(default_metadata[k], dict)
             ):
                 GleanPing.apply_default_metadata(ping_metadata[k], default_metadata[k])
             else:
@@ -197,44 +205,58 @@ class GleanPing(GenericPing):
 
     def _get_ping_data_and_dependencies_with_default_metadata(self) -> Dict[str, Dict]:
         # Get the ping data with the pipeline metadata
-        url = self.ping_url_template.format(self.repo_name)
-        ping_data = GleanPing._get_json(url)
+        ping_data = self._get_ping_data_without_dependencies()
 
-        # The ping endpoint for the dependency pings does not include any repo defined moz_pipeline_metadata_defaults
-        # so they need to be applied here.
+        # The ping endpoint for the dependency pings does not include any repo defined
+        # moz_pipeline_metadata_defaults so they need to be applied here.
 
         # 1.  Get repo and pipeline default metadata.
         repos = GleanPing.get_repos()
-        current_repo = next((x for x in repos if x.get("app_id") == self.app_id), None)
-        default_metadata = current_repo.get('moz_pipeline_metadata_defaults')
+        current_repo = next((x for x in repos if x.get("app_id") == self.repo_name), {})
+        default_metadata = current_repo.get("moz_pipeline_metadata_defaults", {})
 
         # 2.  Apply the default metadata to each dependency defined ping.
         for dependency in self.get_dependencies():
-            dependency_pings = self._get_json(self.ping_url_template.format(dependency))
+            dependency_pings = self._get_dependency_pings(dependency)
             for dependency_ping in dependency_pings.values():
-                # Although it is counter intuitive to apply the default metadata on top of the existing dependency ping
-                # metadata it does set the repo specific value for bq_dataset_family instead of using the dependency id
-                # for the bq_dataset_family value.
-                GleanPing.apply_default_metadata(dependency_ping.get('moz_pipeline_metadata'), default_metadata)
+                # Although it is counter intuitive to apply the default metadata on top of the
+                # existing dependency ping metadata it does set the repo specific value for
+                # bq_dataset_family instead of using the dependency id for the bq_dataset_family
+                # value.
+                GleanPing.apply_default_metadata(
+                    dependency_ping.get("moz_pipeline_metadata"), default_metadata
+                )
             ping_data.update(dependency_pings)
         return ping_data
 
     @staticmethod
     def reorder_metadata(metadata):
-        desired_order_list = ['bq_dataset_family', 'bq_table', 'bq_metadata_format', 'submission_timestamp_granularity',
-                              'expiration_policy', 'override_attributes', 'jwe_mappings']
-        reordered_metadata = {k: metadata[k] for k in desired_order_list if k in metadata}
+        desired_order_list = [
+            "bq_dataset_family",
+            "bq_table",
+            "bq_metadata_format",
+            "submission_timestamp_granularity",
+            "expiration_policy",
+            "override_attributes",
+            "jwe_mappings",
+        ]
+        reordered_metadata = {
+            k: metadata[k] for k in desired_order_list if k in metadata
+        }
 
         # re-order jwe-mappings
-        desired_order_list = ['source_field_path', 'decrypted_field_path']
-        jwe_mapping_metadata = reordered_metadata.get('jwe_mappings')
+        desired_order_list = ["source_field_path", "decrypted_field_path"]
+        jwe_mapping_metadata = reordered_metadata.get("jwe_mappings")
         if jwe_mapping_metadata:
             reordered_jwe_mapping_metadata = []
             for mapping in jwe_mapping_metadata:
-                reordered_jwe_mapping_metadata.append({k: mapping[k] for k in desired_order_list if k in mapping})
-            reordered_metadata['jwe_mappings'] = reordered_jwe_mapping_metadata
+                reordered_jwe_mapping_metadata.append(
+                    {k: mapping[k] for k in desired_order_list if k in mapping}
+                )
+            reordered_metadata["jwe_mappings"] = reordered_jwe_mapping_metadata
 
-        # future proofing, in case there are other fields added at the ping top level add them to the end.
+        # future proofing, in case there are other fields added at the ping top level
+        # add them to the end.
         leftovers = {k: metadata[k] for k in set(metadata) - set(reordered_metadata)}
         reordered_metadata = {**reordered_metadata, **leftovers}
         return reordered_metadata
@@ -242,10 +264,10 @@ class GleanPing(GenericPing):
     def get_pings_and_pipeline_metadata(self) -> Dict[str, Dict]:
         pings = self._get_ping_data_and_dependencies_with_default_metadata()
         for ping_name, ping_data in pings.items():
-            metadata = ping_data.get('moz_pipeline_metadata')
+            metadata = ping_data.get("moz_pipeline_metadata")
 
-            # While technically unnecessary, the dictionary elements are re-ordered to match the currently deployed
-            # order and used to verify no difference in output.
+            # While technically unnecessary, the dictionary elements are re-ordered to match the
+            # currently deployed order and used to verify no difference in output.
             pings[ping_name] = GleanPing.reorder_metadata(metadata)
         return pings
 
