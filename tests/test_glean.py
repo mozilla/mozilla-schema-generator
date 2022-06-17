@@ -244,7 +244,7 @@ class TestGleanPing(object):
     # also a ping specific expiration_policy.  The ping specific expiration_policy is applied to the
     # ping schema and the repository default expiration_policy is applied to the dependency ping
     # schema.
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_expiration_policy(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -297,7 +297,7 @@ class TestGleanPing(object):
 
     # Unit test covering the case where the repository has a default jwe_mappings and confirming
     # it is applied to all pings
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_jwe_mappings(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -340,7 +340,7 @@ class TestGleanPing(object):
 
     # Note that even when the repo has no metadata defaults specified the glean/repositories
     # endpoint will add both bq_dataset_family and bq_metadata_format
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_no_metadata_defaults(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -376,7 +376,7 @@ class TestGleanPing(object):
 
     # Unit test covering the case where the repository has a default override_attributes
     # and confirming it is applied to all pings
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_override_attributes(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -420,7 +420,7 @@ class TestGleanPing(object):
 
     # Unit test covering the case where the repository has a default
     # submission_timestamp_granularity and confirming it is applied to all pings
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_submission_timestamp_granularity(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -463,7 +463,7 @@ class TestGleanPing(object):
 
     # Can reuse any other test class as long as the repo indicates there is no dependency (local
     # test config).
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_metadata_no_dependency(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
@@ -493,7 +493,7 @@ class TestGleanPing(object):
 
     # Unit test covering case where 2 pings have specific metadata and default metadata is applied
     # to the dependency ping
-    @patch("mozilla_schema_generator.glean_ping.GleanPing.get_repos", autospec=True)
+    @patch.object(glean_ping.GleanPing, "get_repos")
     def test_metadata_multiple_pings(self, mock_get_repos, config):
         mock_get_repos.return_value = [
             {
