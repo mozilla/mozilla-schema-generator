@@ -555,7 +555,7 @@ class TestGleanPing(object):
         glean = glean_ping.GleanPing(
             {
                 "name": "rally-debug",
-                "app_id": "rally_debug",
+                "app_id": "rally-debug",
             }
         )
         schemas = glean.generate_schema(config, split=False, generic_schema=True)
@@ -584,7 +584,7 @@ class TestGleanPing(object):
             {
                 "name": "rally-debug",
                 "in-source": True,
-                "app_id": "rally_debug",
+                "app_id": "rally-debug",
                 "encryption": {"use_jwk": True},
             }
         )
@@ -602,7 +602,7 @@ class TestGleanPing(object):
                 # This ping exists in the static list of affected pings.
                 "name": "rally-debug",
                 "in-source": True,
-                "app_id": "rally_debug",
+                "app_id": "rally-debug",
             }
         )
         schemas = glean.generate_schema(config, split=False)

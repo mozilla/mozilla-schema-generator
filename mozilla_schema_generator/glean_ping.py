@@ -212,7 +212,7 @@ class GleanPing(GenericPing):
 
         # 1.  Get repo and pipeline default metadata.
         repos = GleanPing.get_repos()
-        current_repo = next((x for x in repos if x.get("app_id") == self.repo_name), {})
+        current_repo = next((x for x in repos if x.get("app_id") == self.app_id), {})
         default_metadata = current_repo.get("moz_pipeline_metadata_defaults", {})
 
         # 2.  Apply the default metadata to each dependency defined ping.
