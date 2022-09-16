@@ -37,4 +37,4 @@ firefox-accounts.account-ecosystem.*
 # Bug 1783960
 # Delete the rally-attention-stream meta-pixel ping, per bug comment 20
 # This is a companion to mozilla/probe-scraper#495
-rally-attention-stream.*
+# rally-attention-stream.*
