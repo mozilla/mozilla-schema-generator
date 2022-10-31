@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 12.1.0"/>
+    <meta name="generator" content="pdoc 12.2.0"/>
     <title>mozilla_schema_generator.glean_ping API documentation</title>
 
     <style>/*! * Bootstrap Reboot v5.0.0 (https://getbootstrap.com/) * Copyright 2011-2021 The Bootstrap Authors * Copyright 2011-2021 Twitter, Inc. * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE) * Forked from Normalize.css, licensed MIT (https://github.com/necolas/normalize.css/blob/master/LICENSE.md) */*,::after,::before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#fff;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}hr{margin:1rem 0;color:inherit;background-color:currentColor;border:0;opacity:.25}hr:not([size]){height:1px}h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}h1{font-size:calc(1.375rem + 1.5vw)}@media (min-width:1200px){h1{font-size:2.5rem}}h2{font-size:calc(1.325rem + .9vw)}@media (min-width:1200px){h2{font-size:2rem}}h3{font-size:calc(1.3rem + .6vw)}@media (min-width:1200px){h3{font-size:1.75rem}}h4{font-size:calc(1.275rem + .3vw)}@media (min-width:1200px){h4{font-size:1.5rem}}h5{font-size:1.25rem}h6{font-size:1rem}p{margin-top:0;margin-bottom:1rem}abbr[data-bs-original-title],abbr[title]{-webkit-text-decoration:underline dotted;text-decoration:underline dotted;cursor:help;-webkit-text-decoration-skip-ink:none;text-decoration-skip-ink:none}address{margin-bottom:1rem;font-style:normal;line-height:inherit}ol,ul{padding-left:2rem}dl,ol,ul{margin-top:0;margin-bottom:1rem}ol ol,ol ul,ul ol,ul ul{margin-bottom:0}dt{font-weight:700}dd{margin-bottom:.5rem;margin-left:0}blockquote{margin:0 0 1rem}b,strong{font-weight:bolder}small{font-size:.875em}mark{padding:.2em;background-color:#fcf8e3}sub,sup{position:relative;font-size:.75em;line-height:0;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}a{color:#0d6efd;text-decoration:underline}a:hover{color:#0a58ca}a:not([href]):not([class]),a:not([href]):not([class]):hover{color:inherit;text-decoration:none}code,kbd,pre,samp{font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:1em;direction:ltr;unicode-bidi:bidi-override}pre{display:block;margin-top:0;margin-bottom:1rem;overflow:auto;font-size:.875em}pre code{font-size:inherit;color:inherit;word-break:normal}code{font-size:.875em;color:#d63384;word-wrap:break-word}a>code{color:inherit}kbd{padding:.2rem .4rem;font-size:.875em;color:#fff;background-color:#212529;border-radius:.2rem}kbd kbd{padding:0;font-size:1em;font-weight:700}figure{margin:0 0 1rem}img,svg{vertical-align:middle}table{caption-side:bottom;border-collapse:collapse}caption{padding-top:.5rem;padding-bottom:.5rem;color:#6c757d;text-align:left}th{text-align:inherit;text-align:-webkit-match-parent}tbody,td,tfoot,th,thead,tr{border-color:inherit;border-style:solid;border-width:0}label{display:inline-block}button{border-radius:0}button:focus:not(:focus-visible){outline:0}button,input,optgroup,select,textarea{margin:0;font-family:inherit;font-size:inherit;line-height:inherit}button,select{text-transform:none}[role=button]{cursor:pointer}select{word-wrap:normal}select:disabled{opacity:1}[list]::-webkit-calendar-picker-indicator{display:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]:not(:disabled),[type=reset]:not(:disabled),[type=submit]:not(:disabled),button:not(:disabled){cursor:pointer}::-moz-focus-inner{padding:0;border-style:none}textarea{resize:vertical}fieldset{min-width:0;padding:0;margin:0;border:0}legend{float:left;width:100%;padding:0;margin-bottom:.5rem;font-size:calc(1.275rem + .3vw);line-height:inherit}@media (min-width:1200px){legend{font-size:1.5rem}}legend+*{clear:left}::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-fields-wrapper,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-text,::-webkit-datetime-edit-year-field{padding:0}::-webkit-inner-spin-button{height:auto}[type=search]{outline-offset:-2px;-webkit-appearance:textfield}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-color-swatch-wrapper{padding:0}::file-selector-button{font:inherit}::-webkit-file-upload-button{font:inherit;-webkit-appearance:button}output{display:inline-block}iframe{border:0}summary{display:list-item;cursor:pointer}progress{vertical-align:baseline}[hidden]{display:none!important}</style>
@@ -37,27 +37,6 @@
                                 <a class="function" href="#GleanPing.__init__">GleanPing</a>
                         </li>
                         <li>
-                                <a class="variable" href="#GleanPing.schema_url">schema_url</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.probes_url_template">probes_url_template</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.ping_url_template">ping_url_template</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.repos_url">repos_url</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.dependencies_url_template">dependencies_url_template</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.default_dependencies">default_dependencies</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.ignore_pings">ignore_pings</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#GleanPing.get_schema">get_schema</a>
                         </li>
                         <li>
@@ -87,12 +66,6 @@
                         <li>
                                 <a class="function" href="#GleanPing.get_repos">get_repos</a>
                         </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.f">f</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#GleanPing.bug_1737656_affected_tables">bug_1737656_affected_tables</a>
-                        </li>
                 </ul>
 
             </li>
@@ -113,9 +86,9 @@
 <a href="./../mozilla_schema_generator.html">mozilla_schema_generator</a><wbr>.glean_ping    </h1>
 
                 
-                        <input id="glean_ping-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+                        <input id="mod-glean_ping-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
-                        <label class="view-source-button" for="glean_ping-view-source"><span>View Source</span></label>
+                        <label class="view-source-button" for="mod-glean_ping-view-source"><span>View Source</span></label>
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="c1"># -*- coding: utf-8 -*-</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a>
@@ -804,83 +777,6 @@
     
 
                             </div>
-                            <div id="GleanPing.schema_url" class="classattr">
-                                <div class="attr variable">
-            <span class="name">schema_url</span><span class="default_value"> = &#39;https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/glean/glean/glean.1.schema.json&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.schema_url"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.probes_url_template" class="classattr">
-                                <div class="attr variable">
-            <span class="name">probes_url_template</span><span class="default_value"> = &#39;https://probeinfo.telemetry.mozilla.org/glean/{}/metrics&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.probes_url_template"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.ping_url_template" class="classattr">
-                                <div class="attr variable">
-            <span class="name">ping_url_template</span><span class="default_value"> = &#39;https://probeinfo.telemetry.mozilla.org/glean/{}/pings&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.ping_url_template"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.repos_url" class="classattr">
-                                <div class="attr variable">
-            <span class="name">repos_url</span><span class="default_value"> = &#39;https://probeinfo.telemetry.mozilla.org/glean/repositories&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.repos_url"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.dependencies_url_template" class="classattr">
-                                <div class="attr variable">
-            <span class="name">dependencies_url_template</span><span class="default_value"> = &#39;https://probeinfo.telemetry.mozilla.org/glean/{}/dependencies&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.dependencies_url_template"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.default_dependencies" class="classattr">
-                                <div class="attr variable">
-            <span class="name">default_dependencies</span><span class="default_value"> = [&#39;glean-core&#39;]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.default_dependencies"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.ignore_pings" class="classattr">
-                                <div class="attr variable">
-            <span class="name">ignore_pings</span><span class="default_value"> = {&#39;all-pings&#39;, &#39;glean_ping_info&#39;, &#39;all_pings&#39;, &#39;glean_client_info&#39;, &#39;default&#39;}</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.ignore_pings"></a>
-    
-    
-
-                            </div>
                             <div id="GleanPing.get_schema" class="classattr">
                                         <input id="GleanPing.get_schema-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
@@ -1300,38 +1196,11 @@ to an arbitrary depth, updating keys. The <code>default_metadata</code> is merge
 
 
                             </div>
-                            <div id="GleanPing.f" class="classattr">
-                                <div class="attr variable">
-            <span class="name">f</span><span class="default_value"> = &lt;_io.TextIOWrapper name=&#39;mozilla_schema_generator/configs/bug_1737656_affected.txt&#39; mode=&#39;r&#39; encoding=&#39;UTF-8&#39;&gt;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.f"></a>
-    
-    
-
-                            </div>
-                            <div id="GleanPing.bug_1737656_affected_tables" class="classattr">
-                                <div class="attr variable">
-            <span class="name">bug_1737656_affected_tables</span><span class="default_value"> = [&#39;burnham.baseline_v1&#39;, &#39;burnham.deletion_request_v1&#39;, &#39;burnham.discovery_v1&#39;, &#39;burnham.events_v1&#39;, &#39;burnham.metrics_v1&#39;, &#39;burnham.space_ship_ready_v1&#39;, &#39;burnham.starbase46_v1&#39;, &#39;firefox_desktop_background_update.background_update_v1&#39;, &#39;firefox_desktop_background_update.baseline_v1&#39;, &#39;firefox_desktop_background_update.deletion_request_v1&#39;, &#39;firefox_desktop_background_update.events_v1&#39;, &#39;firefox_desktop_background_update.metrics_v1&#39;, &#39;firefox_desktop.baseline_v1&#39;, &#39;firefox_desktop.deletion_request_v1&#39;, &#39;firefox_desktop.events_v1&#39;, &#39;firefox_desktop.fog_validation_v1&#39;, &#39;firefox_desktop.metrics_v1&#39;, &#39;firefox_installer.install_v1&#39;, &#39;firefox_launcher_process.launcher_process_failure_v1&#39;, &#39;messaging_system.cfr_v1&#39;, &#39;messaging_system.infobar_v1&#39;, &#39;messaging_system.moments_v1&#39;, &#39;messaging_system.onboarding_v1&#39;, &#39;messaging_system.personalization_experiment_v1&#39;, &#39;messaging_system.snippets_v1&#39;, &#39;messaging_system.spotlight_v1&#39;, &#39;messaging_system.undesired_events_v1&#39;, &#39;messaging_system.whats_new_panel_v1&#39;, &#39;mlhackweek_search.action_v1&#39;, &#39;mlhackweek_search.baseline_v1&#39;, &#39;mlhackweek_search.custom_v1&#39;, &#39;mlhackweek_search.deletion_request_v1&#39;, &#39;mlhackweek_search.events_v1&#39;, &#39;mlhackweek_search.metrics_v1&#39;, &#39;mozilla_lockbox.addresses_sync_v1&#39;, &#39;mozilla_lockbox.baseline_v1&#39;, &#39;mozilla_lockbox.bookmarks_sync_v1&#39;, &#39;mozilla_lockbox.creditcards_sync_v1&#39;, &#39;mozilla_lockbox.deletion_request_v1&#39;, &#39;mozilla_lockbox.events_v1&#39;, &#39;mozilla_lockbox.history_sync_v1&#39;, &#39;mozilla_lockbox.logins_sync_v1&#39;, &#39;mozilla_lockbox.metrics_v1&#39;, &#39;mozilla_lockbox.sync_v1&#39;, &#39;mozilla_lockbox.tabs_sync_v1&#39;, &#39;mozilla_mach.baseline_v1&#39;, &#39;mozilla_mach.deletion_request_v1&#39;, &#39;mozilla_mach.events_v1&#39;, &#39;mozilla_mach.metrics_v1&#39;, &#39;mozilla_mach.usage_v1&#39;, &#39;mozillavpn.deletion_request_v1&#39;, &#39;mozillavpn.main_v1&#39;, &#39;mozphab.baseline_v1&#39;, &#39;mozphab.deletion_request_v1&#39;, &#39;mozphab.events_v1&#39;, &#39;mozphab.metrics_v1&#39;, &#39;mozphab.usage_v1&#39;, &#39;org_mozilla_bergamot.custom_v1&#39;, &#39;org_mozilla_bergamot.deletion_request_v1&#39;, &#39;org_mozilla_connect_firefox.baseline_v1&#39;, &#39;org_mozilla_connect_firefox.deletion_request_v1&#39;, &#39;org_mozilla_connect_firefox.events_v1&#39;, &#39;org_mozilla_connect_firefox.metrics_v1&#39;, &#39;org_mozilla_fenix.activation_v1&#39;, &#39;org_mozilla_fenix.addresses_sync_v1&#39;, &#39;org_mozilla_fenix.baseline_v1&#39;, &#39;org_mozilla_fenix.bookmarks_sync_v1&#39;, &#39;org_mozilla_fenix.creditcards_sync_v1&#39;, &#39;org_mozilla_fenix.deletion_request_v1&#39;, &#39;org_mozilla_fenix.events_v1&#39;, &#39;org_mozilla_fenix.first_session_v1&#39;, &#39;org_mozilla_fenix.fog_validation_v1&#39;, &#39;org_mozilla_fenix.history_sync_v1&#39;, &#39;org_mozilla_fenix.installation_v1&#39;, &#39;org_mozilla_fenix.logins_sync_v1&#39;, &#39;org_mozilla_fenix.metrics_v1&#39;, &#39;org_mozilla_fenix.migration_v1&#39;, &#39;org_mozilla_fenix.startup_timeline_v1&#39;, &#39;org_mozilla_fenix.sync_v1&#39;, &#39;org_mozilla_fenix.tabs_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.activation_v1&#39;, &#39;org_mozilla_fenix_nightly.addresses_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.baseline_v1&#39;, &#39;org_mozilla_fenix_nightly.bookmarks_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.creditcards_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.deletion_request_v1&#39;, &#39;org_mozilla_fenix_nightly.events_v1&#39;, &#39;org_mozilla_fenix_nightly.first_session_v1&#39;, &#39;org_mozilla_fenix_nightly.fog_validation_v1&#39;, &#39;org_mozilla_fenix_nightly.history_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.installation_v1&#39;, &#39;org_mozilla_fenix_nightly.logins_sync_v1&#39;, &#39;org_mozilla_fenix_nightly.metrics_v1&#39;, &#39;org_mozilla_fenix_nightly.migration_v1&#39;, &#39;org_mozilla_fenix_nightly.startup_timeline_v1&#39;, &#39;org_mozilla_fenix_nightly.sync_v1&#39;, &#39;org_mozilla_fenix_nightly.tabs_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.activation_v1&#39;, &#39;org_mozilla_fennec_aurora.addresses_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.baseline_v1&#39;, &#39;org_mozilla_fennec_aurora.bookmarks_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.creditcards_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.deletion_request_v1&#39;, &#39;org_mozilla_fennec_aurora.events_v1&#39;, &#39;org_mozilla_fennec_aurora.first_session_v1&#39;, &#39;org_mozilla_fennec_aurora.fog_validation_v1&#39;, &#39;org_mozilla_fennec_aurora.history_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.installation_v1&#39;, &#39;org_mozilla_fennec_aurora.logins_sync_v1&#39;, &#39;org_mozilla_fennec_aurora.metrics_v1&#39;, &#39;org_mozilla_fennec_aurora.migration_v1&#39;, &#39;org_mozilla_fennec_aurora.startup_timeline_v1&#39;, &#39;org_mozilla_fennec_aurora.sync_v1&#39;, &#39;org_mozilla_fennec_aurora.tabs_sync_v1&#39;, &#39;org_mozilla_firefox_beta.activation_v1&#39;, &#39;org_mozilla_firefox_beta.addresses_sync_v1&#39;, &#39;org_mozilla_firefox_beta.baseline_v1&#39;, &#39;org_mozilla_firefox_beta.bookmarks_sync_v1&#39;, &#39;org_mozilla_firefox_beta.creditcards_sync_v1&#39;, &#39;org_mozilla_firefox_beta.deletion_request_v1&#39;, &#39;org_mozilla_firefox_beta.events_v1&#39;, &#39;org_mozilla_firefox_beta.first_session_v1&#39;, &#39;org_mozilla_firefox_beta.fog_validation_v1&#39;, &#39;org_mozilla_firefox_beta.history_sync_v1&#39;, &#39;org_mozilla_firefox_beta.installation_v1&#39;, &#39;org_mozilla_firefox_beta.logins_sync_v1&#39;, &#39;org_mozilla_firefox_beta.metrics_v1&#39;, &#39;org_mozilla_firefox_beta.migration_v1&#39;, &#39;org_mozilla_firefox_beta.startup_timeline_v1&#39;, &#39;org_mozilla_firefox_beta.sync_v1&#39;, &#39;org_mozilla_firefox_beta.tabs_sync_v1&#39;, &#39;org_mozilla_firefox.activation_v1&#39;, &#39;org_mozilla_firefox.addresses_sync_v1&#39;, &#39;org_mozilla_firefox.baseline_v1&#39;, &#39;org_mozilla_firefox.bookmarks_sync_v1&#39;, &#39;org_mozilla_firefox.creditcards_sync_v1&#39;, &#39;org_mozilla_firefox.deletion_request_v1&#39;, &#39;org_mozilla_firefox.events_v1&#39;, &#39;org_mozilla_firefox.first_session_v1&#39;, &#39;org_mozilla_firefox.fog_validation_v1&#39;, &#39;org_mozilla_firefox.history_sync_v1&#39;, &#39;org_mozilla_firefox.installation_v1&#39;, &#39;org_mozilla_firefox.logins_sync_v1&#39;, &#39;org_mozilla_firefox.metrics_v1&#39;, &#39;org_mozilla_firefox.migration_v1&#39;, &#39;org_mozilla_firefox.startup_timeline_v1&#39;, &#39;org_mozilla_firefox.sync_v1&#39;, &#39;org_mozilla_firefox.tabs_sync_v1&#39;, &#39;org_mozilla_firefoxreality.baseline_v1&#39;, &#39;org_mozilla_firefoxreality.deletion_request_v1&#39;, &#39;org_mozilla_firefoxreality.events_v1&#39;, &#39;org_mozilla_firefoxreality.launch_v1&#39;, &#39;org_mozilla_firefoxreality.metrics_v1&#39;, &#39;org_mozilla_focus_beta.activation_v1&#39;, &#39;org_mozilla_focus_beta.baseline_v1&#39;, &#39;org_mozilla_focus_beta.deletion_request_v1&#39;, &#39;org_mozilla_focus_beta.events_v1&#39;, &#39;org_mozilla_focus_beta.metrics_v1&#39;, &#39;org_mozilla_focus.activation_v1&#39;, &#39;org_mozilla_focus.baseline_v1&#39;, &#39;org_mozilla_focus.deletion_request_v1&#39;, &#39;org_mozilla_focus.events_v1&#39;, &#39;org_mozilla_focus.metrics_v1&#39;, &#39;org_mozilla_focus_nightly.activation_v1&#39;, &#39;org_mozilla_focus_nightly.baseline_v1&#39;, &#39;org_mozilla_focus_nightly.deletion_request_v1&#39;, &#39;org_mozilla_focus_nightly.events_v1&#39;, &#39;org_mozilla_focus_nightly.metrics_v1&#39;, &#39;org_mozilla_ios_fennec.baseline_v1&#39;, &#39;org_mozilla_ios_fennec.deletion_request_v1&#39;, &#39;org_mozilla_ios_fennec.events_v1&#39;, &#39;org_mozilla_ios_fennec.metrics_v1&#39;, &#39;org_mozilla_ios_firefox.baseline_v1&#39;, &#39;org_mozilla_ios_firefox.deletion_request_v1&#39;, &#39;org_mozilla_ios_firefox.events_v1&#39;, &#39;org_mozilla_ios_firefox.metrics_v1&#39;, &#39;org_mozilla_ios_firefoxbeta.baseline_v1&#39;, &#39;org_mozilla_ios_firefoxbeta.deletion_request_v1&#39;, &#39;org_mozilla_ios_firefoxbeta.events_v1&#39;, &#39;org_mozilla_ios_firefoxbeta.metrics_v1&#39;, &#39;org_mozilla_ios_focus.baseline_v1&#39;, &#39;org_mozilla_ios_focus.deletion_request_v1&#39;, &#39;org_mozilla_ios_focus.events_v1&#39;, &#39;org_mozilla_ios_focus.metrics_v1&#39;, &#39;org_mozilla_ios_klar.baseline_v1&#39;, &#39;org_mozilla_ios_klar.deletion_request_v1&#39;, &#39;org_mozilla_ios_klar.events_v1&#39;, &#39;org_mozilla_ios_klar.metrics_v1&#39;, &#39;org_mozilla_ios_lockbox.baseline_v1&#39;, &#39;org_mozilla_ios_lockbox.deletion_request_v1&#39;, &#39;org_mozilla_ios_lockbox.events_v1&#39;, &#39;org_mozilla_ios_lockbox.metrics_v1&#39;, &#39;org_mozilla_klar.activation_v1&#39;, &#39;org_mozilla_klar.baseline_v1&#39;, &#39;org_mozilla_klar.deletion_request_v1&#39;, &#39;org_mozilla_klar.events_v1&#39;, &#39;org_mozilla_klar.metrics_v1&#39;, &#39;org_mozilla_mozregression.baseline_v1&#39;, &#39;org_mozilla_mozregression.deletion_request_v1&#39;, &#39;org_mozilla_mozregression.events_v1&#39;, &#39;org_mozilla_mozregression.metrics_v1&#39;, &#39;org_mozilla_mozregression.usage_v1&#39;, &#39;org_mozilla_reference_browser.baseline_v1&#39;, &#39;org_mozilla_reference_browser.deletion_request_v1&#39;, &#39;org_mozilla_reference_browser.events_v1&#39;, &#39;org_mozilla_reference_browser.metrics_v1&#39;, &#39;org_mozilla_tv_firefox.baseline_v1&#39;, &#39;org_mozilla_tv_firefox.deletion_request_v1&#39;, &#39;org_mozilla_tv_firefox.events_v1&#39;, &#39;org_mozilla_tv_firefox.metrics_v1&#39;, &#39;org_mozilla_vrbrowser.addresses_sync_v1&#39;, &#39;org_mozilla_vrbrowser.baseline_v1&#39;, &#39;org_mozilla_vrbrowser.bookmarks_sync_v1&#39;, &#39;org_mozilla_vrbrowser.creditcards_sync_v1&#39;, &#39;org_mozilla_vrbrowser.deletion_request_v1&#39;, &#39;org_mozilla_vrbrowser.events_v1&#39;, &#39;org_mozilla_vrbrowser.history_sync_v1&#39;, &#39;org_mozilla_vrbrowser.logins_sync_v1&#39;, &#39;org_mozilla_vrbrowser.metrics_v1&#39;, &#39;org_mozilla_vrbrowser.session_end_v1&#39;, &#39;org_mozilla_vrbrowser.sync_v1&#39;, &#39;org_mozilla_vrbrowser.tabs_sync_v1&#39;, &#39;rally_core.deletion_request_v1&#39;, &#39;rally_core.demographics_v1&#39;, &#39;rally_core.enrollment_v1&#39;, &#39;rally_core.study_enrollment_v1&#39;, &#39;rally_core.study_unenrollment_v1&#39;, &#39;rally_core.uninstall_deletion_v1&#39;, &#39;rally_debug.deletion_request_v1&#39;, &#39;rally_debug.demographics_v1&#39;, &#39;rally_debug.enrollment_v1&#39;, &#39;rally_debug.study_enrollment_v1&#39;, &#39;rally_debug.study_unenrollment_v1&#39;, &#39;rally_debug.uninstall_deletion_v1&#39;, &#39;rally_study_zero_one.deletion_request_v1&#39;, &#39;rally_study_zero_one.rs01_event_v1&#39;, &#39;rally_study_zero_one.study_enrollment_v1&#39;, &#39;rally_zero_one.deletion_request_v1&#39;, &#39;rally_zero_one.measurements_v1&#39;, &#39;rally_zero_one.pioneer_enrollment_v1&#39;]</span>
-
-        
-    </div>
-    <a class="headerlink" href="#GleanPing.bug_1737656_affected_tables"></a>
-    
-    
-
-                            </div>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt><a href="generic_ping.html#GenericPing">mozilla_schema_generator.generic_ping.GenericPing</a></dt>
-                                <dd id="GleanPing.probe_info_base_url" class="variable"><a href="generic_ping.html#GenericPing.probe_info_base_url">probe_info_base_url</a></dd>
-                <dd id="GleanPing.default_encoding" class="variable"><a href="generic_ping.html#GenericPing.default_encoding">default_encoding</a></dd>
-                <dd id="GleanPing.default_max_size" class="variable"><a href="generic_ping.html#GenericPing.default_max_size">default_max_size</a></dd>
-                <dd id="GleanPing.extra_schema_key" class="variable"><a href="generic_ping.html#GenericPing.extra_schema_key">extra_schema_key</a></dd>
-                <dd id="GleanPing.cache_dir" class="variable"><a href="generic_ping.html#GenericPing.cache_dir">cache_dir</a></dd>
-                <dd id="GleanPing.get_env" class="function"><a href="generic_ping.html#GenericPing.get_env">get_env</a></dd>
+                                <dd id="GleanPing.get_env" class="function"><a href="generic_ping.html#GenericPing.get_env">get_env</a></dd>
                 <dd id="GleanPing.make_schemas" class="function"><a href="generic_ping.html#GenericPing.make_schemas">make_schemas</a></dd>
                 <dd id="GleanPing.make_extra_schema" class="function"><a href="generic_ping.html#GenericPing.make_extra_schema">make_extra_schema</a></dd>
 
