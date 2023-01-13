@@ -108,6 +108,20 @@ function _create_changelog() {
         --date=iso
 }
 
+function _check_all_schemas_have_bq() {
+    find . -type f -name "*.schema.json" | while read -r fname; do
+        # This schema is AWS-specific, fails transpilation, and should be ignored
+        if [[ $fname =~ metadata/sources ]] ; then
+            continue
+        fi
+        bq_out=${fname/schema.json/bq}
+        if ! test -e "$bq_out"; then
+          echo "Missing expected bq schema file: $bq_out" >&2
+          exit 1
+        fi
+    done
+}
+
 function _create_readme() {
     cat << EOF > README.md
 # mozilla-pipeline-schemas: generated-schemas
@@ -157,6 +171,8 @@ function _commit_schemas() {
         --generic-schema \
         --mps-branch "$mps_branch_source" \
         --out-dir schemas
+
+    _check_all_schemas_have_bq
 
     _create_readme
 
