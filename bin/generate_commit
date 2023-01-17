@@ -110,7 +110,7 @@ function _create_changelog() {
 
 function _check_all_schemas_have_bq() {
     MISSING_BQ_SCHEMAS="$(
-      find . -type f -name "*.schema.json" |
+      find ./schemas -type f -name "*.schema.json" |
       sed 's/schema.json/bq/' |
       grep -vf "$DISALLOWLIST" |
       # echo files that don't exist
