@@ -109,17 +109,18 @@ function _create_changelog() {
 }
 
 function _check_all_schemas_have_bq() {
-    find . -type f -name "*.schema.json" | while read -r fname; do
-        # This schema is AWS-specific, fails transpilation, and should be ignored
-        if [[ $fname =~ metadata/sources ]] ; then
-            continue
-        fi
-        bq_out=${fname/schema.json/bq}
-        if ! test -e "$bq_out"; then
-          echo "Missing expected bq schema file: $bq_out" >&2
-          exit 1
-        fi
-    done
+    MISSING_BQ_SCHEMAS="$(
+      find . -type f -name "*.schema.json" |
+      sed 's/schema.json/bq/' |
+      grep -vf "$DISALLOWLIST" |
+      # echo files that don't exist
+      xargs -n 1 bash -c 'test -e "$1" || echo "$1"' -s
+    )"
+    if [ -n "$MISSING_BQ_SCHEMAS" ]; then
+        echo "Missing expected bq schema files:" >&2
+        echo "$MISSING_BQ_SCHEMAS" >&2
+        exit 1
+    fi
 }
 
 function _create_readme() {
