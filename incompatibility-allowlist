@@ -42,5 +42,5 @@ firefox-accounts.account-ecosystem.*
 # Bug 1804256
 # Delete mozillavpn.metrics and mozillavpn.baseline after reverting changes to unify VPN apps
 # This is a companion to https://github.com/mozilla/probe-scraper/pull/550
-mozillavpn.metrics.*
-mozillavpn.baseline.*
+# mozillavpn.metrics.*
+# mozillavpn.baseline.*
