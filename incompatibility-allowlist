@@ -40,7 +40,8 @@ firefox-accounts.account-ecosystem.*
 # rally-attention-stream.*
 
 # Bug 1804256
-# Delete mozillavpn.metrics and mozillavpn.baseline after reverting changes to unify VPN apps
-# This is a companion to https://github.com/mozilla/probe-scraper/pull/550
+# Delete mozillavpn.metrics and mozillavpn.baseline after fixing typo in https://github.com/mozilla/probe-scraper/pull/553
+# mozillavpn was treated as Glean.js app after typo got fixed, which resulted in these 
+# ping schemas being removed (since they don't exist for Glean.js)
 mozillavpn.metrics.*
 mozillavpn.baseline.*
