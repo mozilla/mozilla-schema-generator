@@ -41,7 +41,20 @@ firefox-accounts.account-ecosystem.*
 
 # Bug 1804256
 # Delete mozillavpn.metrics and mozillavpn.baseline after fixing typo in https://github.com/mozilla/probe-scraper/pull/553
-# mozillavpn was treated as Glean.js app after typo got fixed, which resulted in these 
+# mozillavpn was treated as Glean.js app after typo got fixed, which resulted in these
 # ping schemas being removed (since they don't exist for Glean.js)
 mozillavpn.metrics.*
 mozillavpn.baseline.*
+
+# Bug 1815432
+# Delete unused glean crash pings for glean applications other than firefox-desktop
+org-mozilla-firefox.crash.*
+org-mozilla-firefox-beta.crash.*
+org-mozilla-fenix.crash.*
+org-mozilla-fenix-nightly.crash.*
+org-mozilla-fennec-aurora.crash.*
+org-mozilla-focus.crash.*
+org-mozilla-focus-beta.crash.*
+org-mozilla-focus-nightly.crash.*
+org-mozilla-klar.crash.*
+pine.crash.*
