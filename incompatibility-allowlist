@@ -48,7 +48,6 @@ mozillavpn.baseline.*
 
 # Bug 1815432
 # Delete unused glean crash pings for glean applications other than firefox-desktop
-firefox-desktop-background-update.crash.*
 org-mozilla-firefox.crash.*
 org-mozilla-firefox-beta.crash.*
 org-mozilla-fenix.crash.*
