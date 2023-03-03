@@ -4,7 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import datetime
 import json
 import logging
 import os
@@ -198,12 +197,16 @@ class GenericPing(object):
 
     @staticmethod
     def _get_json_str(url: str) -> str:
-        no_param_url = re.sub(r"\?.*", "", url)
+        if GenericPing._present_in_cache(url):
+            return GenericPing._retrieve_from_cache(url)
 
-        if GenericPing._present_in_cache(no_param_url):
-            return GenericPing._retrieve_from_cache(no_param_url)
+        headers = {}
+        if url.startswith(GenericPing.probe_info_base_url):
+            # For probe-info-service requests, set the cache-control header to force
+            # google cloud cdn to bypass the cache
+            headers["Cache-Control"] = "no-cache"
 
-        r = requests.get(url, stream=True)
+        r = requests.get(url, headers=headers, stream=True)
         r.raise_for_status()
 
         json_bytes = b""
@@ -216,17 +219,12 @@ class GenericPing(object):
             raise ValueError("Could not parse " + url) from e
 
         final_json = json_bytes.decode(r.encoding or GenericPing.default_encoding)
-        GenericPing._add_to_cache(no_param_url, final_json)
+        GenericPing._add_to_cache(url, final_json)
 
         return final_json
 
     @staticmethod
     def _get_json(url: str) -> dict:
-        if url.startswith(GenericPing.probe_info_base_url):
-            # For probe-info-service requests, add
-            # random query param to force cloudfront
-            # to bypass the cache
-            url += f"?t={datetime.datetime.utcnow().isoformat()}"
         try:
             return json.loads(GenericPing._get_json_str(url))
         except JSONDecodeError:
