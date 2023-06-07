@@ -12,6 +12,7 @@ from pathlib import Path
 import click
 import yaml
 
+from . import subset_pings
 from .bhr_ping import BhrPing
 from .common_ping import CommonPing
 from .config import Config
@@ -235,6 +236,35 @@ def write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branc
     dump_schema(schemas, out_dir and out_dir.joinpath(repo["app_id"]), pretty)
 
 
+@click.command()
+@click.argument(
+    "config",
+    type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
+    default=CONFIGS_DIR / "subset.yaml",
+)
+@common_options
+def generate_subset_pings(config, out_dir, split, pretty, mps_branch):
+    """Read in pings from disk and move fields to new subset pings.
+
+    If configured, also create a remainder ping with all the fields that weren't moved.
+
+    Ignore mps_branch and use the schemas on disk, because those will be populated with probes.
+    """
+    if split:
+        raise NotImplementedError("Splitting of subset pings is not supported.")
+    if out_dir:
+        out_dir = Path(out_dir)
+    with open(config, "r") as f:
+        config_data = yaml.safe_load(f)
+    schemas = subset_pings.generate(config_data, out_dir)
+    for namespace, doctypes in schemas.items():
+        for doctype, versions in doctypes.items():
+            for version, schema in versions.items():
+                dump_schema(
+                    {doctype: schema}, out_dir / namespace, pretty, version=version
+                )
+
+
 def dump_schema(schemas, out_dir, pretty, *, version=1):
     json_dump_args = {"cls": SchemaEncoder}
     if pretty:
@@ -275,6 +305,7 @@ main.add_command(generate_main_ping)
 main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
+main.add_command(generate_subset_pings)
 
 
 if __name__ == "__main__":
