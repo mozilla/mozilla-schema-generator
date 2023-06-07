@@ -9,6 +9,6 @@ from mozilla_schema_generator.config import Config
 
 
 def test_schema_contains_hangs_stacks():
-    schema = BhrPing().generate_schema(Config("bhr", {}))["bhr"][0].schema
+    schema = BhrPing().generate_schema(Config("bhr", {}))["bhr"].schema
     hangs = schema["properties"]["payload"]["properties"]["hangs"]
     assert hangs["items"]["properties"]["stack"]["type"] == "string"

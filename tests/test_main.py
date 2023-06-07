@@ -29,7 +29,7 @@ class TestMainPing(object):
         assert main.get_env().get_size() > 0
 
     def test_single_schema(self, main, config):
-        schema = main.generate_schema(config)["main"][0].schema
+        schema = main.generate_schema(config)["main"].schema
 
         assert "environment" in schema["properties"]
         assert "payload" in schema["properties"]
@@ -51,20 +51,3 @@ class TestMainPing(object):
             max([int(p.definition["versions"]["last"]) for p in probes])
             >= main.MIN_FX_VERSION
         )
-
-    def test_split_schema(self, main, config):
-        schema = main.generate_schema(config, split=True)
-
-        expected = {
-            "histograms",
-            "scalars",
-            "keyed_histograms",
-            "keyed_scalars",
-            "extra",
-        }
-        assert set(schema.keys()) == expected
-
-        for k, schemas in schema.items():
-            for s in schemas:
-                assert "environment" in s.schema["properties"]
-                assert "payload" in s.schema["properties"]

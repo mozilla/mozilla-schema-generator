@@ -277,9 +277,7 @@ class GleanPing(GenericPing):
             k: v["history"][-1]["description"] for k, v in self._get_ping_data().items()
         }
 
-    def generate_schema(
-        self, config, split, generic_schema=False
-    ) -> Dict[str, List[Schema]]:
+    def generate_schema(self, config, generic_schema=False) -> Dict[str, Schema]:
         pings = self.get_pings_and_pipeline_metadata()
         schemas = {}
 
@@ -314,12 +312,11 @@ class GleanPing(GenericPing):
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
-                schemas[new_config.name] = [schema]
+                schemas[new_config.name] = schema
             else:
                 generated = super().generate_schema(new_config)
-                for value in generated.values():
-                    for schema in value:
-                        schema.schema.update(defaults)
+                for schema in generated.values():
+                    schema.schema.update(defaults)
                 schemas.update(generated)
 
         return schemas

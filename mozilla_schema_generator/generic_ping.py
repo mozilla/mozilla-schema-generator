@@ -25,7 +25,6 @@ class GenericPing(object):
     probe_info_base_url = "https://probeinfo.telemetry.mozilla.org"
     default_encoding = "utf-8"
     default_max_size = 12000  # https://bugzilla.mozilla.org/show_bug.cgi?id=1688633
-    extra_schema_key = "extra"
     cache_dir = pathlib.Path(os.environ.get("MSG_PROBE_CACHE_DIR", ".probe_cache"))
 
     def __init__(self, schema_url, env_url, probes_url, mps_branch="main"):
@@ -45,15 +44,13 @@ class GenericPing(object):
         ]
 
     def generate_schema(
-        self, config: Config, *, split: bool = None, max_size: int = None
-    ) -> Dict[str, List[Schema]]:
+        self, config: Config, *, max_size: int = None
+    ) -> Dict[str, Schema]:
         schema = self.get_schema()
         env = self.get_env()
 
         probes = self.get_probes()
 
-        if split is None:
-            split = False
         if max_size is None:
             max_size = self.default_max_size
 
@@ -62,30 +59,14 @@ class GenericPing(object):
                 "Environment must be smaller than max_size {}".format(max_size)
             )
 
-        # TODO: Allow splits of extra schema, if necessary
         if schema.get_size() >= max_size:
             raise SchemaException(
                 "Schema must be smaller than max_size {}".format(max_size)
             )
 
-        if split:
-            configs = config.split()
-        else:
-            configs = [config]
-            env = schema
+        schemas = {config.name: self.make_schema(schema, probes, config, max_size)}
 
-        schemas = {
-            c.name: self.make_schemas(env, probes, c, split, max_size) for c in configs
-        }
-
-        if split:
-            schemas[self.extra_schema_key] = self.make_extra_schema(
-                schema, probes, configs
-            )
-
-        if any(
-            schema.get_size() > max_size for _, s in schemas.items() for schema in s
-        ):
+        if any(schema.get_size() > max_size for schema in schemas.values()):
             raise SchemaException(
                 "Schema must be smaller or equal max_size {}".format(max_size)
             )
@@ -93,18 +74,16 @@ class GenericPing(object):
         return schemas
 
     @staticmethod
-    def make_schemas(
-        env: Schema, probes: List[Probe], config: Config, split: bool, max_size: int
-    ) -> List[Schema]:
+    def make_schema(
+        env: Schema, probes: List[Probe], config: Config, max_size: int
+    ) -> Schema:
         """
         Fill in probes based on the config, and keep only the env
         parts of the schema. Throw away everything else.
         """
         schema_elements = sorted(config.get_schema_elements(probes), key=lambda x: x[1])
-        schemas = []
 
-        # TODO: Should env be checked to be a subset of schema?
-        final_schema = env.clone()
+        schema = env.clone()
         for schema_key, probe in schema_elements:
             try:
                 addtlProps = env.get(schema_key + ("additionalProperties",))
@@ -113,59 +92,27 @@ class GenericPing(object):
 
             probe_schema = Schema(probe.get_schema(addtlProps)).clone()
 
-            if split and final_schema.get_size() + probe_schema.get_size() > max_size:
-                schemas.append(final_schema)
-                final_schema = env.clone()
-
-            final_schema.set_schema_elem(
+            schema.set_schema_elem(
                 schema_key + ("properties", probe.name), probe_schema.schema
             )
 
         # Remove all additionalProperties (#22)
-        schemas.append(final_schema)
-        for s in schemas:
-            for key in config.get_match_keys():
-                try:
-                    s.delete_group_from_schema(
-                        key + ("propertyNames",), propagate=False
-                    )
-                except KeyError:
-                    pass
+        for key in config.get_match_keys():
+            try:
+                schema.delete_group_from_schema(
+                    key + ("propertyNames",), propagate=False
+                )
+            except KeyError:
+                pass
 
-                try:
-                    s.delete_group_from_schema(
-                        key + ("additionalProperties",), propagate=True
-                    )
-                except KeyError:
-                    pass
+            try:
+                schema.delete_group_from_schema(
+                    key + ("additionalProperties",), propagate=True
+                )
+            except KeyError:
+                pass
 
-        return schemas
-
-    @staticmethod
-    def make_extra_schema(
-        schema: Schema, probes: List[Probe], configs: List[Config]
-    ) -> List[Schema]:
-        """
-        Given the list of probes and the configuration,
-        return the schema that has everything but those sections that we
-        filled in already.
-
-        TODO: Split the extra schema, when needed (e.g. extra.0.schema.json, extra.1.schema.json)
-        """
-        schema = schema.clone()
-
-        # Get the schema elements we already filled in for the other tables
-        schema_elements = [
-            schema_key
-            for _config in configs
-            for schema_key, _ in _config.get_schema_elements(probes)
-        ]
-
-        # Delete those from the schema
-        for schema_key in schema_elements:
-            schema.delete_group_from_schema(schema_key)
-
-        return [schema]
+        return schema
 
     @staticmethod
     def _slugify(text: str) -> str:
