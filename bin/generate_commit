@@ -55,7 +55,7 @@ function _generate_schemas() {
     alias_schemas "$ALIASES_PATH" .
 
     # Generate subset pings
-    mozilla-schema-generator generate-subset-pings
+    mozilla-schema-generator generate-subset-pings \
         --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)

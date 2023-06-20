@@ -252,8 +252,11 @@ def generate_subset_pings(config, out_dir, split, pretty, mps_branch):
     """
     if split:
         raise NotImplementedError("Splitting of subset pings is not supported.")
-    if out_dir:
-        out_dir = Path(out_dir)
+    if not out_dir:
+        raise NotImplementedError(
+            "Generating subset pings without out dir is not supported."
+        )
+    out_dir = Path(out_dir)
     with open(config, "r") as f:
         config_data = yaml.safe_load(f)
     schemas = subset_pings.generate(config_data, out_dir)
