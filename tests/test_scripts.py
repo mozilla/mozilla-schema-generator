@@ -31,7 +31,7 @@ class TestSchemaAliasing(object):
         bq_file = path / f"{self.source_doctype}.1.bq"
 
         json_file.parent.mkdir(parents=True)
-        json_file.touch()
+        json_file.write_text("{}")
         bq_file.touch()
 
         yield
@@ -64,7 +64,7 @@ class TestSchemaAliasing(object):
         assert res.returncode == 0
 
         test_path = pathlib.Path(self.base_dir) / self.source_namespace / test_doctype
-        assert (test_path / f"{test_doctype}.1.bq").exists()
+        assert (test_path / f"{test_doctype}.1.schema.json").exists()
 
     def test_aliasing_new_namespace(self):
         test_namespace = "test-namespace"
@@ -85,7 +85,7 @@ class TestSchemaAliasing(object):
         assert res.returncode == 0
 
         test_path = pathlib.Path(self.base_dir) / test_namespace / test_doctype
-        assert (test_path / f"{test_doctype}.1.bq").exists()
+        assert (test_path / f"{test_doctype}.1.schema.json").exists()
 
     def test_no_aliasing(self):
         aliases_path = self.write_aliases({})

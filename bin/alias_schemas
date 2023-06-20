@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+import json
+from pathlib import Path
+
 import click
-import json 
-import pathlib
-import shutil
 import jsonschema
 
+SCHEMA_PATH = Path(__file__).parent.parent / "validation-schemas" / "aliases.json"
 
-SCHEMA_PATH = pathlib.Path(__file__).parent.parent / "validation-schemas" / "aliases.json"
 
 def get_schema():
     with open(SCHEMA_PATH) as f:
@@ -16,28 +16,28 @@ def get_schema():
 
 @click.command()
 @click.argument(
-    'aliases-path',
+    "aliases-path",
     type=click.Path(
         dir_okay=False,
         file_okay=True,
         writable=False,
         exists=True,
     ),
-    required=True
+    required=True,
 )
 @click.argument(
-    'base-dir',
+    "base-dir",
     type=click.Path(
         dir_okay=True,
         file_okay=False,
         writable=True,
         exists=True,
     ),
-    required=True
+    required=True,
 )
 def main(aliases_path, base_dir):
 
-    base_dir = pathlib.Path(base_dir)
+    base_dir = Path(base_dir)
 
     with open(aliases_path) as f:
         aliases_parsed = json.load(f)
@@ -46,21 +46,34 @@ def main(aliases_path, base_dir):
 
     for dest_namespace, doctypes in aliases_parsed.items():
         for dest_doctype, alias_info in doctypes.items():
-            source_namespace = alias_info['source-namespace']
-            source_doctype = alias_info['source-doctype']
+            source_namespace = alias_info["source-namespace"]
+            source_doctype = alias_info["source-doctype"]
             source_dir = base_dir / source_namespace / source_doctype
             dest_dir = base_dir / dest_namespace / dest_doctype
 
             assert source_dir.exists()
 
-            for source in source_dir.glob('*.bq'):
-                fname = source.name.replace(source_doctype, dest_doctype)
-                dest = dest_dir / fname
+            for source in source_dir.glob(f"{source_doctype}.*.schema.json"):
+                _, version, *_ = source.name.split(".")
+                dest = dest_dir / f"{dest_doctype}.{version}.schema.json"
+
+                source_json = json.loads(source.read_text())
+                dest_json = json.loads(dest.read_text()) if dest.exists() else {}
+                if "mozPipelineMetadata" in dest_json:
+                    source_json["mozPipelineMetadata"] = dest_json[
+                        "mozPipelineMetadata"
+                    ]
+                elif "mozPipelineMetadata" in source_json:
+                    metadata = source_json["mozPipelineMetadata"]
+                    metadata["bq_dataset_family"] = dest_namespace
+                    metadata[
+                        "bq_table"
+                    ] = f'{dest_doctype.replace("-", "_")}_v{version}'
 
                 print(f"Aliasing {source} to {dest}")
 
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy(source, dest)
+                dest.write_text(json.dumps(source_json))
 
 
 if __name__ == "__main__":

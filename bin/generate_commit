@@ -51,6 +51,13 @@ function _generate_schemas() {
         --mps-branch "$mps_branch_source" \
         --out-dir .
 
+    # Copy aliased schemas into place before handling subset pings
+    alias_schemas "$ALIASES_PATH" .
+
+    # Generate subset pings
+    mozilla-schema-generator generate-subset-pings \
+        --out-dir .
+
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +
 
@@ -80,9 +87,6 @@ function _generate_schemas() {
 
     # Remove BigQuery schemas that are in the disallow list
     find . -name '*.bq' | grep -f "$DISALLOWLIST" | xargs rm -f
-
-    # Copy aliased BQ schemas into place
-    alias_schemas "$ALIASES_PATH" .
     popd
 }
 
@@ -106,6 +110,21 @@ function _create_changelog() {
         --since="$start_date" \
         --pretty=format:"%h%x09%cd%x09%s" \
         --date=iso
+}
+
+function _check_all_schemas_have_bq() {
+    MISSING_BQ_SCHEMAS="$(
+      find ./schemas -type f -name "*.schema.json" |
+      sed 's/schema.json/bq/' |
+      grep -vf "$DISALLOWLIST" |
+      # echo files that don't exist
+      xargs -n 1 bash -c 'test -e "$1" || echo "$1"' -s
+    )"
+    if [ -n "$MISSING_BQ_SCHEMAS" ]; then
+        echo "Missing expected bq schema files:" >&2
+        echo "$MISSING_BQ_SCHEMAS" >&2
+        exit 1
+    fi
 }
 
 function _create_readme() {
@@ -147,9 +166,11 @@ function _commit_schemas() {
     # checkout branches everytime, that will contain a changelog of changes.
     # Assumes the current directory is the root of the repository.
     # Note that in this step we throw out all the temporary modifications we've
-    # made to the JSON schemas.
-    find . -name "*.bq" -type f -exec git add {} +
+    # made to the JSON schemas that exist in the source branch.
     git checkout ./*.schema.json
+
+    # Copy aliased schemas into place again to ensure generic schemas
+    alias_schemas "$ALIASES_PATH" schemas
 
     # Add Glean JSON schemas with generic schema
     mozilla-schema-generator generate-glean-pings \
@@ -158,8 +179,11 @@ function _commit_schemas() {
         --mps-branch "$mps_branch_source" \
         --out-dir schemas
 
+    _check_all_schemas_have_bq
+
     _create_readme
 
+    find . -name "*.bq" -type f -exec git add {} +
     find . -name "*.schema.json" -type f -exec git add {} +
     find . -name "*.md" -type f -exec git add {} +
 

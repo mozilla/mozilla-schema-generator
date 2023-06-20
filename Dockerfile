@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.7-buster
 MAINTAINER Frank Bertsch <frank@mozilla.com>
 
 # Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/main/docs/building-container.md

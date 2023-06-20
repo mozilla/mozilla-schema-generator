@@ -1,0 +1,9 @@
+- document_namespace: telemetry
+  document_type: main
+  document_version: 4
+- document_namespace: telemetry
+  document_type: saved-session
+  document_version: 4
+- document_namespace: telemetry
+  document_type: first-shutdown
+  document_version: 4

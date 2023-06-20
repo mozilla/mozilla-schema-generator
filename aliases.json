@@ -7,6 +7,18 @@
     "first-shutdown": {
       "source-namespace": "telemetry",
       "source-doctype": "main"
+    },
+    "main-remainder": {
+      "source-namespace": "telemetry",
+      "source-doctype": "main"
+    },
+    "saved-session-remainder": {
+      "source-namespace": "telemetry",
+      "source-doctype": "main"
+    },
+    "first-shutdown-remainder": {
+      "source-namespace": "telemetry",
+      "source-doctype": "main"
     }
   }
 }
