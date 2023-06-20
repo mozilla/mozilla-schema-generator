@@ -34,9 +34,9 @@ format:
 	black mozilla_schema_generator tests ./*.py
 
 lint:
-	flake8 mozilla_schema_generator tests --max-line-length 100
-	isort --check mozilla_schema_generator tests ./*.py
-	black --check mozilla_schema_generator tests ./*.py
+	flake8 mozilla_schema_generator tests bin/alias_schemas --max-line-length 100
+	isort --check mozilla_schema_generator tests bin/alias_schemas ./*.py
+	black --check mozilla_schema_generator tests bin/alias_schemas ./*.py
 
 test:
 	py.test -v
