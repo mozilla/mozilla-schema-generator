@@ -254,7 +254,7 @@ def generate_subset_pings(config, out_dir, split, pretty, mps_branch):
         raise NotImplementedError("Splitting of subset pings is not supported.")
     if not out_dir:
         raise NotImplementedError(
-            "Generating subset pings without out dir is not supported."
+            "Generating subset pings without out_dir is not supported."
         )
     out_dir = Path(out_dir)
     with open(config, "r") as f:
