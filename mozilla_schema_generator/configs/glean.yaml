@@ -146,3 +146,9 @@ metrics:
         not:
           - glean_ping_info
       type: url
+  object:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: object
