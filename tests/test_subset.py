@@ -35,6 +35,7 @@ def test_subset(tmp_path: Path):
                         "document_type": "subset",
                         "document_version": "1",
                         "pattern": ".*int",
+                        "extra_pattern": ".*int64",
                     },
                 ],
                 "remainder": {
@@ -50,6 +51,7 @@ def test_subset(tmp_path: Path):
                 "type": "object",
                 "properties": {
                     "int": {"type": "integer"},
+                    "int64": {"type": "integer"},
                     "string": {"type": "string"},
                 },
                 "required": [],
@@ -72,7 +74,10 @@ def test_subset(tmp_path: Path):
             "client_id": {"type": "string"},
             "payload": {
                 "type": "object",
-                "properties": {"string": {"type": "string"}},
+                "properties": {
+                    "int64": {"type": "integer"},
+                    "string": {"type": "string"},
+                },
                 "required": [],
             },
             "test_string": {"type": "string"},
@@ -92,7 +97,10 @@ def test_subset(tmp_path: Path):
             "client_id": {"type": "string"},
             "payload": {
                 "type": "object",
-                "properties": {"int": {"type": "integer"}},
+                "properties": {
+                    "int": {"type": "integer"},
+                    "int64": {"type": "integer"},
+                },
             },
             "test_int": {"type": "integer"},
         },

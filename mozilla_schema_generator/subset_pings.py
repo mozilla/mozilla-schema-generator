@@ -22,22 +22,32 @@ def _path_string(*path):
     return ".".join(path)
 
 
-def _schema_pop(schema, pattern, prefix=()):
-    if schema.get("type") != "object" or "properties" not in schema:
+def _schema_copy(src, pattern, dst=None, delete=True, prefix=()):
+    if src.get("type") != "object" or "properties" not in src:
         # only recurse into objects with explicitly defined properties
         return None
-    properties = schema["properties"]
-    result_props = {}
-    for name, subschema in list(properties.items()):
+    src_props = src["properties"]
+    dst_props = {}
+    for name, src_subschema in list(src_props.items()):
         path = ".".join((*prefix, name))
         if pattern.fullmatch(path):
-            result = properties.pop(name)
+            prop = src_props.pop(name) if delete else deepcopy(src_props[name])
         else:
-            result = _schema_pop(subschema, pattern, prefix=(*prefix, name))
-        if result is not None:
-            result_props[name] = result
-    if result_props:
-        return {"properties": result_props, "type": "object"}
+            prop = _schema_copy(
+                src_subschema,
+                pattern,
+                dst=None if dst is None else dst["properties"].get(name, None),
+                delete=delete,
+                prefix=(*prefix, name),
+            )
+        if prop is not None:
+            dst_props[name] = prop
+    if dst_props:
+        if dst is None:
+            return {"properties": dst_props, "type": "object"}
+        else:
+            dst["properties"].update(dst_props)
+            return dst
     return None
 
 
@@ -84,8 +94,14 @@ def generate(config_data, out_dir: Path) -> Dict[str, Dict[str, Dict[str, List[D
         for subset_config in config["subsets"]:
             dst_namespace, dst_doctype, dst_version = _target_as_tuple(subset_config)
             pattern = re.compile(subset_config["pattern"])
-            subset = _schema_pop(schema, pattern)
+            subset = _schema_copy(schema, pattern, delete=True)
             assert subset is not None, "Subset pattern matched no paths"
+            if "extra_pattern" in subset_config:
+                # match paths where the schema must be present in the remainder because
+                # schemas cannot delete fields, but data must only go to the subset.
+                pattern = re.compile(subset_config["extra_pattern"])
+                subset = _schema_copy(schema, pattern, dst=subset, delete=False)
+                assert subset is not None, "Subset extra_pattern matched no paths"
             _copy_metadata(schema, subset)
             _update_pipeline_metadata(subset, dst_namespace, dst_doctype, dst_version)
             schemas[dst_namespace][dst_doctype][dst_version] = [subset]
