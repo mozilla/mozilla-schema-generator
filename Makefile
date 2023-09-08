@@ -30,8 +30,8 @@ clean-pyc:
 
 format:
 	autoflake -r -i --remove-all-unused-imports mozilla_schema_generator tests
-	isort mozilla_schema_generator tests ./*.py
-	black mozilla_schema_generator tests ./*.py
+	isort mozilla_schema_generator tests bin/alias_schemas ./*.py
+	black mozilla_schema_generator tests bin/alias_schemas ./*.py
 
 lint:
 	flake8 mozilla_schema_generator tests bin/alias_schemas --max-line-length 100

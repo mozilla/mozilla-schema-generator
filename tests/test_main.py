@@ -21,7 +21,7 @@ def main():
 def config():
     config_file = "./mozilla_schema_generator/configs/main.yaml"
     with open(config_file) as f:
-        return Config("main", yaml.load(f))
+        return Config("main", yaml.safe_load(f))
 
 
 class TestMainPing(object):

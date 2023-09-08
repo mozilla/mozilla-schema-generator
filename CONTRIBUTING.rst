@@ -3,7 +3,7 @@ Contributing
 ============
 
 Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given. 
+little bit helps, and credit will always be given.
 
 You can contribute in many ways:
 
@@ -36,7 +36,7 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-Mozilla Schema Creator could always use more documentation, whether as part of the 
+Mozilla Schema Creator could always use more documentation, whether as part of the
 official Mozilla Schema Creator docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
@@ -93,9 +93,8 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.7, and for PyPy.
-   Check https://travis-ci.org/fbertsch/mozilla-schema-generator 
-   under pull requests for active pull requests.
+3. The pull request should work for Python 3.8. The CI will ensure it and
+   the pull request will only be merged once CI is green.
 
 
 Tips

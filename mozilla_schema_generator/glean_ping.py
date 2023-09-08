@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 class GleanPing(GenericPing):
-
     schema_url = (
         "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
         "/{branch}/schemas/glean/glean/glean.1.schema.json"
@@ -44,7 +43,9 @@ class GleanPing(GenericPing):
     }
 
     with open(BUG_1737656_TXT, "r") as f:
-        bug_1737656_affected_tables = [l.strip() for l in f.readlines() if l.strip()]
+        bug_1737656_affected_tables = [
+            line.strip() for line in f.readlines() if line.strip()
+        ]
 
     def __init__(self, repo, **kwargs):  # TODO: Make env-url optional
         self.repo = repo

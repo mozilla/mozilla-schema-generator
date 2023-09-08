@@ -14,7 +14,6 @@ from .utils import prepend_properties
 
 
 class CommonPing(GenericPing):
-
     # Only includes probes that have been available at some point past
     # this version.
     # ONLY DECREMENT, or the schema will change in an incompatible way!

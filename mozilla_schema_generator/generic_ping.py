@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 class GenericPing(object):
-
     probe_info_base_url = "https://probeinfo.telemetry.mozilla.org"
     default_encoding = "utf-8"
     default_max_size = 12000  # https://bugzilla.mozilla.org/show_bug.cgi?id=1688633

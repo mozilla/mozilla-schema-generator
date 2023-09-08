@@ -17,7 +17,6 @@ import pytest
 
 
 class TestSchemaAliasing(object):
-
     base_dir = "./test-schemas"
     test_aliases_path = "test-aliases.json"
     source_namespace = "namespace"

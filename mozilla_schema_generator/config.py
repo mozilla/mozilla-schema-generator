@@ -18,7 +18,6 @@ from .utils import _get, prepend_properties
 
 
 class Config(object):
-
     match_key = "match"
 
     def __init__(self, *args, **kwargs):

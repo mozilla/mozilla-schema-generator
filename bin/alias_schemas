@@ -36,7 +36,6 @@ def get_schema():
     required=True,
 )
 def main(aliases_path, base_dir):
-
     base_dir = Path(base_dir)
 
     with open(aliases_path) as f:

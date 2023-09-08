@@ -24,7 +24,7 @@ class TestPing(object):
     def test_schema_max_size(self):
         config_file = "./mozilla_schema_generator/configs/main.yaml"
         with open(config_file) as f:
-            config = Config("main", yaml.load(f))
+            config = Config("main", yaml.safe_load(f))
             ping = MainPing()
 
             max_size = ping.generate_schema(config, max_size=MainPing.default_max_size)[

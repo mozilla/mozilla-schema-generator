@@ -28,7 +28,7 @@ def glean():
 def config():
     config_file = "./mozilla_schema_generator/configs/glean.yaml"
     with open(config_file) as f:
-        return Config("glean", yaml.load(f))
+        return Config("glean", yaml.safe_load(f))
 
 
 class NoProbeGleanPing(glean_ping.GleanPing):
@@ -643,7 +643,6 @@ class TestGleanPing(object):
             assert metrics_text is None
 
     def test_url_to_url2(self, config):
-
         glean = GleanPingWithUrlMetric(
             {
                 # This ping does not exist in the static list of affected pings.

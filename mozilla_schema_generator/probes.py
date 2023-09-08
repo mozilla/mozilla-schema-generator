@@ -16,7 +16,6 @@ from .utils import _get
 
 
 class Probe(object):
-
     type_key = "type"
     name_key = "name"
     history_key = "history"
@@ -66,7 +65,6 @@ class Probe(object):
 
 
 class MainProbe(Probe):
-
     first_added_key = "first_added"
 
     histogram_schema = {"type": "string"}
@@ -152,7 +150,6 @@ class MainProbe(Probe):
 
 
 class GleanProbe(Probe):
-
     all_pings_keywords = ("all-pings", "all_pings")
     first_added_key = "first_added"
 

@@ -10,7 +10,6 @@ from .probes import Probe
 
 
 class Matcher(object):
-
     table_group_key = "table_group"
     type_key = "type"
     contains_key = "contains"
