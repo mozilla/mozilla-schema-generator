@@ -19,7 +19,7 @@ readme = open("README.md").read()
 
 setup(
     name="mozilla-schema-generator",
-    python_requires=">=3.6.0",
+    python_requires=">=3.8.0",
     version="0.5.1",
     description="Create full representations of schemas using the probe info service.",
     long_description=readme,
@@ -43,6 +43,6 @@ setup(
     classifiers=[
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
 )
