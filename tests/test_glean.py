@@ -643,7 +643,6 @@ class TestGleanPing(object):
             assert metrics_text is None
 
     def test_url_to_url2(self, config):
-
         glean = GleanPingWithUrlMetric(
             {
                 # This ping does not exist in the static list of affected pings.
