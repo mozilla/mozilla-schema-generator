@@ -176,11 +176,11 @@ class TestGleanPing(object):
         assert glean.get_env().get_size() > 0
 
     def test_single_schema(self, glean, config):
-        schemas = glean.generate_schema(config, split=False)
+        schemas = glean.generate_schema(config)
 
         assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             # A few parts of the generic structure
             assert "ping_info" in schema["properties"]
@@ -220,10 +220,10 @@ class TestGleanPing(object):
     # reflect the new value that is assigned from the probe-scraper processing but is not be used
     # in a generated schema.
     def test_generic_schema(self, glean, config):
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        schemas = glean.generate_schema(config, generic_schema=True)
         assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             generic_schema = glean.get_schema(generic_schema=True).schema
             generic_schema["mozPipelineMetadata"] = {
@@ -238,7 +238,7 @@ class TestGleanPing(object):
         repo = {"name": "LeanGleanPingNoIding", "app_id": "org-mozilla-lean"}
         not_glean = NoProbeGleanPing(repo)
         with pytest.raises(requests.exceptions.HTTPError):
-            not_glean.generate_schema(config, split=False)
+            not_glean.generate_schema(config)
 
     # Unit test covering the case where repository has a default expiration_policy and there is
     # also a ping specific expiration_policy.  The ping specific expiration_policy is applied to the
@@ -263,9 +263,9 @@ class TestGleanPing(object):
             }
         ]
         glean = GleanPingWithExpirationPolicy({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        schemas = glean.generate_schema(config, generic_schema=True)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
             if name == "ping1":
@@ -315,9 +315,9 @@ class TestGleanPing(object):
             }
         ]
         glean = GleanPingWithEncryption({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        schemas = glean.generate_schema(config, generic_schema=True)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
             if name == "ping1":
@@ -356,8 +356,8 @@ class TestGleanPing(object):
         ]
 
         glean = GleanPingNoMetadata({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
 
         assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
@@ -392,8 +392,8 @@ class TestGleanPing(object):
             }
         ]
         glean = GleanPingWithOverrideAttributes({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
 
         assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
@@ -437,8 +437,8 @@ class TestGleanPing(object):
         ]
 
         glean = GleanPingWithGranularity({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
 
         assert len(final_schemas) == 2
         for name, schema in final_schemas.items():
@@ -480,8 +480,8 @@ class TestGleanPing(object):
         ]
 
         glean = GleanPingWithGranularity({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
 
         assert len(final_schemas) == 1
         for name, schema in final_schemas.items():
@@ -515,8 +515,8 @@ class TestGleanPing(object):
             }
         ]
         glean = GleanPingWithMultiplePings({"name": "app1", "app_id": "app1"})
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
 
         assert len(final_schemas) == 3
         for name, schema in final_schemas.items():
@@ -558,9 +558,9 @@ class TestGleanPing(object):
                 "app_id": "rally-debug",
             }
         )
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        schemas = glean.generate_schema(config, generic_schema=True)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             print(name)
             assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "rally_debug"
@@ -588,9 +588,9 @@ class TestGleanPing(object):
                 "encryption": {"use_jwk": True},
             }
         )
-        schemas = glean.generate_schema(config, split=False, generic_schema=True)
+        schemas = glean.generate_schema(config, generic_schema=True)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             metadata_format = schema["mozPipelineMetadata"]["bq_metadata_format"]
             assert metadata_format == "pioneer"
@@ -605,9 +605,9 @@ class TestGleanPing(object):
                 "app_id": "rally-debug",
             }
         )
-        schemas = glean.generate_schema(config, split=False)
+        schemas = glean.generate_schema(config)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             # Only this static list of pings should have the incorrect schema for text
             if name not in [
@@ -635,9 +635,9 @@ class TestGleanPing(object):
                 "app_id": "org-mozilla-glean",
             }
         )
-        schemas = glean.generate_schema(config, split=False)
+        schemas = glean.generate_schema(config)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
             metrics_text = schema["properties"]["metrics"]["properties"].get("text")
             assert metrics_text is None
@@ -651,9 +651,9 @@ class TestGleanPing(object):
                 "app_id": "org-mozilla-glean",
             }
         )
-        schemas = glean.generate_schema(config, split=False)
+        schemas = glean.generate_schema(config)
 
-        final_schemas = {k: schemas[k][0].schema for k in schemas}
+        final_schemas = {k: schemas[k].schema for k in schemas}
         schema = final_schemas.get("metrics")
         assert "url" not in schema["properties"]["metrics"]["properties"].keys()
         assert "url2" in schema["properties"]["metrics"]["properties"].keys()

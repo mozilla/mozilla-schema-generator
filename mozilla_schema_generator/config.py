@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import queue
-from collections import defaultdict
 from typing import Dict, List, Tuple
 
 from .matcher import Matcher
@@ -51,26 +50,8 @@ class Config(object):
 
         self.matchers = matchers
 
-    def _get_splits(self) -> Dict[str, Dict[Tuple[str], Matcher]]:
-        """
-        Find the splits that we need to make. Each
-        self.table_group_key is it's own split.
-        """
-        splits = defaultdict(dict)
-        for key, matcher in self.matchers.items():
-            splits[matcher.get_table_group()][key] = matcher
-
-        return splits
-
     def get_match_keys(self) -> List[Tuple[str]]:
         return [prepend_properties(key) for key in self.matchers.keys()]
-
-    def split(self) -> List[Config]:
-        """
-        Split this config into multiple configs.
-        """
-        splits = self._get_splits()
-        return [Config(name, matchers=matchers) for name, matchers in splits.items()]
 
     def get_schema_elements(self, probes: List[Probe]) -> List[Tuple[tuple, Probe]]:
         """

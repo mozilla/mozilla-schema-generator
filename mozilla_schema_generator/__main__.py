@@ -47,11 +47,6 @@ def common_options(func):
                 required=False,
             ),
             click.option(
-                "--split",
-                is_flag=True,
-                help=("If provided, splits the schema into " "smaller sub-schemas"),
-            ),
-            click.option(
                 "--pretty",
                 is_flag=True,
                 help=(
@@ -81,7 +76,7 @@ def common_options(func):
     default=CONFIGS_DIR / "main.yaml",
 )
 @common_options
-def generate_main_ping(config, out_dir, split, pretty, mps_branch):
+def generate_main_ping(config, out_dir, pretty, mps_branch):
     schema_generator = MainPing(mps_branch=mps_branch)
     if out_dir:
         out_dir = Path(out_dir)
@@ -90,20 +85,20 @@ def generate_main_ping(config, out_dir, split, pretty, mps_branch):
         config_data = yaml.safe_load(f)
 
     config = Config("main", config_data)
-    schemas = schema_generator.generate_schema(config, split=False)
+    schemas = schema_generator.generate_schema(config)
     # schemas introduces an extra layer to the actual schema
     dump_schema(schemas, out_dir, pretty, version=4)
 
 
 @click.command()
 @common_options
-def generate_bhr_ping(out_dir, split, pretty, mps_branch):
+def generate_bhr_ping(out_dir, pretty, mps_branch):
     schema_generator = BhrPing(mps_branch=mps_branch)
     if out_dir:
         out_dir = Path(out_dir)
 
     config = Config("bhr", {})
-    schemas = schema_generator.generate_schema(config, split=split)
+    schemas = schema_generator.generate_schema(config)
     dump_schema(schemas, out_dir, pretty, version=4)
 
 
@@ -122,12 +117,7 @@ def generate_bhr_ping(out_dir, split, pretty, mps_branch):
         "of pings in the common ping format."
     ),
 )
-def generate_common_pings(
-    config_dir, out_dir, split, pretty, mps_branch, common_pings_config
-):
-    if split:
-        raise NotImplementedError("Splitting of common pings is not yet supported.")
-
+def generate_common_pings(config_dir, out_dir, pretty, mps_branch, common_pings_config):
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -150,7 +140,7 @@ def generate_common_pings(
         version = m.group(2)
         config = Config(name, config_data)
 
-        schemas = schema_generator.generate_schema(config, split=False)
+        schemas = schema_generator.generate_schema(config)
 
         dump_schema(schemas, out_dir, pretty, version=int(version))
 
@@ -181,12 +171,7 @@ def generate_common_pings(
         "every application's glean pings."
     ),
 )
-def generate_glean_pings(
-    config, out_dir, split, pretty, mps_branch, repo, generic_schema
-):
-    if split:
-        raise NotImplementedError("Splitting of Glean pings is not yet supported.")
-
+def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_schema):
     if out_dir:
         out_dir = Path(out_dir)
 
@@ -221,18 +206,15 @@ def generate_glean_pings(
             repo,
             glean_config,
             out_dir,
-            split,
             pretty,
             generic_schema,
             mps_branch,
         )
 
 
-def write_schema(repo, config, out_dir, split, pretty, generic_schema, mps_branch):
+def write_schema(repo, config, out_dir, pretty, generic_schema, mps_branch):
     schema_generator = GleanPing(repo, mps_branch=mps_branch)
-    schemas = schema_generator.generate_schema(
-        config, split=False, generic_schema=generic_schema
-    )
+    schemas = schema_generator.generate_schema(config, generic_schema=generic_schema)
     dump_schema(schemas, out_dir and out_dir.joinpath(repo["app_id"]), pretty)
 
 
@@ -279,7 +261,7 @@ def dump_schema(schemas, out_dir, pretty, *, version=1):
         print(json.dumps(schemas, **json_dump_args))
 
     else:
-        for name, _schemas in schemas.items():
+        for name, schema in schemas.items():
             # Bug 1601270; we transform ping names from snake_case to kebab-case;
             # we can remove this line once all snake_case probes have converted.
             name = name.replace("_", "-")
@@ -287,10 +269,6 @@ def dump_schema(schemas, out_dir, pretty, *, version=1):
             if not ping_out_dir.exists():
                 ping_out_dir.mkdir(parents=True)
 
-            if len(_schemas) > 1:
-                raise Exception("Table splitting is currently unsupported")
-
-            schema = _schemas[0]
             fname = ping_out_dir.joinpath("{}.{}.schema.json".format(name, version))
             with open(fname, "w") as f:
                 f.write(json.dumps(schema, **json_dump_args))
