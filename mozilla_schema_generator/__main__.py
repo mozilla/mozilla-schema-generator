@@ -225,15 +225,13 @@ def write_schema(repo, config, out_dir, pretty, generic_schema, mps_branch):
     default=CONFIGS_DIR / "subset.yaml",
 )
 @common_options
-def generate_subset_pings(config, out_dir, split, pretty, mps_branch):
+def generate_subset_pings(config, out_dir, pretty, mps_branch):
     """Read in pings from disk and move fields to new subset pings.
 
     If configured, also create a remainder ping with all the fields that weren't moved.
 
     Ignore mps_branch and use the schemas on disk, because those will be populated with probes.
     """
-    if split:
-        raise NotImplementedError("Splitting of subset pings is not supported.")
     if not out_dir:
         raise NotImplementedError(
             "Generating subset pings without out_dir is not supported."
