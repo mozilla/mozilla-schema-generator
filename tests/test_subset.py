@@ -116,7 +116,7 @@ def test_subset(tmp_path: Path):
 
     assert schemas == {
         "test": {
-            "remainder": {"1": [expect_remainder_schema]},
-            "subset": {"1": [expect_subset_schema]},
+            "remainder": {"1": expect_remainder_schema},
+            "subset": {"1": expect_subset_schema},
         }
     }

@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 # most metadata fields are added to the bq schema directly and left out of the json schema, but
 # fields here appear in the json schema and must be explicitly included in all resulting pings
@@ -78,7 +78,7 @@ def _target_as_tuple(target: Dict[str, str]) -> Tuple[str, str, str]:
     )
 
 
-def generate(config_data, out_dir: Path) -> Dict[str, Dict[str, Dict[str, List[Dict]]]]:
+def generate(config_data, out_dir: Path) -> Dict[str, Dict[str, Dict[str, Dict]]]:
     """Read in pings from disk and split fields into new subset pings.
 
     If configured, also produce a remainder ping with all the fields that weren't moved.
@@ -104,11 +104,11 @@ def generate(config_data, out_dir: Path) -> Dict[str, Dict[str, Dict[str, List[D
                 assert subset is not None, "Subset extra_pattern matched no paths"
             _copy_metadata(schema, subset)
             _update_pipeline_metadata(subset, dst_namespace, dst_doctype, dst_version)
-            schemas[dst_namespace][dst_doctype][dst_version] = [subset]
+            schemas[dst_namespace][dst_doctype][dst_version] = subset
         remainder_config = config.get("remainder")
         if remainder_config:
             dst_namespace, dst_doctype, dst_version = _target_as_tuple(remainder_config)
             # no need to copy metadata
             _update_pipeline_metadata(schema, dst_namespace, dst_doctype, dst_version)
-            schemas[dst_namespace][dst_doctype][dst_version] = [schema]
+            schemas[dst_namespace][dst_doctype][dst_version] = schema
     return schemas
