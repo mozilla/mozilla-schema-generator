@@ -34,13 +34,6 @@ class GleanPing(GenericPing):
     )
 
     default_dependencies = ["glean-core"]
-    ignore_pings = {
-        "all-pings",
-        "all_pings",
-        "default",
-        "glean_ping_info",
-        "glean_client_info",
-    }
 
     with open(BUG_1737656_TXT, "r") as f:
         bug_1737656_affected_tables = [
