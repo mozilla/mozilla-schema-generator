@@ -30,7 +30,7 @@ class TestCommonPing(object):
         assert ping.get_env().get_size() > 0
 
     def test_single_schema(self, ping, config):
-        schema = ping.generate_schema(config)["event"][0].schema
+        schema = ping.generate_schema(config)["event"].schema
 
         assert "environment" in schema["properties"]
         assert _get(

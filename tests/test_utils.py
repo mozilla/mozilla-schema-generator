@@ -104,9 +104,7 @@ class LocalMainPing(GenericPing):
 
     def generate_schema(self, config, **kwargs):
         schemas = super().generate_schema(config, **kwargs)
-        return {
-            k: [s.schema for s in schema_list] for k, schema_list in schemas.items()
-        }
+        return {k: s.schema for k, s in schemas.items()}
 
 
 """

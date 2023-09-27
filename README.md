@@ -23,32 +23,10 @@ This library takes the information for what should be in those pings from the [P
 ## Data Store Integration
 
 The primary use of the schemas is for integration with the
-[Schema Transpiler](https://www.github.com/mozilla/jsonschema-transpiler). 
+[Schema Transpiler](https://www.github.com/mozilla/jsonschema-transpiler).
 The schemas that this repository generates can be transpiled into Avro and Bigquery. They define
 the schema of the Avro and BigQuery tables that the [BQ Sink](https://www.github.com/mozilla/gcp-ingestion)
 writes to.
-
-### BigQuery Limitations and Splitting
-
-[BigQuery has a hard limit of ten thousand columns on any single table](https://cloud.google.com/bigquery/quotas). 
-This library can take that limitation into account by splitting schemas into multiple tables,
-although so far we have been able to avoid this complication. We retain schema
-splitting support here as an option to use in the future. The option is currently disabled.
-
-When a schema is split, each
-table has some common information duplicated in every table, and then a set
-of fields that are unique to that table. The join of these tables gives the full
-set of fields available from the ping.
-
-To decide on a table split, we include the `table_group` configuration in the configuration
-file. For example, `payload/histograms` has `table_group: histograms`; this indicates that
-there will be a table outputted with just histograms.
-
-If a single table expands beyond the configured column limit, we move the new fields to the next table.
-For example, we could have main_histograms_1 and main_histograms_2.
-
-_Note_: Tables are only split if the `--split` parameter is provided, and this
-is option is not currently used for our production configuration.
 
 ## Validation
 
@@ -70,11 +48,6 @@ Generate the Full Main Ping schema:
 
 ```
 mozilla-schema-generator generate-main-ping
-```
-
-Generate the Main Ping schema divided among tables (for BigQuery):
-```
-mozilla-schema-generator generate-main-ping --split --out-dir main-ping
 ```
 
 The `out-dir` parameter will be the namespace for the pings.
