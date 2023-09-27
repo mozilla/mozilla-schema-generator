@@ -58,3 +58,9 @@ mozillavpn.baseline.*
 # org-mozilla-focus-nightly.crash.*
 # org-mozilla-klar.crash.*
 # pine.crash.*
+
+# Bug 1852630
+# Rename main-remainder.4 to main.5
+telemetry.main-remainder.*
+telemetry.saved-session-remainder.*
+telemetry.first-shutdown-remainder.*
