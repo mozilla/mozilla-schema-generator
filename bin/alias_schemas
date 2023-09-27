@@ -44,17 +44,18 @@ def main(aliases_path, base_dir):
     jsonschema.validate(instance=aliases_parsed, schema=get_schema())
 
     for dest_namespace, doctypes in aliases_parsed.items():
-        for dest_doctype, alias_info in doctypes.items():
-            source_namespace = alias_info["source-namespace"]
-            source_doctype = alias_info["source-doctype"]
-            source_dir = base_dir / source_namespace / source_doctype
-            dest_dir = base_dir / dest_namespace / dest_doctype
+        for dest_doctype, versions in doctypes.items():
+            for dest_version, alias_info in versions.items():
+                source_namespace = alias_info["source-namespace"]
+                source_doctype = alias_info["source-doctype"]
+                source_version = alias_info["source-version"]
+                source_dir = base_dir / source_namespace / source_doctype
+                dest_dir = base_dir / dest_namespace / dest_doctype
 
-            assert source_dir.exists()
+                source = source_dir / f"{source_doctype}.{source_version}.schema.json"
+                dest = dest_dir / f"{dest_doctype}.{dest_version}.schema.json"
 
-            for source in source_dir.glob(f"{source_doctype}.*.schema.json"):
-                _, version, *_ = source.name.split(".")
-                dest = dest_dir / f"{dest_doctype}.{version}.schema.json"
+                assert source.exists()
 
                 source_json = json.loads(source.read_text())
                 dest_json = json.loads(dest.read_text()) if dest.exists() else {}
@@ -67,7 +68,7 @@ def main(aliases_path, base_dir):
                     metadata["bq_dataset_family"] = dest_namespace
                     metadata[
                         "bq_table"
-                    ] = f'{dest_doctype.replace("-", "_")}_v{version}'
+                    ] = f'{dest_doctype.replace("-", "_")}_v{dest_version}'
 
                 print(f"Aliasing {source} to {dest}")
 

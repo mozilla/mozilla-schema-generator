@@ -1,24 +1,35 @@
 {
   "telemetry": {
     "saved-session": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
+      "4": {
+        "source-namespace": "telemetry",
+        "source-doctype": "main",
+        "source-version": "4"
+      },
+      "5": {
+        "source-namespace": "telemetry",
+        "source-doctype": "main",
+        "source-version": "4"
+      }
     },
     "first-shutdown": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
+      "4": {
+        "source-namespace": "telemetry",
+        "source-doctype": "main",
+        "source-version": "4"
+      },
+      "5": {
+        "source-namespace": "telemetry",
+        "source-doctype": "main",
+        "source-version": "4"
+      }
     },
-    "main-remainder": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
-    },
-    "saved-session-remainder": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
-    },
-    "first-shutdown-remainder": {
-      "source-namespace": "telemetry",
-      "source-doctype": "main"
+    "main": {
+      "5": {
+        "source-namespace": "telemetry",
+        "source-doctype": "main",
+        "source-version": "4"
+      }
     }
   }
 }

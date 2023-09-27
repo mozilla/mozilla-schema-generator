@@ -21,13 +21,14 @@ class TestSchemaAliasing(object):
     test_aliases_path = "test-aliases.json"
     source_namespace = "namespace"
     source_doctype = "doctype"
+    source_version = "1"
 
     @pytest.fixture(autouse=True)
     def setup_teardown_dir(self):
         dir_path = pathlib.Path(self.base_dir)
         path = dir_path / self.source_namespace / self.source_doctype
-        json_file = path / f"{self.source_doctype}.1.schema.json"
-        bq_file = path / f"{self.source_doctype}.1.bq"
+        json_file = path / f"{self.source_doctype}.{self.source_version}.schema.json"
+        bq_file = path / f"{self.source_doctype}.{self.source_version}.bq"
 
         json_file.parent.mkdir(parents=True)
         json_file.write_text("{}")
@@ -51,8 +52,11 @@ class TestSchemaAliasing(object):
             {
                 self.source_namespace: {
                     test_doctype: {
-                        "source-namespace": self.source_namespace,
-                        "source-doctype": self.source_doctype,
+                        "1": {
+                            "source-namespace": self.source_namespace,
+                            "source-doctype": self.source_doctype,
+                            "source-version": self.source_version,
+                        }
                     }
                 }
             }
@@ -68,12 +72,16 @@ class TestSchemaAliasing(object):
     def test_aliasing_new_namespace(self):
         test_namespace = "test-namespace"
         test_doctype = "test-doctype"
+        test_version = "1"
         aliases_path = self.write_aliases(
             {
                 test_namespace: {
                     test_doctype: {
-                        "source-namespace": self.source_namespace,
-                        "source-doctype": self.source_doctype,
+                        test_version: {
+                            "source-namespace": self.source_namespace,
+                            "source-doctype": self.source_doctype,
+                            "source-version": self.source_version,
+                        }
                     }
                 }
             }
