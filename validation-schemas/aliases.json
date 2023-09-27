@@ -6,18 +6,28 @@
       "patternProperties": {
         "[a-zA-Z_-]": {
           "type": "object",
-          "properties": {
-            "source-namespace": {
-              "type": "string"
-            },
-            "source-doctype": {
-              "type": "string"
+          "patternProperties": {
+            "[0-9]": {
+              "type": "object",
+              "properties": {
+                "source-namespace": {
+                  "type": "string"
+                },
+                "source-doctype": {
+                  "type": "string"
+                },
+                "source-version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source-namespace",
+                "source-doctype",
+                "source-version"
+              ],
+              "additionalProperties": false
             }
           },
-          "required": [
-            "source-namespace",
-            "source-doctype"
-          ],
           "additionalProperties": false
         }
       },
