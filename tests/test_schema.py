@@ -87,3 +87,10 @@ class TestSchema(object):
         )
 
         print_and_test(schema.schema, res_schema.schema)
+
+    def test_schema_with_json(self):
+        json_obj = {"format": "json"}
+        assert Schema._get_schema_size(json_obj) == 1
+
+        defined_obj = {"type": "object", "properties": {"str": {"type": "json"}}}
+        assert Schema._get_schema_size(defined_obj) == 1

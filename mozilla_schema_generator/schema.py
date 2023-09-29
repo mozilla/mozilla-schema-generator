@@ -116,6 +116,10 @@ class Schema(object):
             return sum(Schema._get_schema_size(s) for s in schema)
 
         if "type" not in schema:
+            # A JSON column is just that: one column
+            if schema.get("format") == "json":
+                return 1
+
             raise Exception("Missing type for schema element at key " + "/".join(key))
 
         if isinstance(schema["type"], list):
