@@ -329,7 +329,12 @@ class GleanPing(GenericPing):
             else:
                 generated = super().generate_schema(new_config)
                 for schema in generated.values():
-                    schema.schema.update(defaults)
+                    # We want to override each individual key with assembled defaults,
+                    # but keep values _inside_ them if they have been set in the schemas.
+                    for key, value in defaults.items():
+                        if key not in schema.schema:
+                            schema.schema[key] = {}
+                        schema.schema[key].update(value)
                 schemas.update(generated)
 
         return schemas
