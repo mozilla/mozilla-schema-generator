@@ -64,3 +64,7 @@ mozillavpn.baseline.*
 telemetry.main-remainder.*
 telemetry.saved-session-remainder.*
 telemetry.first-shutdown-remainder.*
+
+ # Bug 1867770
+ # Delete mozillavpn_cirrus so we can rename mozillavpn_cirrus to _mozillavpn_backend_cirrus
+ mozillavpn_cirrus*
