@@ -157,6 +157,26 @@ class GleanPing(GenericPing):
                 incompatible_probe_type = GleanProbe(_id, hist_defn, pings=pings)
                 processed.append(incompatible_probe_type)
 
+            # Handling probe type changes (Bug 1870317)
+            probe_types = {hist["type"] for hist in defn[probe.history_key]}
+            if len(probe_types) > 1:
+                # The probe type changed at some point in history.
+                # Create schema entry for each type.
+                hist_defn = defn.copy()
+
+                # No new entry needs to be created for the current probe type
+                probe_types.remove(defn["type"])
+
+                for hist in hist_defn[probe.history_key]:
+                    # Create a new entry for a historic type
+                    if hist["type"] in probe_types:
+                        hist_defn["type"] = hist["type"]
+                        probe = GleanProbe(_id, hist_defn, pings=pings)
+                        processed.append(probe)
+
+                        # Keep track of the types entries were already created for
+                        probe_types.remove(hist["type"])
+
         return processed
 
     def _get_ping_data(self) -> Dict[str, Dict]:
