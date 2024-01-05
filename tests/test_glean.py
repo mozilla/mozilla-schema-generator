@@ -215,6 +215,93 @@ class TestGleanPing(object):
             }
             assert glean.get_ping_descriptions() == {"foo": "baz"}
 
+    def test_dependencies(self, glean):
+        RETURN_VALUES = {"glean-core": {"name": "glean-core", "type": "dependency"}}
+        with patch.object(
+            glean,
+            "_get_json",
+            return_value=RETURN_VALUES,
+        ):
+            assert set(glean.get_dependencies()) == {
+                "glean-core",
+            }
+
+    def test_probes(self, glean):
+        RETURN_VALUES = {
+            "test.probe": {
+                "history": [
+                    {
+                        "dates": {
+                            "first": "2023-11-27 21:59:53",
+                            "last": "2024-01-05 17:36:15",
+                        },
+                        "description": "description",
+                        "expires": "never",
+                        "type": "string",
+                        "version": 0,
+                    }
+                ],
+                "in-source": True,
+                "name": "test.probe",
+                "type": "string",
+            }
+        }
+
+        with patch.object(glean, "get_dependencies", return_value=[]):
+            with patch.object(
+                glean,
+                "_get_json",
+                return_value=RETURN_VALUES,
+            ):
+                probes = glean.get_probes()
+                assert len(probes) == 1
+                assert probes[0].id == "test.probe"
+                assert probes[0].type == "string"
+
+    def test_probes_multiple_types(self, glean):
+        RETURN_VALUES = {
+            "test.probe": {
+                "history": [
+                    {
+                        "dates": {
+                            "first": "2023-11-27 21:59:53",
+                            "last": "2024-01-05 17:36:15",
+                        },
+                        "description": "description",
+                        "expires": "never",
+                        "type": "string",
+                        "version": 0,
+                    },
+                    {
+                        "dates": {
+                            "first": "2024-01-05 21:59:53",
+                            "last": "2024-01-06 17:36:15",
+                        },
+                        "description": "description",
+                        "expires": "never",
+                        "type": "url",
+                        "version": 0,
+                    },
+                ],
+                "in-source": True,
+                "name": "test.probe",
+                "type": "string",
+            }
+        }
+
+        with patch.object(glean, "get_dependencies", return_value=[]):
+            with patch.object(
+                glean,
+                "_get_json",
+                return_value=RETURN_VALUES,
+            ):
+                probes = glean.get_probes()
+                assert len(probes) == 2
+                assert probes[0].id == "test.probe"
+                assert probes[0].type == "string"
+                assert probes[1].id == "test.probe"
+                assert probes[1].type == "url"
+
     # This test isn't technically a valid test since a schema glean-core would never be generated
     # independent of a define repo.  The expected value of bq_dataset_family has been updated to
     # reflect the new value that is assigned from the probe-scraper processing but is not be used
