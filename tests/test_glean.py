@@ -11,9 +11,10 @@ import pytest
 import requests
 import yaml
 
-from mozilla_schema_generator import glean_ping
+from mozilla_schema_generator import generic_ping, glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.probes import GleanProbe
+from mozilla_schema_generator.schema import Schema
 from mozilla_schema_generator.utils import _get, prepend_properties
 
 from .test_utils import print_and_test
@@ -747,3 +748,48 @@ class TestGleanPing(object):
         assert list(
             (schema["properties"]["metrics"]["properties"]["url2"]["properties"].keys())
         ) == ["my_url"]
+
+    def test_override_nested_defaults(self, config):
+        """
+        We want to test that any defaults set in the schema
+        get applied to the generated schema here,
+        while also applying any defaults from here.
+
+        Notably we now set `json_object_path_regex` for all Glean schemas.
+        """
+
+        # Patching GenericPing.get_schema to return the schema
+        # that will contain the configuration soon.
+        # This should continue to work
+        # even if the upstream schema actually gains those fields.
+        json = generic_ping.GenericPing._get_json(
+            glean_ping.GleanPing.schema_url.format(branch="main")
+        )
+        json.update(
+            {
+                "mozPipelineMetadata": {
+                    "json_object_path_regex": "metrics\\.object\\..*",
+                }
+            }
+        )
+        with patch.object(
+            generic_ping.GenericPing, "get_schema", return_value=Schema(json)
+        ):
+            glean = glean_ping.GleanPing(
+                {"name": "glean-core", "app_id": "org-mozilla-glean"}
+            )
+            schemas = glean.generate_schema(config)
+            final_schemas = {k: schemas[k].schema for k in schemas}
+
+            # Glean built-in pings only.
+            assert len(final_schemas) == 4
+
+            expected_metdata = {
+                "bq_dataset_family": "glean_core",
+                "bq_table": "metrics_v1",
+                "bq_metadata_format": "structured",
+                "json_object_path_regex": "metrics\\.object\\..*",
+            }
+            for name, schema in final_schemas.items():
+                if name == "metrics":
+                    assert schema["mozPipelineMetadata"] == expected_metdata
