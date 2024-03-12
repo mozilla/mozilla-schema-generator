@@ -300,7 +300,7 @@ class GleanPing(GenericPing):
 
     def _include_info_sections(self, ping_data) -> bool:
         # Default to true if not specified.
-        if "history" not in ping_data:
+        if "history" not in ping_data or len(ping_data["history"]) == 0:
             return True
         latest_ping_data = ping_data["history"][-1]
         return (
@@ -350,13 +350,13 @@ class GleanPing(GenericPing):
 
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
+            # Adjust the schema path if the ping does not require info sections
+            self.set_schema_url(pipeline_meta)
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
                 schemas[new_config.name] = schema
             else:
-                # Adjust the schema path if the ping does not require info sections
-                self.set_schema_url(pipeline_meta)
                 generated = super().generate_schema(new_config)
                 for schema in generated.values():
                     # We want to override each individual key with assembled defaults,

@@ -64,6 +64,9 @@ class GleanPingStub(glean_ping.GleanPing):
         current_repo = next((x for x in repos if x.get("app_id") == self.repo_name), {})
         return current_repo.get("dependencies", [])
 
+    def _get_history(self):
+        return []
+
     def _get_dependency_pings(self, dependency):
         return {
             "dependency_ping": {
@@ -83,6 +86,7 @@ class GleanPingStub(glean_ping.GleanPing):
                 "in-source": True,
                 "moz_pipeline_metadata": self.ping_metadata,
                 "name": "ping1",
+                "history": self._get_history(),
             }
         }
 
@@ -142,6 +146,18 @@ class GleanPingWithGranularity(GleanPingStub):
         "include_info_sections": True,
         "submission_timestamp_granularity": "seconds",
     }
+
+
+class GleanPingNoInfoSection(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "include_info_sections": False,
+    }
+
+    def _get_history(self):
+        return [{"include_info_sections": False}]
 
 
 class GleanPingWithMultiplePings(GleanPingStub):
@@ -585,6 +601,35 @@ class TestGleanPing(object):
                 assert (
                     schema["mozPipelineMetadata"]
                     == GleanPingWithGranularity.ping_metadata
+                )
+
+    @patch.object(glean_ping.GleanPing, "get_repos")
+    def test_ping_no_info_sections(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": [],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                },
+                "name": "app1",
+            }
+        ]
+
+        # TODO remove the temp branch name when the min schema pr lands
+        glean = GleanPingNoInfoSection({"name": "app1", "app_id": "app1"}, mps_branch="wstuckey/glean-min")
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
+
+        assert len(final_schemas) == 1
+        for name, schema in final_schemas.items():
+            assert "required" not in schema
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingNoInfoSection.ping_metadata
                 )
 
     # Unit test covering case where 2 pings have specific metadata and default metadata is applied
