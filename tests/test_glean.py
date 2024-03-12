@@ -96,6 +96,7 @@ class GleanPingWithExpirationPolicy(GleanPingStub):
             "delete_after_days": 12,
             "collect_through_date": "2022-06-10",
         },
+        "include_info_sections": True,
     }
 
 
@@ -104,6 +105,7 @@ class GleanPingWithEncryption(GleanPingStub):
         "bq_dataset_family": "app1",
         "bq_metadata_format": "structured",
         "bq_table": "ping1_v1",
+        "include_info_sections": True,
         "jwe_mappings": [
             {
                 "decrypted_field_path": "",
@@ -118,6 +120,7 @@ class GleanPingNoMetadata(GleanPingStub):
         "bq_dataset_family": "app1",
         "bq_metadata_format": "structured",
         "bq_table": "ping1_v1",
+        "include_info_sections": True,
     }
 
 
@@ -126,6 +129,7 @@ class GleanPingWithOverrideAttributes(GleanPingStub):
         "bq_dataset_family": "app1",
         "bq_metadata_format": "structured",
         "bq_table": "ping1_v1",
+        "include_info_sections": True,
         "override_attributes": [{"name": "geo_city", "value": None}],
     }
 
@@ -135,6 +139,7 @@ class GleanPingWithGranularity(GleanPingStub):
         "bq_dataset_family": "app1",
         "bq_metadata_format": "structured",
         "bq_table": "ping1_v1",
+        "include_info_sections": True,
         "submission_timestamp_granularity": "seconds",
     }
 
@@ -145,6 +150,7 @@ class GleanPingWithMultiplePings(GleanPingStub):
         "bq_metadata_format": "structured",
         "bq_table": "ping1_v1",
         "expiration_policy": {"delete_after_days": 30},
+        "include_info_sections": True,
         "override_attributes": [{"name": "geo_city", "value": None}],
         "submission_timestamp_granularity": "seconds",
     }
@@ -154,6 +160,7 @@ class GleanPingWithMultiplePings(GleanPingStub):
         "bq_metadata_format": "structured",
         "bq_table": "ping2_v1",
         "expiration_policy": {"delete_after_days": 45},
+        "include_info_sections": True,
         "submission_timestamp_granularity": "millis",
     }
 
@@ -318,6 +325,7 @@ class TestGleanPing(object):
                 "bq_dataset_family": "glean_core",
                 "bq_metadata_format": "structured",
                 "bq_table": name.replace("-", "_") + "_v1",
+                "include_info_sections": True,
             }
             print_and_test(generic_schema, schema)
 
@@ -363,7 +371,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 4
+                assert len(schema["mozPipelineMetadata"]) == 5
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -415,7 +423,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 4
+                assert len(schema["mozPipelineMetadata"]) == 5
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -455,7 +463,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 3
+                assert len(schema["mozPipelineMetadata"]) == 4
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -492,7 +500,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 4
+                assert len(schema["mozPipelineMetadata"]) == 5
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -537,7 +545,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 4
+                assert len(schema["mozPipelineMetadata"]) == 5
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -620,7 +628,7 @@ class TestGleanPing(object):
                 )
             if name == "dependency_ping":
                 # Need to do individual comparison due to update of value based on app_id
-                assert len(schema["mozPipelineMetadata"]) == 5
+                assert len(schema["mozPipelineMetadata"]) == 6
                 assert schema["mozPipelineMetadata"]["bq_dataset_family"] == "app1"
                 assert (
                     schema["mozPipelineMetadata"]["bq_metadata_format"] == "structured"
@@ -763,7 +771,7 @@ class TestGleanPing(object):
         # This should continue to work
         # even if the upstream schema actually gains those fields.
         json = generic_ping.GenericPing._get_json(
-            glean_ping.GleanPing.schema_url.format(branch="main")
+            glean_ping.DEFAULT_SCHEMA_URL.format(branch="main")
         )
         json.update(
             {
@@ -789,6 +797,7 @@ class TestGleanPing(object):
                 "bq_table": "metrics_v1",
                 "bq_metadata_format": "structured",
                 "json_object_path_regex": "metrics\\.object\\..*",
+                "include_info_sections": True,
             }
             for name, schema in final_schemas.items():
                 if name == "metrics":

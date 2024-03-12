@@ -28,8 +28,9 @@ class GenericPing(object):
     cache_dir = pathlib.Path(os.environ.get("MSG_PROBE_CACHE_DIR", ".probe_cache"))
 
     def __init__(self, schema_url, env_url, probes_url, mps_branch="main"):
-        self.schema_url = schema_url.format(branch=mps_branch)
-        self.env_url = env_url.format(branch=mps_branch)
+        self.branch_name = mps_branch
+        self.schema_url = schema_url.format(branch=self.branch_name)
+        self.env_url = env_url.format(branch=self.branch_name)
         self.probes_url = probes_url
 
     def get_schema(self) -> Schema:
