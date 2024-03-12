@@ -619,7 +619,9 @@ class TestGleanPing(object):
         ]
 
         # TODO remove the temp branch name when the min schema pr lands
-        glean = GleanPingNoInfoSection({"name": "app1", "app_id": "app1"}, mps_branch="wstuckey/glean-min")
+        glean = GleanPingNoInfoSection(
+            {"name": "app1", "app_id": "app1"}, mps_branch="wstuckey/glean-min"
+        )
         schemas = glean.generate_schema(config, generic_schema=True)
         final_schemas = {k: schemas[k].schema for k in schemas}
 
