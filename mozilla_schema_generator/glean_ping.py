@@ -30,6 +30,7 @@ MINIMUM_SCHEMA_URL = (
     "/{branch}/schemas/glean/glean/glean-min.1.schema.json"
 )
 
+
 class GleanPing(GenericPing):
     probes_url_template = GenericPing.probe_info_base_url + "/glean/{}/metrics"
     ping_url_template = GenericPing.probe_info_base_url + "/glean/{}/pings"
@@ -302,8 +303,10 @@ class GleanPing(GenericPing):
         if "history" not in ping_data:
             return True
         latest_ping_data = ping_data["history"][-1]
-        return ("include_info_sections" not in latest_ping_data
-                or latest_ping_data["include_info_sections"])
+        return (
+            "include_info_sections" not in latest_ping_data
+            or latest_ping_data["include_info_sections"]
+        )
 
     def set_schema_url(self, metadata):
         """
