@@ -20,12 +20,18 @@ BUG_1737656_TXT = ROOT_DIR / "configs" / "bug_1737656_affected.txt"
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_SCHEMA_URL = (
+    "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+    "/{branch}/schemas/glean/glean/glean.1.schema.json"
+)
+
+MINIMUM_SCHEMA_URL = (
+    "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+    "/{branch}/schemas/glean/glean/glean-min.1.schema.json"
+)
+
 
 class GleanPing(GenericPing):
-    schema_url = (
-        "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
-        "/{branch}/schemas/glean/glean/glean.1.schema.json"
-    )
     probes_url_template = GenericPing.probe_info_base_url + "/glean/{}/metrics"
     ping_url_template = GenericPing.probe_info_base_url + "/glean/{}/pings"
     repos_url = GenericPing.probe_info_base_url + "/glean/repositories"
@@ -45,8 +51,8 @@ class GleanPing(GenericPing):
         self.repo_name = repo["name"]
         self.app_id = repo["app_id"]
         super().__init__(
-            self.schema_url,
-            self.schema_url,
+            DEFAULT_SCHEMA_URL,
+            DEFAULT_SCHEMA_URL,
             self.probes_url_template.format(self.repo_name),
             **kwargs,
         )
@@ -249,6 +255,7 @@ class GleanPing(GenericPing):
             "bq_dataset_family",
             "bq_table",
             "bq_metadata_format",
+            "include_info_sections",
             "submission_timestamp_granularity",
             "expiration_policy",
             "override_attributes",
@@ -279,6 +286,7 @@ class GleanPing(GenericPing):
         pings = self._get_ping_data_and_dependencies_with_default_metadata()
         for ping_name, ping_data in pings.items():
             metadata = ping_data.get("moz_pipeline_metadata")
+            metadata["include_info_sections"] = self._include_info_sections(ping_data)
 
             # While technically unnecessary, the dictionary elements are re-ordered to match the
             # currently deployed order and used to verify no difference in output.
@@ -289,6 +297,26 @@ class GleanPing(GenericPing):
         return {
             k: v["history"][-1]["description"] for k, v in self._get_ping_data().items()
         }
+
+    def _include_info_sections(self, ping_data) -> bool:
+        # Default to true if not specified.
+        if "history" not in ping_data or len(ping_data["history"]) == 0:
+            return True
+        latest_ping_data = ping_data["history"][-1]
+        return (
+            "include_info_sections" not in latest_ping_data
+            or latest_ping_data["include_info_sections"]
+        )
+
+    def set_schema_url(self, metadata):
+        """
+        Switch between the glean-min and glean schemas if the ping does not require
+        info sections as specified in the parsed ping info in probe scraper.
+        """
+        if not metadata["include_info_sections"]:
+            self.schema_url = MINIMUM_SCHEMA_URL.format(branch=self.branch_name)
+        else:
+            self.schema_url = DEFAULT_SCHEMA_URL.format(branch=self.branch_name)
 
     def generate_schema(self, config, generic_schema=False) -> Dict[str, Schema]:
         pings = self.get_pings_and_pipeline_metadata()
@@ -322,6 +350,8 @@ class GleanPing(GenericPing):
 
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
+            # Adjust the schema path if the ping does not require info sections
+            self.set_schema_url(pipeline_meta)
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
