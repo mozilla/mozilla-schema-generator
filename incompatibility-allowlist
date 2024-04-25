@@ -68,3 +68,13 @@ telemetry.first-shutdown-remainder.*
 # Bug 1867770
 # Delete mozillavpn-cirrus so we can rename the mozillavpn_cirrus app to mozillavpn_backend_cirrus
 mozillavpn-cirrus.*
+
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1874935#c11
+# Delete unused pings from the accounts-backend and moso-mastodon-backend applications
+# These pings were never used and their tables have been erroneously deployed
+accounts-backend.baseline.*
+accounts-backend.deletion-request.*
+accounts-backend.metrics.*
+moso-mastodon-backend.baseline.*
+moso-mastodon-backend.deletion-request.*
+moso-mastodon-backend.metrics.*
