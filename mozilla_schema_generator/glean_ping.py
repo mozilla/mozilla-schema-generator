@@ -8,8 +8,6 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Set
 
-from requests import HTTPError
-
 from .config import Config
 from .generic_ping import GenericPing
 from .probes import GleanProbe
