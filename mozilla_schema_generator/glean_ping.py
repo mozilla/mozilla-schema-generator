@@ -39,8 +39,6 @@ class GleanPing(GenericPing):
         GenericPing.probe_info_base_url + "/glean/{}/dependencies"
     )
 
-    default_dependencies = []
-
     with open(BUG_1737656_TXT, "r") as f:
         bug_1737656_affected_tables = [
             line.strip() for line in f.readlines() if line.strip()
@@ -87,13 +85,9 @@ class GleanPing(GenericPing):
 
         # The dependencies are specified using library names, but we need to
         # map those back to the name of the repository in the repository file.
-        try:
-            dependencies = self._get_json(
-                self.dependencies_url_template.format(self.repo_name)
-            )
-        except HTTPError:
-            logging.info(f"No dependencies found for {self.repo_name}")
-            return self.default_dependencies
+        dependencies = self._get_json(
+            self.dependencies_url_template.format(self.repo_name)
+        )
 
         dependency_library_names = list(dependencies.keys())
 
@@ -107,10 +101,6 @@ class GleanPing(GenericPing):
         for name in dependency_library_names:
             if name in repos_by_dependency_name:
                 dependencies.append(repos_by_dependency_name[name])
-
-        if len(dependencies) == 0:
-            logging.info(f"No dependencies found for {self.repo_name}")
-            return self.default_dependencies
 
         logging.info(f"For {self.repo_name}, found Glean dependencies: {dependencies}")
         return dependencies
