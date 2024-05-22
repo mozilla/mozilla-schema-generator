@@ -302,11 +302,20 @@ class GleanPing(GenericPing):
         # Default to true if not specified.
         if "history" not in ping_data or len(ping_data["history"]) == 0:
             return True
-        latest_ping_data = ping_data["history"][-1]
-        return (
-            "include_info_sections" not in latest_ping_data
-            or latest_ping_data["include_info_sections"]
-        )
+
+        # Check if at some point in the past the info section fields have already been deployed.
+        # Keep them in the schema, even if include_info_sections has changed as
+        # removing fields is currently not supported.
+        # See https://bugzilla.mozilla.org/show_bug.cgi?id=1898105
+        for history in ping_data["history"]:
+            if (
+                "include_info_sections" not in history
+                or history["include_info_sections"]
+            ):
+                return True
+
+        # The ping was created with include_info_sections = False. The fields can be excluded.
+        return False
 
     def set_schema_url(self, metadata):
         """
