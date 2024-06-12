@@ -50,7 +50,6 @@ function _generate_schemas() {
     mozilla-schema-generator generate-glean-pings \
         --mps-branch "$mps_branch_source" \
         --out-dir .
-    
     # Copy aliased schemas into place before handling subset pings
     alias_schemas "$ALIASES_PATH" .
 
