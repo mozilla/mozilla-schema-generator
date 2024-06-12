@@ -50,12 +50,17 @@ function _generate_schemas() {
     mozilla-schema-generator generate-glean-pings \
         --mps-branch "$mps_branch_source" \
         --out-dir .
-
+    
     # Copy aliased schemas into place before handling subset pings
     alias_schemas "$ALIASES_PATH" .
 
     # Generate subset pings
     mozilla-schema-generator generate-subset-pings \
+        --out-dir .
+    
+    # This needs to be called at the end because it overwrites main_v4 schema that
+    # is used to generate subset pings
+    mozilla-schema-generator freeze-main-4-ping \
         --out-dir .
 
     # Remove all non-json schemas (e.g. parquet)
