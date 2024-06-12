@@ -286,7 +286,12 @@ class GleanPing(GenericPing):
         pings = self._get_ping_data_and_dependencies_with_default_metadata()
         for ping_name, ping_data in pings.items():
             metadata = ping_data.get("moz_pipeline_metadata")
-            metadata["include_info_sections"] = self._include_info_sections(ping_data)
+            metadata["include_info_sections"] = self._is_field_included(
+                ping_data, "include_info_sections"
+            )
+            metadata["include_client_id"] = self._is_field_included(
+                ping_data, "include_client_id"
+            )
 
             # While technically unnecessary, the dictionary elements are re-ordered to match the
             # currently deployed order and used to verify no difference in output.
@@ -298,7 +303,13 @@ class GleanPing(GenericPing):
             k: v["history"][-1]["description"] for k, v in self._get_ping_data().items()
         }
 
-    def _include_info_sections(self, ping_data) -> bool:
+    @staticmethod
+    def _is_field_included(ping_data, field_name) -> bool:
+        """Return false if the field exists and is false in all history entries of the ping.
+
+        If the field is not found or true in one or more history entries, true is returned.
+        """
+
         # Default to true if not specified.
         if "history" not in ping_data or len(ping_data["history"]) == 0:
             return True
@@ -308,10 +319,7 @@ class GleanPing(GenericPing):
         # removing fields is currently not supported.
         # See https://bugzilla.mozilla.org/show_bug.cgi?id=1898105
         for history in ping_data["history"]:
-            if (
-                "include_info_sections" not in history
-                or history["include_info_sections"]
-            ):
+            if field_name not in history or history[field_name]:
                 return True
 
         # The ping was created with include_info_sections = False. The fields can be excluded.
