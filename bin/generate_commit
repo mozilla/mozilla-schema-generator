@@ -57,6 +57,11 @@ function _generate_schemas() {
     # Generate subset pings
     mozilla-schema-generator generate-subset-pings \
         --out-dir .
+    
+    # This needs to be called at the end because it overwrites main_v4 schema that
+    # is used to generate subset pings
+    mozilla-schema-generator freeze-main-4-ping \
+        --out-dir ./telemetry
 
     # Remove all non-json schemas (e.g. parquet)
     find . -not -name "*.schema.json" -type f -exec rm {} +

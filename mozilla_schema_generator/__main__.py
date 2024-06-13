@@ -8,6 +8,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from shutil import copyfile
 
 import click
 import yaml
@@ -88,6 +89,21 @@ def generate_main_ping(config, out_dir, pretty, mps_branch):
     schemas = schema_generator.generate_schema(config)
     # schemas introduces an extra layer to the actual schema
     dump_schema(schemas, out_dir, pretty, version=4)
+
+
+@click.command()
+@common_options
+def freeze_main_4_ping(out_dir, pretty, mps_branch):
+    # Copy the frozen main ping schema to the output directory
+    #
+    # We want to stop updating main_v4 schema, but we still need it in the generated
+    # artifact so the table not gets deleted by deployment pipeline.
+    # Frozen schema was copied from https://github.com/mozilla-services/mozilla-pipeline-schemas/blob/9ef50e7478220f9917db20345cf3240da8f9774a/schemas/telemetry/main/main.4.schema.json # noqa E501
+    #
+    # This needs to be called after generate_main_ping and generate_subset_pings
+    frozen_main_4_ping_file = CONFIGS_DIR / "main.4.schema.json.20240612.9ef50e7"
+    main_4_path = out_dir + "/main/main.4.schema.json"
+    copyfile(frozen_main_4_ping_file, main_4_path)
 
 
 @click.command()
@@ -285,6 +301,7 @@ main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
 main.add_command(generate_subset_pings)
+main.add_command(freeze_main_4_ping)
 
 
 if __name__ == "__main__":
