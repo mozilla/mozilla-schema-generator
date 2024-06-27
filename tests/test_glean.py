@@ -165,6 +165,7 @@ class GleanPingNoInfoSection(GleanPingStub):
     def _get_history(self):
         return [{"include_info_sections": False}]
 
+
 class GleanPingNoInfoSectionWithHistory(GleanPingStub):
     ping_metadata = {
         "bq_dataset_family": "app1",
