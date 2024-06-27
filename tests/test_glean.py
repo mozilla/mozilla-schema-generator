@@ -165,6 +165,18 @@ class GleanPingNoInfoSection(GleanPingStub):
     def _get_history(self):
         return [{"include_info_sections": False}]
 
+class GleanPingNoInfoSectionWithHistory(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+        "include_info_sections": False,
+        "include_client_id": True,
+    }
+
+    def _get_history(self):
+        return [{"include_info_sections": True}, {"include_info_sections": False}]
+
 
 class GleanPingWithMultiplePings(GleanPingStub):
     ping1_metadata = {
@@ -685,6 +697,36 @@ class TestGleanPing(object):
                 assert (
                     schema["mozPipelineMetadata"]
                     == GleanPingNoInfoSection.ping_metadata
+                )
+
+    @patch.object(glean_ping.GleanPing, "get_repos")
+    def test_ping_no_info_sections_history(self, mock_get_repos, config):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": [],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {
+                    "bq_dataset_family": "app1",
+                    "bq_metadata_format": "structured",
+                },
+                "name": "app1",
+            }
+        ]
+
+        glean = GleanPingNoInfoSectionWithHistory(
+            {"name": "app1", "app_id": "app1"},
+        )
+        schemas = glean.generate_schema(config, generic_schema=True)
+        final_schemas = {k: schemas[k].schema for k in schemas}
+
+        assert len(final_schemas) == 1
+        for name, schema in final_schemas.items():
+            assert "required" not in schema
+            if name == "ping1":
+                assert (
+                    schema["mozPipelineMetadata"]
+                    == GleanPingNoInfoSectionWithHistory.ping_metadata
                 )
 
     # Unit test covering case where 2 pings have specific metadata and default metadata is applied

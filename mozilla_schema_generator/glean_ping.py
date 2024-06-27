@@ -21,12 +21,14 @@ BUG_1737656_TXT = ROOT_DIR / "configs" / "bug_1737656_affected.txt"
 logger = logging.getLogger(__name__)
 
 DEFAULT_SCHEMA_URL = (
-    "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+    "https://raw.githubusercontent.com"
+    "/mozilla-services/mozilla-pipeline-schemas"
     "/{branch}/schemas/glean/glean/glean.1.schema.json"
 )
 
 MINIMUM_SCHEMA_URL = (
-    "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas"
+    "https://raw.githubusercontent.com"
+    "/mozilla-services/mozilla-pipeline-schemas"
     "/{branch}/schemas/glean/glean/glean-min.1.schema.json"
 )
 
@@ -286,8 +288,10 @@ class GleanPing(GenericPing):
         pings = self._get_ping_data_and_dependencies_with_default_metadata()
         for ping_name, ping_data in pings.items():
             metadata = ping_data.get("moz_pipeline_metadata")
+            if not metadata:
+                continue
             metadata["include_info_sections"] = self._is_field_included(
-                ping_data, "include_info_sections"
+                ping_data, "include_info_sections", consider_all_history=False
             )
             metadata["include_client_id"] = self._is_field_included(
                 ping_data, "include_client_id"
@@ -304,23 +308,32 @@ class GleanPing(GenericPing):
         }
 
     @staticmethod
-    def _is_field_included(ping_data, field_name) -> bool:
-        """Return false if the field exists and is false in all history entries of the ping.
+    def _is_field_included(ping_data, field_name, consider_all_history=True) -> bool:
+        """Return false if the field exists and is false.
 
-        If the field is not found or true in one or more history entries, true is returned.
+        If `consider_all_history` is False, then only check the latest value in the ping history.
+        Otherwise, if the field is not found or true in one or more history entries, true is returned.
         """
 
         # Default to true if not specified.
         if "history" not in ping_data or len(ping_data["history"]) == 0:
             return True
 
-        # Check if at some point in the past the info section fields have already been deployed.
-        # Keep them in the schema, even if include_info_sections has changed as
+        # Check if at some point in the past the field has already been deployed.
+        # And if the caller of this method wants to consider this history of the field.
+        # Keep them in the schema, even if the field has changed as
         # removing fields is currently not supported.
         # See https://bugzilla.mozilla.org/show_bug.cgi?id=1898105
-        for history in ping_data["history"]:
+        # and https://bugzilla.mozilla.org/show_bug.cgi?id=1898105#c10
+        ping_history: list
+        if consider_all_history:
+           ping_history = ping_data['history'] 
+        else:
+            ping_history = [ping_data['history'][-1]]
+        for history in ping_history:
             if field_name not in history or history[field_name]:
                 return True
+
 
         # The ping was created with include_info_sections = False. The fields can be excluded.
         return False
