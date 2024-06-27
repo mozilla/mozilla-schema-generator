@@ -329,9 +329,9 @@ class GleanPing(GenericPing):
         # and https://bugzilla.mozilla.org/show_bug.cgi?id=1898105#c10
         ping_history: list
         if consider_all_history:
-            ping_history = ping_data['history']
+            ping_history = ping_data["history"]
         else:
-            ping_history = [ping_data['history'][-1]]
+            ping_history = [ping_data["history"][-1]]
         for history in ping_history:
             if field_name not in history or history[field_name]:
                 return True
