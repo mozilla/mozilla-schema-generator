@@ -78,3 +78,7 @@ accounts-backend.metrics.*
 moso-mastodon-backend.baseline.*
 moso-mastodon-backend.deletion-request.*
 moso-mastodon-backend.metrics.*
+
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1898105
+# Delete User Characteristics pings to support no_info pings
+firefox-desktop.user-characteristics.*
