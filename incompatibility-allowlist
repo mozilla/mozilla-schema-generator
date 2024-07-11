@@ -78,3 +78,8 @@ accounts-backend.metrics.*
 moso-mastodon-backend.baseline.*
 moso-mastodon-backend.deletion-request.*
 moso-mastodon-backend.metrics.*
+
+# DSRE-1173
+rally-*
+pioneer-*
+telemetry.pioneer-study.*
