@@ -90,6 +90,9 @@ class GleanPingStub(glean_ping.GleanPing):
             }
         }
 
+    def _get_metadata_overrides(self):
+        return {}
+
 
 class GleanPingWithExpirationPolicy(GleanPingStub):
     ping_metadata = {
@@ -214,6 +217,69 @@ class GleanPingWithMultiplePings(GleanPingStub):
                 "name": "ping2",
             },
         }
+
+
+class GleanPingWithMetadataOverrides(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping_v1",
+        "include_info_sections": True,
+    }
+
+    def get_dependencies(self):
+        return ["dependency"]
+
+    def _get_ping_data_without_dependencies(self) -> Dict[str, Dict]:
+        return {
+            "ping1": {
+                "in-source": True,
+                "moz_pipeline_metadata": self.ping_metadata,
+                "name": "ping1",
+            },
+        }
+
+    def _get_dependency_pings(self, dependency):
+        return {
+            "dependency_ping1": {
+                "in-source": True,
+                "moz_pipeline_metadata": {
+                    "bq_dataset_family": "test",
+                },
+                "name": "dependency_ping1",
+            },
+            "dependency_ping2": {
+                "in-source": True,
+                "moz_pipeline_metadata": {
+                    "bq_dataset_family": "test",
+                    "expiration_policy": {"delete_after_days": 120},
+                },
+                "name": "dependency_ping2",
+            },
+            "dependency_ping3": {
+                "in-source": True,
+                "moz_pipeline_metadata": {
+                    "bq_dataset_family": "test",
+                },
+                "name": "dependency_ping3",
+            },
+        }
+
+    def get_repos(self):
+        return [
+            {
+                "app_id": "app1",
+                "moz_pipeline_metadata": {
+                    "dependency_ping2": {
+                        "expiration_policy": {"delete_after_days": 90}
+                    },
+                    "dependency_ping3": {
+                        "expiration_policy": {"delete_after_days": 100},
+                        "override_attributes": [{"name": "geo_city", "value": None}],
+                    },
+                },
+            }
+        ]
 
 
 class TestGleanPing(object):
@@ -946,3 +1012,24 @@ class TestGleanPing(object):
             for name, schema in final_schemas.items():
                 if name == "metrics":
                     assert schema["mozPipelineMetadata"] == expected_metdata
+
+    def test_override_dependency_metadata(self, config):
+        glean = GleanPingWithMetadataOverrides({"name": "app1", "app_id": "app1"})
+
+        pings = glean._get_ping_data_and_dependencies_with_default_metadata()
+
+        expected_pings = {
+            **glean._get_ping_data_without_dependencies(),
+            **glean._get_dependency_pings(""),
+        }
+        expected_pings["dependency_ping2"]["moz_pipeline_metadata"][
+            "expiration_policy"
+        ] = {"delete_after_days": 90}
+        expected_pings["dependency_ping3"]["moz_pipeline_metadata"][
+            "expiration_policy"
+        ] = {"delete_after_days": 100}
+        expected_pings["dependency_ping3"]["moz_pipeline_metadata"][
+            "override_attributes"
+        ] = [{"name": "geo_city", "value": None}]
+
+        assert pings == expected_pings

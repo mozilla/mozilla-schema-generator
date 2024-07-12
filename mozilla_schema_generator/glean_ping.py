@@ -233,11 +233,15 @@ class GleanPing(GenericPing):
         # moz_pipeline_metadata_defaults so they need to be applied here.
 
         # 1.  Get repo and pipeline default metadata.
-        repos = GleanPing.get_repos()
+        repos = self.get_repos()
         current_repo = next((x for x in repos if x.get("app_id") == self.app_id), {})
         default_metadata = current_repo.get("moz_pipeline_metadata_defaults", {})
 
         # 2.  Apply the default metadata to each dependency defined ping.
+
+        # Apply app-level metadata to pings defined in dependencies
+        app_metadata = current_repo.get("moz_pipeline_metadata", {})
+
         for dependency in self.get_dependencies():
             dependency_pings = self._get_dependency_pings(dependency)
             for dependency_ping in dependency_pings.values():
@@ -248,7 +252,14 @@ class GleanPing(GenericPing):
                 GleanPing.apply_default_metadata(
                     dependency_ping.get("moz_pipeline_metadata"), default_metadata
                 )
+                # app-level ping properties take priority over the app defaults
+                metadata_override = app_metadata.get(dependency_ping["name"])
+                if metadata_override is not None:
+                    GleanPing.apply_default_metadata(
+                        dependency_ping.get("moz_pipeline_metadata"), metadata_override
+                    )
             ping_data.update(dependency_pings)
+
         return ping_data
 
     @staticmethod
