@@ -152,3 +152,21 @@ metrics:
         not:
           - glean_ping_info
       type: object
+  labeled_custom_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_custom_distribution
+  labeled_memory_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_memory_distribution
+  labeled_timing_distribution:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_timing_distribution
