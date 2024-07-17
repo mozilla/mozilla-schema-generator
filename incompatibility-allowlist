@@ -83,3 +83,4 @@ moso-mastodon-backend.metrics.*
 rally-*
 pioneer-*
 telemetry.pioneer-study.*
+metadata.pioneer*
