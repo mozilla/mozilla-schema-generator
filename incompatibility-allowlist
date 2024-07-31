@@ -84,3 +84,8 @@ rally-*
 pioneer-*
 telemetry.pioneer-study.*
 metadata.pioneer*
+
+# DSRE-1719
+edge_validator.*
+mozdata.*
+mozza.*
