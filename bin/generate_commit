@@ -85,6 +85,18 @@ function _generate_schemas() {
                 "$fname" > "$bq_out"
     done
 
+    # Copy frozen main ping schema to place
+    #
+    # We want to stop updating main_v4 BigQuery schema, but we still need it in the generated artifact
+    # so the table does not get deleted by deployment pipeline. It is safe to do this because ingestion
+    # pipeline no longer writes to main_v4 table (configured via `split_config.preserve_original: false`).
+    # We also need to keep the main_v4 json schema intact as it is used to validate pings by the pipeline.
+    #
+    # Frozen schema was copied from https://github.com/mozilla-services/mozilla-pipeline-schemas/blob/8353a5c8d3173b9a2e2f288865591ff3ec5f13c0/schemas/telemetry/main/main.4.bq # noqa E501
+    cp ../../mozilla-schema-generator/mozilla_schema_generator/configs/main.4.bq.20240617.9ef50e7 telemetry/main/main.4.bq
+    # TODO: relax column limit check in generator
+    # TODO: first_shutdown and saved_session have the same schema - handle them the same way
+
     # Remove BigQuery schemas that are in the disallow list
     find . -name '*.bq' | grep -f "$DISALLOWLIST" | xargs rm -f
     popd
