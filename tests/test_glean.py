@@ -278,6 +278,9 @@ class GleanPingWithMetadataOverrides(GleanPingStub):
                         "override_attributes": [{"name": "geo_city", "value": None}],
                     },
                 },
+                "moz_pipeline_metadata_defaults": {
+                    "expiration_policy": {"delete_after_days": 80}
+                },
             }
         ]
 
@@ -946,6 +949,9 @@ class TestGleanPing(object):
             **glean._get_ping_data_without_dependencies(),
             **glean._get_dependency_pings(""),
         }
+        expected_pings["dependency_ping1"]["moz_pipeline_metadata"][
+            "expiration_policy"
+        ] = {"delete_after_days": 80}
         expected_pings["dependency_ping2"]["moz_pipeline_metadata"][
             "expiration_policy"
         ] = {"delete_after_days": 90}
