@@ -4,6 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import copy
 import logging
 from pathlib import Path
 from typing import Dict, List, Set
@@ -250,7 +251,8 @@ class GleanPing(GenericPing):
                 # bq_dataset_family instead of using the dependency id for the bq_dataset_family
                 # value.
                 GleanPing.apply_default_metadata(
-                    dependency_ping.get("moz_pipeline_metadata"), default_metadata
+                    dependency_ping.get("moz_pipeline_metadata"),
+                    copy.deepcopy(default_metadata),
                 )
                 # app-level ping properties take priority over the app defaults
                 metadata_override = app_metadata.get(dependency_ping["name"])
