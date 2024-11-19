@@ -89,6 +89,12 @@ metrics:
         not:
           - glean_ping_info
       type: labeled_string
+  labeled_quantity:
+    match:
+      send_in_pings:
+        not:
+          - glean_ping_info
+      type: labeled_quantity
 
   # Metric types affected by https://bugzilla.mozilla.org/show_bug.cgi?id=1737656
   # The jwe, labeled_rate, url, and text types were deployed to BigQuery tables
