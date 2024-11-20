@@ -78,12 +78,12 @@ jobs:
 
   deploy:
     docker:
-      - image: docker:20.10.2
+      - image: cimg/base:default
     working_directory: ~/mozilla/mozilla-schema-generator
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.2
+          version: docker24
       - run: |
           printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' "$CIRCLE_SHA1" "$CIRCLE_TAG" "$CIRCLE_PROJECT_USERNAME" "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_BUILD_URL" > version.json
       - run: docker build -t app:build .
