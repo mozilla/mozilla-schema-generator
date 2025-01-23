@@ -92,3 +92,7 @@ mozza.*
 
 # DSRE-1815
 mlhackweek-search.*
+
+# DSRE-1832
+telemetry.block-autoplay.1
+firefox-accounts.*
