@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -32,6 +32,9 @@ MINIMUM_SCHEMA_URL = (
     "/mozilla-services/mozilla-pipeline-schemas"
     "/{branch}/schemas/glean/glean/glean-min.1.schema.json"
 )
+
+# Force the ping to select the Glean min schema.
+FORCE_MIN_SCHEMA = ["quick-suggest"]
 
 
 class GleanPing(GenericPing):
@@ -352,12 +355,12 @@ class GleanPing(GenericPing):
         # The ping was created with include_info_sections = False. The fields can be excluded.
         return False
 
-    def set_schema_url(self, metadata):
+    def set_schema_url(self, ping_name, metadata):
         """
         Switch between the glean-min and glean schemas if the ping does not require
         info sections as specified in the parsed ping info in probe scraper.
         """
-        if not metadata["include_info_sections"]:
+        if not metadata["include_info_sections"] or ping_name in FORCE_MIN_SCHEMA:
             self.schema_url = MINIMUM_SCHEMA_URL.format(branch=self.branch_name)
         else:
             self.schema_url = DEFAULT_SCHEMA_URL.format(branch=self.branch_name)
@@ -395,7 +398,7 @@ class GleanPing(GenericPing):
             defaults = {"mozPipelineMetadata": pipeline_meta}
 
             # Adjust the schema path if the ping does not require info sections
-            self.set_schema_url(pipeline_meta)
+            self.set_schema_url(ping, pipeline_meta)
             if generic_schema:  # Use the generic glean ping schema
                 schema = self.get_schema(generic_schema=True)
                 schema.schema.update(defaults)
