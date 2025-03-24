@@ -7,3 +7,6 @@ metadata/metaschema/.*
 glean/.*
 telemetry/disableSHA1rollout/.*
 telemetry/untrustedModules/.*
+telemetry/main/main.4.bq
+telemetry/first-shutdown/first-shutdown.4.bq
+telemetry/saved-session/saved-session.4.bq
