@@ -1,13 +1,15 @@
-####################
-# CircleCI configuration reference:
-#   https://circleci.com/docs/2.0/configuration-reference
-####################
+version: 2.1
 
-version: 2
+orbs:
+  gcp-gcr: circleci/gcp-gcr@0.16
+  docker: circleci/docker@2.6
+  python: circleci/python@2.1.1
+  gcp-cli: circleci/gcp-cli@3.2
 
-#####################################################
-# Jobs: see https://circleci.com/docs/2.0/jobs-steps/
-#####################################################
+executors:
+  ubuntu-machine-executor:
+    machine:
+      image: ubuntu-2004:current
 
 jobs:
   test:
@@ -77,36 +79,18 @@ jobs:
           command: gh-pages --message "[skip ci] updates" --dist /tmp/_html
 
   deploy:
-    docker:
-      - image: docker/compose:1.22.0
+    executor: ubuntu-machine-executor
     working_directory: ~/mozilla/mozilla-schema-generator
     steps:
       - checkout
-      - setup_remote_docker:
-          version: default
       - run: |
           printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' "$CIRCLE_SHA1" "$CIRCLE_TAG" "$CIRCLE_PROJECT_USERNAME" "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_BUILD_URL" > version.json
-      - run: docker build -t app:build .
-      - run:
-          name: Deploy to Dockerhub
-          command: |
-            # Deploy main
-            if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker tag app:build ${DOCKERHUB_REPO}:latest
-              docker push ${DOCKERHUB_REPO}:latest
-            elif  [ ! -z "${CIRCLE_TAG}" ]; then
-            # Deploy a release tag...
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              echo "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-              docker tag app:build "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-              docker images
-              docker push "${DOCKERHUB_REPO}:${CIRCLE_TAG}"
-            fi
-
-#########################################################
-# Workflows: see https://circleci.com/docs/2.0/workflows/
-#########################################################
+      - gcp-gcr/gcr-auth:
+          use_oidc: true
+      - gcp-gcr/build-image: &image
+          image: mozilla-schema-generator
+          tag: ${CIRCLE_TAG:-latest}
+      - gcp-gcr/push-image: *image
 
 workflows:
   version: 2
@@ -131,13 +115,16 @@ workflows:
               only: main
 
       - deploy:
-          requires:
-            - test
+          context: dataeng-bqetl-gcr
+          # requires:
+          #   - test
           filters:
             tags:
               only: /.*/
             branches:
-              only: main
+              only:
+                - main
+                - DENG-8344  # for testing purposes
 
   nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
     triggers:
