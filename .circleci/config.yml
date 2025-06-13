@@ -116,15 +116,14 @@ workflows:
 
       - deploy:
           context: dataeng-bqetl-gcr
-          # requires:
-          #   - test
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
             branches:
               only:
                 - main
-                - DENG-8344  # for testing purposes
 
   nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
     triggers:
