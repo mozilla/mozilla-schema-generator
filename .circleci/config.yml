@@ -9,7 +9,7 @@ orbs:
 executors:
   ubuntu-machine-executor:
     machine:
-      image: ubuntu-2004:current
+      image: ubuntu-2404:current
 
 jobs:
   test:
