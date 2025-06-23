@@ -92,3 +92,8 @@ mozza.*
 
 # DSRE-1815
 mlhackweek-search.*
+
+# DENG-4097
+telemetry.main.4
+telemetry.first-shutdown.4
+telemetry.saved-session.4
