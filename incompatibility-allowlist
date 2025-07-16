@@ -92,3 +92,6 @@ mozza.*
 
 # DSRE-1815
 mlhackweek-search.*
+
+# DENG-8496
+telemetry.modules.4
