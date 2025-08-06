@@ -13,9 +13,6 @@
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/crash/crash.4.schema.json"
     },
     {
-        "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/modules/modules.4.schema.json"
-    },
-    {
         "schema_url": "https://raw.githubusercontent.com/mozilla-services/mozilla-pipeline-schemas/{branch}/schemas/telemetry/testpilot/testpilot.4.schema.json"
     },
     {
