@@ -21,16 +21,16 @@ BUG_1737656_TXT = ROOT_DIR / "configs" / "bug_1737656_affected.txt"
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SCHEMA_URL = (
+SCHEMA_URL_TEMPLATE = (
     "https://raw.githubusercontent.com"
     "/mozilla-services/mozilla-pipeline-schemas"
-    "/{branch}/schemas/glean/glean/glean.1.schema.json"
+    "/{branch}/schemas/glean/glean/"
 )
 
-MINIMUM_SCHEMA_URL = (
-    "https://raw.githubusercontent.com"
-    "/mozilla-services/mozilla-pipeline-schemas"
-    "/{branch}/schemas/glean/glean/glean-min.1.schema.json"
+SCHEMA_VERSION_TEMPLATE = "{schema_type}.{version}.schema.json"
+
+DEFAULT_SCHEMA_URL = SCHEMA_URL_TEMPLATE + SCHEMA_VERSION_TEMPLATE.format(
+    schema_type="glean", version=1
 )
 
 
@@ -49,10 +49,11 @@ class GleanPing(GenericPing):
             line.strip() for line in f.readlines() if line.strip()
         ]
 
-    def __init__(self, repo, **kwargs):  # TODO: Make env-url optional
+    def __init__(self, repo, version=1, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
         self.repo_name = repo["name"]
         self.app_id = repo["app_id"]
+        self.version = version
         super().__init__(
             DEFAULT_SCHEMA_URL,
             DEFAULT_SCHEMA_URL,
@@ -358,9 +359,17 @@ class GleanPing(GenericPing):
         info sections as specified in the parsed ping info in probe scraper.
         """
         if not metadata["include_info_sections"]:
-            self.schema_url = MINIMUM_SCHEMA_URL.format(branch=self.branch_name)
+            self.schema_url = SCHEMA_URL_TEMPLATE.format(
+                branch=self.branch_name
+            ) + SCHEMA_VERSION_TEMPLATE.format(
+                schema_type="glean-min", version=self.version
+            )
         else:
-            self.schema_url = DEFAULT_SCHEMA_URL.format(branch=self.branch_name)
+            self.schema_url = SCHEMA_URL_TEMPLATE.format(
+                branch=self.branch_name
+            ) + SCHEMA_VERSION_TEMPLATE.format(
+                schema_type="glean", version=self.version
+            )
 
     def generate_schema(self, config, generic_schema=False) -> Dict[str, Schema]:
         pings = self.get_pings_and_pipeline_metadata()

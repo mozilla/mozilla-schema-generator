@@ -213,9 +213,17 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
 
 
 def write_schema(repo, config, out_dir, pretty, generic_schema, mps_branch):
-    schema_generator = GleanPing(repo, mps_branch=mps_branch)
-    schemas = schema_generator.generate_schema(config, generic_schema=generic_schema)
-    dump_schema(schemas, out_dir and out_dir.joinpath(repo["app_id"]), pretty)
+    for version in (1, 2):
+        schema_generator = GleanPing(repo, mps_branch=mps_branch, version=version)
+        schemas = schema_generator.generate_schema(
+            config, generic_schema=generic_schema
+        )
+        dump_schema(
+            schemas,
+            out_dir and out_dir.joinpath(repo["app_id"]),
+            pretty,
+            version=version,
+        )
 
 
 @click.command()
