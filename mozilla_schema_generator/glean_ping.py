@@ -6,9 +6,11 @@
 
 import copy
 import logging
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
+import yaml
 from requests import HTTPError
 
 from .config import Config
@@ -18,6 +20,7 @@ from .schema import Schema
 
 ROOT_DIR = Path(__file__).parent
 BUG_1737656_TXT = ROOT_DIR / "configs" / "bug_1737656_affected.txt"
+METRIC_BLOCKLIST = ROOT_DIR / "configs" / "metric_blocklist.yaml"
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +44,7 @@ class GleanPing(GenericPing):
     dependencies_url_template = (
         GenericPing.probe_info_base_url + "/glean/{}/dependencies"
     )
+    app_listings_url = GenericPing.probe_info_base_url + "/v2/glean/app-listings"
 
     default_dependencies = ["glean-core"]
 
@@ -48,6 +52,9 @@ class GleanPing(GenericPing):
         bug_1737656_affected_tables = [
             line.strip() for line in f.readlines() if line.strip()
         ]
+
+    with open(METRIC_BLOCKLIST, "r") as f:
+        metric_blocklist = yaml.safe_load(f)
 
     def __init__(self, repo, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
@@ -118,15 +125,39 @@ class GleanPing(GenericPing):
         logging.info(f"For {self.repo_name}, found Glean dependencies: {dependencies}")
         return dependencies
 
+    @staticmethod
+    def metric_is_removed(metric: Dict[str, Any]) -> bool:
+        """Returns true if the given metric was removed from the source over one year ago.
+
+        This is to allow metrics to be added back to the schema.
+        Format of argument is a single metric from the probeinfo service metrics endpoint.
+        """
+        return not metric["in-source"] and datetime.fromisoformat(
+            metric["history"][-1]["dates"]["last"]
+        ) < datetime.utcnow() - timedelta(days=365)
+
     def get_probes(self) -> List[GleanProbe]:
         data = self._get_json(self.probes_url)
-        probes = list(data.items())
+        blocklist = set(
+            self.metric_blocklist.get(self.get_app_name(), [])
+            + self.metric_blocklist.get(self.app_id, [])
+        )
+        probes = [
+            m
+            for m in data.items()
+            if m[0] not in blocklist or not self.metric_is_removed(m[1])
+        ]
 
         for dependency in self.get_dependencies():
             dependency_probes = self._get_json(
                 self.probes_url_template.format(dependency)
             )
-            probes += list(dependency_probes.items())
+            blocklist = set(self.metric_blocklist.get(dependency, []))
+            probes += [
+                m
+                for m in dependency_probes.items()
+                if m[0] not in blocklist or not self.metric_is_removed(m[1])
+            ]
 
         pings = self.get_pings()
 
@@ -389,3 +420,17 @@ class GleanPing(GenericPing):
         """
         repos = GleanPing._get_json(GleanPing.repos_url)
         return [repo for repo in repos if "library_names" not in repo]
+
+    def get_app_name(self) -> str:
+        """Get app name associated with the app id.
+
+        e.g. org-mozilla-firefox -> fenix
+        """
+        apps = GleanPing._get_json(GleanPing.app_listings_url)
+        # app id in app-listings has "." instead of "-" so using document_namespace
+        app_name = [
+            app["app_name"] for app in apps if app["document_namespace"] == self.app_id
+        ]
+        if len(app_name) != 1:
+            raise ValueError(f"Found {len(app_name)} apps with app id {self.app_id}")
+        return app_name[0]
