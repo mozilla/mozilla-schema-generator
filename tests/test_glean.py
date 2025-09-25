@@ -324,7 +324,7 @@ class TestGleanPing(object):
     def test_pings(self, glean):
         # FIXME: this only tests the case where a repo has no dependencies-- ideally
         # we would test the dependency resolution algorithm as well
-        RETURN_VALUES = [{"foo": {"history": [{"description": "baz"}]}}, {}, {}, {}]
+        RETURN_VALUES = [{"foo": {"history": [{"description": "baz"}]}}, {}, {}]
         with patch.object(
             glean_ping.GleanPing,
             "_get_json",
