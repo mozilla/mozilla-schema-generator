@@ -431,6 +431,4 @@ class GleanPing(GenericPing):
         app_name = [
             app["app_name"] for app in apps if app["document_namespace"] == self.app_id
         ]
-        if len(app_name) != 1:
-            raise ValueError(f"Found {len(app_name)} apps with app id {self.app_id}")
-        return app_name[0]
+        return app_name[0] if len(app_name) > 0 else self.app_id
