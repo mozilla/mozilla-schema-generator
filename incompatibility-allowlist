@@ -95,3 +95,11 @@ mlhackweek-search.*
 
 # DENG-8496
 telemetry.modules.4
+
+# SVCSE-3019
+# Delete regrets reporter data
+regrets-reporter-ucs.*
+regrets-reporter.*
+org-mozilla-ios-tiktok-reporter.*
+org-mozilla-tiktokreporter.*
+org-mozilla-ios-tiktok-reporter-tiktok-reportershare.*
