@@ -104,3 +104,11 @@ org-mozilla-ios-tiktok-reporter.*
 org-mozilla-tiktokreporter.*
 org-mozilla-ios-tiktok-reporter-tiktok-reportershare.*
 telemetry.regrets-reporter-update.*
+
+# EXP-6138
+# Delete unused pings from experimenter-backend, these pings were never used and the
+# application has switched from glean-core to glean-server, which does not include them
+experimenter-backend.baseline.*
+experimenter-backend.deletion-request.*
+experimenter-backend.health.*
+experimenter-backend.metrics.*
