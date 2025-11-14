@@ -112,3 +112,7 @@ experimenter-backend.baseline.*
 experimenter-backend.deletion-request.*
 experimenter-backend.health.*
 experimenter-backend.metrics.*
+# Delete pings from experimenter-backend that will be recreated with fewer metrics
+experimenter-backend.page-view.*
+experimenter-backend.data-collection-opt-out.*
+experimenter-backend.events.*
