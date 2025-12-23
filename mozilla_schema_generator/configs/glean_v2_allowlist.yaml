@@ -1,0 +1,15 @@
+# app id to ping type mappings to generate v2 schemas with
+org-mozilla-fennec-aurora:
+  - adjust-attribution
+  - captcha-detection
+  - first-session
+  - health
+  - metrics
+  - sync
+org-mozilla-fenix-nightly:
+  - adjust-attribution
+  - captcha-detection
+  - first-session
+  - health
+  - metrics
+  - sync

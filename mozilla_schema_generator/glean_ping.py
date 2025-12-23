@@ -53,14 +53,18 @@ class GleanPing(GenericPing):
             line.strip() for line in f.readlines() if line.strip()
         ]
 
-    with open(METRIC_BLOCKLIST, "r") as f:
-        metric_blocklist = yaml.safe_load(f)
-
     def __init__(self, repo, version=1, **kwargs):  # TODO: Make env-url optional
         self.repo = repo
         self.repo_name = repo["name"]
         self.app_id = repo["app_id"]
         self.version = version
+
+        if self.version == 2:
+            with open(METRIC_BLOCKLIST, "r") as f:
+                self.metric_blocklist = yaml.safe_load(f)
+        else:
+            self.metric_blocklist = {}
+
         super().__init__(
             DEFAULT_SCHEMA_URL,
             DEFAULT_SCHEMA_URL,
