@@ -292,7 +292,13 @@ class TestGleanPing(object):
     def test_single_schema(self, glean, config):
         schemas = glean.generate_schema(config)
 
-        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
+        assert schemas.keys() == {
+            "baseline",
+            "events",
+            "metrics",
+            "deletion-request",
+            "health",
+        }
 
         final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
@@ -467,7 +473,13 @@ class TestGleanPing(object):
     # in a generated schema.
     def test_generic_schema(self, glean, config):
         schemas = glean.generate_schema(config, generic_schema=True)
-        assert schemas.keys() == {"baseline", "events", "metrics", "deletion-request"}
+        assert schemas.keys() == {
+            "baseline",
+            "events",
+            "metrics",
+            "deletion-request",
+            "health",
+        }
 
         final_schemas = {k: schemas[k].schema for k in schemas}
         for name, schema in final_schemas.items():
@@ -926,7 +938,7 @@ class TestGleanPing(object):
             final_schemas = {k: schemas[k].schema for k in schemas}
 
             # Glean built-in pings only.
-            assert len(final_schemas) == 4
+            assert len(final_schemas) == 5
 
             expected_metdata = {
                 "bq_dataset_family": "glean_core",

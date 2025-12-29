@@ -186,7 +186,7 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
 
     # validate that the config has mappings for every single metric type specified in the
     # Glean schema (see: https://bugzilla.mozilla.org/show_bug.cgi?id=1739239)
-    glean_schema = GleanPing(repos[0]).get_schema()
+    glean_schema = GleanPing(repos[0], mps_branch=mps_branch).get_schema()
     glean_matched_metrics_in_config = set(config_data["metrics"].keys())
     glean_metrics_in_schema = set(
         glean_schema.get(["properties", "metrics", "properties"]).keys()
