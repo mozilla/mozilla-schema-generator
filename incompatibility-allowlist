@@ -114,6 +114,7 @@ experimenter-backend.health.*
 experimenter-backend.metrics.*
 
 # DENG-4097
+# Remove BQ schemas for deprecated main_v4 tables (data routed to _v5)
 telemetry.main.4
 telemetry.first-shutdown.4
 telemetry.saved-session.4
