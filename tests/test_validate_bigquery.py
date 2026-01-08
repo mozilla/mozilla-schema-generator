@@ -165,7 +165,7 @@ def test_local_validation_command(tmp_path, tmp_git):
 def test_validation_fails_on_removed_ping(tmp_path, tmp_git):
     repo = Repo(tmp_git)
     # remove a file and commit
-    os.remove(tmp_git / "schemas/telemetry/main/main.4.bq")
+    os.remove(tmp_git / "schemas/firefox-desktop/baseline/baseline.1.bq")
     repo.git.commit("-a", "-m", "remove main")
 
     head_ref = "generated-schemas"
@@ -197,8 +197,8 @@ def test_parse_incompatibility_allowlist(tmp_path):
 def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     repo = Repo(tmp_git)
     # remove a file and commit
-    os.remove(tmp_git / "schemas/telemetry/main/main.4.bq")
-    repo.git.commit("-a", "-m", "remove main")
+    os.remove(tmp_git / "schemas/firefox-desktop/baseline/baseline.1.bq")
+    repo.git.commit("-a", "-m", "remove firefox-desktop baseline")
 
     head_ref = "generated-schemas"
     base_ref = "generated-schemas~1"
@@ -227,14 +227,14 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     assert res.exit_code == 1, res.output
     assert "found incompatible changes" in res.output
 
-    res = _test("telemetry.main.4")
+    res = _test("firefox-desktop.baseline.1")
     assert res.exit_code == 0, res.output
     assert "allowing incompatible changes" in res.output
 
     res = _test(
         """
     # test if multiline comment and whitespace at beginning
-    telemetry.main.4
+    firefox-desktop.baseline.1
     """
     )
     assert res.exit_code == 0, res.output
@@ -243,7 +243,7 @@ def test_validation_succeeds_on_removed_ping_with_allowlist(tmp_path, tmp_git):
     res = _test(
         """
     # valid allowlist, but perhaps too broad in terms of allowed deletions
-    telemetry.*
+    firefox-desktop.*
     """
     )
     assert res.exit_code == 0, res.output
