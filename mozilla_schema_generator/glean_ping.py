@@ -6,6 +6,7 @@
 
 import copy
 import logging
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Set
@@ -131,37 +132,70 @@ class GleanPing(GenericPing):
         return dependencies
 
     @staticmethod
-    def metric_is_removed(metric: Dict[str, Any]) -> bool:
-        """Returns true if the given metric was removed from the source over one year ago.
+    def remove_pings_from_metric(
+        metric: Dict[str, Any], blocked_pings: List[str]
+    ) -> Dict[str, Any]:
+        """Remove the given pings from the metric's `send_in_pings` history.
 
-        This is to allow metrics to be added back to the schema.
-        Format of argument is a single metric from the probeinfo service metrics endpoint.
+        Only removes if the given metric has been removed from the source for over one year,
+        to allow metrics to be added back to the schema.
         """
-        return not metric["in-source"] and datetime.fromisoformat(
-            metric["history"][-1]["dates"]["last"]
-        ) < datetime.utcnow() - timedelta(days=365)
+        if (
+            metric["in-source"]
+            or len(blocked_pings) == 0
+            or datetime.fromisoformat(metric["history"][-1]["dates"]["last"])
+            > datetime.utcnow() - timedelta(days=365)
+        ):
+            return metric
+
+        for history_entry in metric["history"]:
+            history_entry["send_in_pings"] = [
+                p for p in history_entry["send_in_pings"] if p not in blocked_pings
+            ]
+
+        return metric
 
     def get_probes(self) -> List[GleanProbe]:
         data = self._get_json(self.probes_url)
-        blocklist = set(
-            self.metric_blocklist.get(self.get_app_name(), [])
-            + self.metric_blocklist.get(self.app_id, [])
-        )
+
+        # blocklist needs to be applied here instead of generate_schema because it needs to be
+        # dependency-aware; metrics can move between app and library and still be in the schema
+        # turn blocklist into metric_name -> ping_types map
+        blocklist = defaultdict(list)
+        for ping_type, metric_names in self.metric_blocklist.get(
+            self.get_app_name(), {}
+        ).items():
+            for metric_name in metric_names:
+                blocklist[metric_name].append(ping_type)
+
+        if blocklist:
+            print(1)
+
         probes = [
-            m
-            for m in data.items()
-            if m[0] not in blocklist or not self.metric_is_removed(m[1])
+            (name, self.remove_pings_from_metric(defn, blocklist.get(name, [])))
+            for name, defn in data.items()
         ]
 
         for dependency in self.get_dependencies():
             dependency_probes = self._get_json(
                 self.probes_url_template.format(dependency)
             )
-            dependency_blocklist = set(self.metric_blocklist.get(dependency, []))
+
+            dependency_blocklist = defaultdict(list)
+            for ping_type, metric_names in self.metric_blocklist.get(
+                dependency, {}
+            ).items():
+                for metric_name in metric_names:
+                    dependency_blocklist[metric_name].append(ping_type)
+
             probes += [
-                m
-                for m in dependency_probes.items()
-                if m[0] not in dependency_blocklist or not self.metric_is_removed(m[1])
+                (
+                    name,
+                    self.remove_pings_from_metric(
+                        defn, dependency_blocklist.get(name, [])
+                    ),
+                )
+                for name, defn in dependency_probes.items()
             ]
 
         pings = self.get_pings()
