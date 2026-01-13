@@ -117,4 +117,8 @@ experimenter-backend.metrics.*
 # Remove BQ schemas for deprecated main_v4 tables (data routed to _v5)
 telemetry.main.4
 telemetry.first-shutdown.4
-telemetry.saved-session.4
+
+# Bug 1656910
+# Remove saved-session schemas
+telemetry.saved-session.*
+telemetry.saved-session-use-counter.*
