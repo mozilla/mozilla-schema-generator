@@ -7,7 +7,7 @@
 import copy
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
@@ -54,15 +54,16 @@ class GleanPing(GenericPing):
             line.strip() for line in f.readlines() if line.strip()
         ]
 
-    def __init__(self, repo, version=1, use_metrics_blocklist=False, **kwargs):  # TODO: Make env-url optional
+    def __init__(
+        self, repo, version=1, use_metrics_blocklist=False, **kwargs
+    ):  # TODO: Make env-url optional
         self.repo = repo
         self.repo_name = repo["name"]
         self.app_id = repo["app_id"]
         self.version = version
 
         if use_metrics_blocklist:
-            with open(METRIC_BLOCKLIST, "r") as f:
-                self.metric_blocklist = yaml.safe_load(f)
+            self.metric_blocklist = self.get_metric_blocklist()
         else:
             self.metric_blocklist = {}
 
@@ -137,14 +138,14 @@ class GleanPing(GenericPing):
     ) -> Dict[str, Any]:
         """Remove the given pings from the metric's `send_in_pings` history.
 
-        Only removes if the given metric has been removed from the source for over one year,
-        to allow metrics to be added back to the schema.
+        Only removes if the given metric has been removed from the source since a fixed date
+        (2025-01-01). This allows metrics to be added back to the schema.
         """
         if (
             metric["in-source"]
             or len(blocked_pings) == 0
             or datetime.fromisoformat(metric["history"][-1]["dates"]["last"])
-            > datetime.utcnow() - timedelta(days=365)
+            >= datetime(year=2025, month=1, day=1)
         ):
             return metric
 
@@ -167,9 +168,6 @@ class GleanPing(GenericPing):
         ).items():
             for metric_name in metric_names:
                 blocklist[metric_name].append(ping_type)
-
-        if blocklist:
-            print(1)
 
         probes = [
             (name, self.remove_pings_from_metric(defn, blocklist.get(name, [])))
@@ -479,3 +477,8 @@ class GleanPing(GenericPing):
             app["app_name"] for app in apps if app["document_namespace"] == self.app_id
         ]
         return app_name[0] if len(app_name) > 0 else self.app_id
+
+    @staticmethod
+    def get_metric_blocklist():
+        with open(METRIC_BLOCKLIST, "r") as f:
+            return yaml.safe_load(f)

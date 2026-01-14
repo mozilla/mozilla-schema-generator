@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,10 +6,12 @@
 from typing import Dict, List
 from unittest.mock import patch
 
+import mock
 import pytest
 import requests
 import yaml
 
+from mozilla_schema_generator import __main__ as msg_main
 from mozilla_schema_generator import generic_ping, glean_ping
 from mozilla_schema_generator.config import Config
 from mozilla_schema_generator.probes import GleanProbe
@@ -975,3 +976,288 @@ class TestGleanPing(object):
         ] = [{"name": "geo_city", "value": None}]
 
         assert pings == expected_pings
+
+    @staticmethod
+    def metric_def(name: str, first_date: str, last_date: str, in_source: bool):
+        """Metric definition template as defined in the probeinfo glean/{app}/metrics endpoint.
+
+        Dates are YYYY-MM-DD.
+        """
+        return {
+            name: {
+                "history": [
+                    {
+                        "dates": {
+                            "first": first_date,
+                            "last": last_date,
+                        },
+                        "description": "",
+                        "type": "string",
+                        "send_in_pings": ["metrics"],
+                    }
+                ],
+                "in-source": in_source,
+                "name": name,
+                "type": "string",
+                "send_in_pings": ["metrics"],
+            }
+        }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_metric_blocklist")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_metric_blocklist_empty(
+        self, mock_get_json, mock_app_name, mock_metric_blocklist, mock_get_dependencies
+    ):
+        """No probes should be removed if blocklist is empty."""
+        mock_metric_blocklist.return_value = {"fenix": {"metrics": []}}
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+            use_metrics_blocklist=True,
+        )
+
+        mock_get_json.return_value = {
+            **self.metric_def("active", "2024-01-01", "2026-01-01", True),
+            **self.metric_def(
+                "expired_in_source_new", "2024-01-01", "2024-01-01", True
+            ),
+            **self.metric_def("expired_removed_new", "2024-01-01", "2026-01-01", False),
+            **self.metric_def(
+                "expired_in_source_old", "2024-01-01", "2024-01-01", False
+            ),
+        }
+        mock_get_dependencies.return_value = []
+
+        probes = glean.get_probes()
+
+        assert {
+            probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
+        } == {
+            "active",
+            "expired_in_source_new",
+            "expired_removed_new",
+            "expired_in_source_old",
+        }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_metric_blocklist")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_metric_blocklist_all(
+        self, mock_get_json, mock_app_name, mock_metric_blocklist, mock_get_dependencies
+    ):
+        """Only old blocklisted and removed probes should be removed."""
+        mock_metric_blocklist.return_value = {
+            "fenix": {
+                "metrics": [
+                    "active",
+                    "expired_in_source_new",
+                    "expired_removed_new",
+                    "expired_in_source_old",
+                    "expired_in_source_old_2",
+                ]
+            }
+        }
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+            use_metrics_blocklist=True,
+        )
+
+        mock_get_json.return_value = {
+            **self.metric_def("active", "2024-01-01", "2026-01-01", True),
+            **self.metric_def(
+                "expired_in_source_new", "2024-01-01", "2024-01-01", True
+            ),
+            **self.metric_def("expired_removed_new", "2024-01-01", "2026-01-01", False),
+            **self.metric_def(
+                "expired_in_source_old", "2024-01-01", "2024-01-01", False
+            ),
+        }
+        mock_get_dependencies.return_value = []
+
+        probes = glean.get_probes()
+
+        assert {
+            probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
+        } == {
+            "active",
+            "expired_in_source_new",
+            "expired_removed_new",
+        }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_metric_blocklist")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_metric_blocklist_dependencies(
+        self, mock_get_json, mock_app_name, mock_metric_blocklist, mock_get_dependencies
+    ):
+        """Blocklisted probes should not be removed if they are still in a dependency."""
+        mock_metric_blocklist.return_value = {
+            "fenix": {
+                "metrics": [
+                    "expired_old",
+                ]
+            },
+            "glean-core": {
+                "metrics": [
+                    "expired_old_2",
+                ]
+            },
+        }
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+            use_metrics_blocklist=True,
+        )
+        mock_get_dependencies.return_value = ["glean-core"]
+
+        def a():
+            yield {
+                **self.metric_def("active", "2024-01-01", "2026-01-01", True),
+                **self.metric_def("expired_old", "2024-01-01", "2024-01-01", False),
+                **self.metric_def("expired_old_2", "2024-01-01", "2026-01-01", True),
+            }
+            # metrics for dependency
+            yield {
+                **self.metric_def("active", "2024-01-01", "2026-01-01", True),
+                **self.metric_def("expired_old", "2024-01-01", "2026-01-01", True),
+                **self.metric_def("expired_old_2", "2024-01-01", "2024-01-01", False),
+            }
+            # /pings
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = a()
+
+        probes = glean.get_probes()
+        active_probes = [
+            probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
+        ]
+
+        assert len(active_probes) == 4
+        assert set(active_probes) == {
+            "active",
+            "expired_old",
+            "expired_old_2",
+        }
+
+
+class TestGleanGeneration:
+    @pytest.fixture
+    def mock_glean_ping(self):
+        with mock.patch("mozilla_schema_generator.__main__.GleanPing") as mock_glean:
+            yield mock_glean
+
+    @pytest.fixture
+    def glean_v2_allowlist(self):
+        return {
+            "firefox-desktop": [
+                "metrics",
+                "health",
+            ],
+            "org-mozilla-firefox": [
+                "metrics",
+            ],
+        }
+
+    @pytest.fixture
+    def glean_v1_overwrite_allowlist(self):
+        return ["firefox-desktop"]
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v2_allowlist_write_v1_v2(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+        glean_v1_overwrite_allowlist,
+    ):
+        """Should write both v1 and v2 when in v2 allowlist but not v1_overwrite."""
+        repo = {"app_id": "org-mozilla-firefox"}
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
+        )
+
+        assert mock_glean_ping.call_count == 2
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=1, use_metrics_blocklist=False
+        )
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=2, use_metrics_blocklist=True
+        )
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v2_allowlist_overwrite_v1(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+        glean_v1_overwrite_allowlist,
+    ):
+        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        repo = {"app_id": "firefox-desktop"}
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
+        )
+
+        assert mock_glean_ping.call_count == 1
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=1, use_metrics_blocklist=True
+        )
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v2_allowlist_write_v1_only(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+        glean_v1_overwrite_allowlist,
+    ):
+        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        repo = {"app_id": "other-app"}
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
+        )
+
+        assert mock_glean_ping.call_count == 1
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=1, use_metrics_blocklist=False
+        )
