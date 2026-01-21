@@ -1,17 +1,5 @@
 {
   "telemetry": {
-    "saved-session": {
-      "4": {
-        "source-namespace": "telemetry",
-        "source-doctype": "main",
-        "source-version": "4"
-      },
-      "5": {
-        "source-namespace": "telemetry",
-        "source-doctype": "main",
-        "source-version": "4"
-      }
-    },
     "first-shutdown": {
       "4": {
         "source-namespace": "telemetry",
