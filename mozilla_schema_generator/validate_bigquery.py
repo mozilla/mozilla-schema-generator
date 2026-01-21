@@ -36,6 +36,8 @@ def check_evolution(base, head, verbose=False):
 
     a, b = set(base), set(head)
     is_error = 0
+    errors = []
+    
     # error condition
     base_only = a - b
     if len(base_only) > 0:
@@ -44,6 +46,7 @@ def check_evolution(base, head, verbose=False):
         log("")
         # set the status
         is_error = 1
+        errors.extend([f"Removed: {x}" for x in base_only])
 
     # informative only
     head_only = b - a
@@ -51,7 +54,7 @@ def check_evolution(base, head, verbose=False):
         log("items added to the base")
         log("\n".join([f"+{x}" for x in head_only]))
         log("")
-    return is_error
+    return is_error, errors
 
 
 def copy_schemas(head: str, repository: Path, artifact: Path) -> Path:
@@ -147,6 +150,7 @@ def local_validation(head, base, repository, artifact, incompatibility_allowlist
         head, base, repository, artifact
     )
     is_error = 0
+    all_errors = []
 
     # look at the compact schemas
     head_files = (head_path).glob("*.txt")
@@ -167,7 +171,11 @@ def local_validation(head, base, repository, artifact, incompatibility_allowlist
     if allowed_incompatibility:
         print("allowing incompatible changes in the following documents:")
         print("\n".join([f"\t{x}" for x in allowed_incompatibility]))
-    is_error |= check_evolution((a - allowed_incompatibility), b, verbose=True)
+    
+    err_code, schema_errors = check_evolution((a - allowed_incompatibility), b, verbose=True)
+    is_error |= err_code
+    if schema_errors:
+        all_errors.extend([f"Schema level: {error}" for error in schema_errors])
 
     for schema_name in a & b:
         base = base_path / schema_name
@@ -192,16 +200,20 @@ def local_validation(head, base, repository, artifact, incompatibility_allowlist
             continue
         # check if this is an error condition
         print(diff + "\n")
-        err_code = check_evolution(base_data, head_data)
+        err_code, field_errors = check_evolution(base_data, head_data)
         if err_code and schema_name in allowed_incompatibility:
             print("found incompatible changes, but continuing")
             continue
         is_error |= err_code
+        if field_errors:
+            all_errors.extend([f"Schema '{schema_name}': {error}" for error in field_errors])
 
     if not is_error:
         click.echo("no incompatible changes detected")
     else:
-        click.echo("found incompatible changes")
+        click.echo("found incompatible changes:")
+        for error in all_errors:
+            click.echo(f"  - {error}")
 
     sys.exit(is_error)
 
