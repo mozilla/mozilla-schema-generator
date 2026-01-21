@@ -1,0 +1,183 @@
+# app id to ping type mappings to generate v2 schemas with
+# accounts-cirrus:
+# - health
+# - metrics
+# burnham:
+# - health
+# - metrics
+# experimenter-cirrus:
+# - metrics
+# - health
+# firefox-crashreporter:
+# - metrics
+# - health
+# firefox-desktop:
+# - metrics
+# - health
+# - sync
+# - captcha-detection
+# - new-metric-capture-emulation
+# - pseudo-main
+# firefox-desktop-background-defaultagent:
+# - metrics
+# - health
+# firefox-desktop-background-tasks:
+# - health
+# - metrics
+# firefox-desktop-background-update:
+# - metrics
+# - health
+# - captcha-detection
+# monitor-cirrus:
+# - metrics
+# - health
+# mozilla-lockbox:
+# - health
+# - metrics
+# mozilla-mach:
+# - usage
+# - health
+# - metrics
+# mozillavpn:
+# - vpnsession
+# - main
+# - metrics
+# - health
+# - daemonsession
+# mozillavpn-backend-cirrus:
+# - metrics
+# - health
+# mozphab:
+# - usage
+# - health
+# - metrics
+# net-thunderbird-android:
+# - metrics
+# - health
+# net-thunderbird-android-beta:
+# - metrics
+# - health
+# net-thunderbird-android-daily:
+# - metrics
+# - health
+# org-mozilla-connect-firefox:
+# - metrics
+# - health
+# org-mozilla-fenix:
+# - metrics
+# - sync
+# - health
+# - first-session
+# - captcha-detection
+# - adjust-attribution
+org-mozilla-fenix-nightly:
+- metrics
+- sync
+- first-session
+- adjust-attribution
+- health
+- captcha-detection
+org-mozilla-fennec-aurora:
+- metrics
+- sync
+- captcha-detection
+- first-session
+- health
+- adjust-attribution
+# org-mozilla-firefox:
+# - metrics
+# - health
+# - sync
+# - first-session
+# - captcha-detection
+# - adjust-attribution
+# org-mozilla-firefox-beta:
+# - metrics
+# - health
+# - sync
+# - first-session
+# - captcha-detection
+# - adjust-attribution
+# org-mozilla-firefox-vpn:
+# - daemonsession
+# - vpnsession
+# - metrics
+# - main
+# - health
+# org-mozilla-firefoxreality:
+# - metrics
+# - health
+# org-mozilla-focus:
+# - metrics
+# - captcha-detection
+# - health
+# org-mozilla-focus-beta:
+# - metrics
+# - captcha-detection
+# - health
+# org-mozilla-focus-nightly:
+# - metrics
+# - captcha-detection
+# - health
+# org-mozilla-ios-fennec:
+# - health
+# - usage-reporting
+# - metrics
+# org-mozilla-ios-firefox:
+# - metrics
+# - usage-reporting
+# - health
+# org-mozilla-ios-firefoxbeta:
+# - usage-reporting
+# - metrics
+# - health
+# org-mozilla-ios-firefoxvpn:
+# - vpnsession
+# - metrics
+# - main
+# - health
+# - daemonsession
+# org-mozilla-ios-firefoxvpn-network-extension:
+# - daemonsession
+# - health
+# - metrics
+# - vpnsession
+# org-mozilla-ios-focus:
+# - metrics
+# - health
+# org-mozilla-ios-klar:
+# - metrics
+# - health
+# org-mozilla-ios-lockbox:
+# - metrics
+# - health
+# org-mozilla-klar:
+# - metrics
+# - health
+# - captcha-detection
+# org-mozilla-mozregression:
+# - health
+# - metrics
+# org-mozilla-reference-browser:
+# - metrics
+# - health
+# org-mozilla-social-nightly:
+# - metrics
+# - health
+# org-mozilla-tv-firefox:
+# - metrics
+# - health
+# org-mozilla-vrbrowser:
+# - session-end
+# - metrics
+# - health
+# pine:
+# - metrics
+# - pseudo-main
+# - health
+# - captcha-detection
+# - new-metric-capture-emulation
+# thunderbird-desktop:
+# - metrics
+# - health
+# - captcha-detection

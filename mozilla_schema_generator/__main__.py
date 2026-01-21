@@ -184,6 +184,12 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
         config_data = yaml.safe_load(f)
     glean_config = Config("glean", config_data)
 
+    with open(CONFIGS_DIR / "glean_v2_allowlist.yaml", "r") as f:
+        v2_allowlist = yaml.safe_load(f)
+
+    with open(CONFIGS_DIR / "glean_v1_overwrite_allowlist.yaml", "r") as f:
+        v1_overwrite_allowlist = yaml.safe_load(f) or []
+
     # validate that the config has mappings for every single metric type specified in the
     # Glean schema (see: https://bugzilla.mozilla.org/show_bug.cgi?id=1739239)
     glean_schema = GleanPing(repos[0], mps_branch=mps_branch).get_schema()
@@ -209,13 +215,54 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
             pretty,
             generic_schema,
             mps_branch,
+            v2_allowlist,
+            v1_overwrite_allowlist,
         )
 
 
-def write_schema(repo, config, out_dir, pretty, generic_schema, mps_branch):
-    schema_generator = GleanPing(repo, mps_branch=mps_branch)
-    schemas = schema_generator.generate_schema(config, generic_schema=generic_schema)
-    dump_schema(schemas, out_dir and out_dir.joinpath(repo["app_id"]), pretty)
+def write_schema(
+    repo,
+    config,
+    out_dir,
+    pretty,
+    generic_schema,
+    mps_branch,
+    v2_allowlist,
+    v1_overwrite_allowlist,
+):
+    for version in (1, 2):
+        if version == 2 and (
+            repo["app_id"] in v1_overwrite_allowlist
+            or repo["app_id"] not in v2_allowlist
+        ):
+            continue
+
+        use_metrics_blocklist = version == 2 or repo["app_id"] in v1_overwrite_allowlist
+
+        schema_generator = GleanPing(
+            repo,
+            mps_branch=mps_branch,
+            version=version,
+            use_metrics_blocklist=use_metrics_blocklist,
+        )
+        schemas = schema_generator.generate_schema(
+            config, generic_schema=generic_schema
+        )
+
+        # only keep pings that are in the allowlist
+        if version == 2:
+            schemas = {
+                name: schema
+                for name, schema in schemas.items()
+                if name in v2_allowlist[repo["app_id"]]
+            }
+
+        dump_schema(
+            schemas,
+            out_dir and out_dir.joinpath(repo["app_id"]),
+            pretty,
+            version=version,
+        )
 
 
 @click.command()
