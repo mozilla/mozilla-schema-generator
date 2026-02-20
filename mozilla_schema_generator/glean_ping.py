@@ -408,7 +408,10 @@ class GleanPing(GenericPing):
             )
 
     def generate_schema(
-        self, config, generic_schema=False, block_distributions=True
+        self,
+        config,
+        generic_schema=False,
+        blocked_distribution_pings=("events", "baseline"),
     ) -> Dict[str, Schema]:
         pings = self.get_pings_and_pipeline_metadata()
         schemas = {}
@@ -441,8 +444,8 @@ class GleanPing(GenericPing):
                 # temporarily block distributions from being added to events and baseline pings
                 # https://mozilla-hub.atlassian.net/browse/DENG-10606
                 if (
-                    block_distributions
-                    and ping in ("events", "baseline")
+                    blocked_distribution_pings
+                    and ping in blocked_distribution_pings
                     and matcher.type.endswith("_distribution")
                 ):
                     matcher.matcher["send_in_pings"]["not_contains"] = ping

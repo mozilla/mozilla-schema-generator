@@ -265,6 +265,87 @@ def write_schema(
         )
 
 
+@click.command(
+    help="""Determine if any distribution fields are blocked.
+See https://mozilla-hub.atlassian.net/browse/DENG-10606 for details.
+"""
+)
+@click.argument(
+    "config",
+    type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
+    default=CONFIGS_DIR / "glean.yaml",
+)
+@click.option(
+    "--mps-branch",
+    help=(
+        "If specified, the source branch of " "mozilla-pipeline-schemas to reference"
+    ),
+    required=False,
+    type=str,
+    default="main",
+)
+@click.option(
+    "--repo",
+    help=(
+        "The glean repository id to check, defaults to all apps. e.g. org-mozilla-firefox"
+    ),
+    required=False,
+    type=str,
+)
+@click.option(
+    "--blocked-distribution-pings",
+    help="Pings that should have distributions blocked, used for testing. "
+    "Should default to events and baseline.",
+    multiple=True,
+    required=False,
+)
+def check_blocked_distribution_metrics(
+    config, mps_branch, repo, blocked_distribution_pings
+):
+    repos = GleanPing.get_repos()
+
+    if repo is not None:
+        repos = [r for r in repos if r["app_id"] == repo]
+
+    with open(config, "r") as f:
+        config_data = yaml.safe_load(f)
+    glean_config = Config("glean", config_data)
+
+    failed = False
+
+    for repo in repos:
+        ping = GleanPing(
+            repo,
+            mps_branch=mps_branch,
+        )
+        schemas = ping.generate_schema(
+            glean_config, generic_schema=False, blocked_distribution_pings=None
+        )
+        if blocked_distribution_pings:
+            schemas_with_block = ping.generate_schema(
+                glean_config,
+                generic_schema=False,
+                blocked_distribution_pings=blocked_distribution_pings,
+            )
+        else:
+            schemas_with_block = ping.generate_schema(
+                glean_config, generic_schema=False
+            )
+
+        if schemas != schemas_with_block:
+            failed = True
+            for ping_name in schemas.keys():
+                if schemas[ping_name] != schemas_with_block[ping_name]:
+                    print(
+                        f"{repo['app_id']}: {ping_name} has blocked distribution metrics"
+                    )
+
+    if failed:
+        raise RuntimeError(
+            "Found blocked distribution metrics, see above logs for details."
+        )
+
+
 @click.command()
 @click.argument(
     "config",
@@ -332,6 +413,7 @@ main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
 main.add_command(generate_subset_pings)
+main.add_command(check_blocked_distribution_metrics)
 
 
 if __name__ == "__main__":

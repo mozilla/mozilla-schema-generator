@@ -1332,3 +1332,18 @@ class TestGleanGeneration:
         mock_glean_ping.assert_any_call(
             repo, mps_branch="", version=1, use_metrics_blocklist=False
         )
+
+    def test_check_blocked_distribution_metrics(self):
+        """Should detect when distributions are blocked.
+
+        This test uses the probeinfo service."""
+        with pytest.raises(RuntimeError):
+            msg_main.check_blocked_distribution_metrics(
+                [
+                    "--repo",
+                    "org-mozilla-fenix-nightly",
+                    "--blocked-distribution-pings",
+                    "metrics",
+                ],
+                standalone_mode=False,
+            )
