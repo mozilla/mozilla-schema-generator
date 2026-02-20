@@ -1,5 +1,4 @@
-FROM python:3.8-bookworm
-MAINTAINER Frank Bertsch <frank@mozilla.com>
+FROM python:3.14
 
 # Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/main/docs/building-container.md
 ARG RUST_SPEC=stable

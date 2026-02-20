@@ -1,10 +1,8 @@
 version: 2.1
 
 orbs:
-  gcp-gcr: circleci/gcp-gcr@0.16
   docker: circleci/docker@2.6
   python: circleci/python@2.1.1
-  gcp-cli: circleci/gcp-cli@3.2
 
 executors:
   ubuntu-machine-executor:
@@ -13,8 +11,8 @@ executors:
 
 jobs:
   test:
-    docker: &docker
-      - image: cimg/python:3.8
+    docker:
+      - image: cimg/python:3.14
     steps:
       - checkout
       - run:
@@ -32,66 +30,6 @@ jobs:
             make test
             make coverage
 
-  docs-build:
-    docker: *docker
-    steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - run:
-          name: Build docs
-          command: |
-            python3 -m virtualenv venv
-            . venv/bin/activate
-            make install-requirements
-            pip install pdoc
-            pdoc -o /tmp/_html ./mozilla_schema_generator
-      - persist_to_workspace:
-          root: /tmp
-          paths: _html
-
-  docs-deploy:
-    docker:
-      - image: node:14
-    steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Install and configure dependencies
-          command: |
-            npm install -g --silent gh-pages@3.0.0
-            git config user.email "ci-build-docs@mozilla.com"
-            git config user.name "ci-build-docs"
-      - add_ssh_keys:
-          fingerprints:
-            - "29:c4:b3:30:56:31:09:72:2f:1d:2f:2f:33:7f:dc:7e"
-      - run:
-          name: Deploy docs to gh-pages branch
-          command: gh-pages --message "[skip ci] updates" --dist /tmp/_html
-
-  deploy:
-    executor: ubuntu-machine-executor
-    working_directory: ~/mozilla/mozilla-schema-generator
-    steps:
-      - checkout
-      - run: |
-          printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' "$CIRCLE_SHA1" "$CIRCLE_TAG" "$CIRCLE_PROJECT_USERNAME" "$CIRCLE_PROJECT_REPONAME" "$CIRCLE_BUILD_URL" > version.json
-      - gcp-gcr/gcr-auth:
-          use_oidc: true
-      - gcp-gcr/build-image: &image
-          image: mozilla-schema-generator
-          tag: ${CIRCLE_TAG:-latest}
-      - gcp-gcr/push-image: *image
-
 workflows:
   version: 2
   commit:
@@ -100,38 +38,3 @@ workflows:
           filters:
             tags:
               only: /.*/
-
-      - docs-build:
-          filters:
-            tags:
-              only: /.*/
-
-      - docs-deploy:
-          requires:
-            - test
-            - docs-build
-          filters:
-            branches:
-              only: main
-
-      - deploy:
-          context: dataeng-bqetl-gcr
-          requires:
-            - test
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only:
-                - main
-
-  nightly: # Test nightly to test external dependencies (MPS, probe-info-service)
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - test
