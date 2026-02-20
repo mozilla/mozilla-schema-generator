@@ -243,3 +243,68 @@ class TestMatcher(object):
         probe_defn["name"] = "bar"
         probe = MainProbe("histogram/name", probe_defn)
         assert matcher.matches(probe)
+
+    def test_not_contains(self):
+        probe_defn = {
+            "history": [
+                {
+                    "dates": {
+                        "first": "2026-01-01 10:00:00",
+                        "last": "2026-02-01 10:00:00",
+                    },
+                    "send_in_pings": ["baseline", "events"],
+                }
+            ],
+            "name": "bool",
+            "type": "boolean",
+        }
+
+        probe = GleanProbe("metric", probe_defn)
+        assert not Matcher(
+            {
+                "send_in_pings": {"not_contains": "baseline"},
+            }
+        ).matches(probe)
+
+        assert Matcher(
+            {
+                "send_in_pings": {"not_contains": "metrics"},
+            }
+        ).matches(probe)
+
+    def test_contains_and_not_contains(self):
+        probe_defn = {
+            "history": [
+                {
+                    "dates": {
+                        "first": "2026-01-01 10:00:00",
+                        "last": "2026-02-01 10:00:00",
+                    },
+                    "send_in_pings": ["baseline", "events"],
+                }
+            ],
+            "name": "bool",
+            "type": "boolean",
+        }
+
+        probe = GleanProbe("metric", probe_defn)
+        assert not Matcher(
+            {
+                "send_in_pings": {"contains": "baseline", "not_contains": "baseline"},
+            }
+        ).matches(probe)
+        assert not Matcher(
+            {
+                "send_in_pings": {"contains": "events", "not_contains": "baseline"},
+            }
+        ).matches(probe)
+        assert Matcher(
+            {
+                "send_in_pings": {"contains": "events", "not_contains": "metrics"},
+            }
+        ).matches(probe)
+        assert not Matcher(
+            {
+                "send_in_pings": {"contains": "metrics", "not_contains": "health"},
+            }
+        ).matches(probe)
