@@ -8,6 +8,7 @@ import copy
 import logging
 from collections import defaultdict
 from datetime import datetime
+from functools import cache
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
@@ -98,6 +99,7 @@ class GleanPing(GenericPing):
 
         return schema
 
+    @cache
     def get_dependencies(self):
         # Get all of the library dependencies for the application that
         # are also known about in the repositories file.
