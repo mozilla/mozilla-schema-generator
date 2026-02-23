@@ -1,0 +1,142 @@
+name: Build, Test, and Deploy
+on:
+  push:
+    branches:
+    tags:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # this action doesn't fetch the generated schemas branch of the submodule so
+          # manually update submodule
+          # possibly related: https://github.com/actions/checkout/issues/645
+          # submodules: "recursive"
+          persist-credentials: false
+      - name: Update mozilla-pipeline-schemas submodule
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PIPELINE_SCHEMAS_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git submodule update --init --recursive
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+      - name: Run tests
+        run: |
+          make install-requirements
+          make lint
+          make test
+          make coverage
+  docs-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+      - name: Build docs
+        run: |
+          make install-requirements
+          pip install pdoc
+          pdoc -o /tmp/_html ./mozilla_schema_generator
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: /tmp/_html/
+
+  docs-deploy:
+    runs-on: ubuntu-latest
+    needs: [docs-build, test]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download docs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-html
+          path: /tmp/_html/
+      - name: check
+        run: |
+          ls -al /tmp/
+          ls -al /tmp/_html/
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install and configure dependencies
+        run: |
+          npm install -g --silent gh-pages@6.3.0
+          git config user.email "ci-build-docs@mozilla.com"
+          git config user.name "ci-build-docs"
+      - name: Deploy docs to gh-pages branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # package.json needed for https://github.com/tschaub/gh-pages/issues/354
+        run: |
+          touch package.json
+          gh-pages --message "[skip ci] updates" --dist /tmp/_html --repo https://x-access-token:$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up tag
+        id: get_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+      - name: Create version.json
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          TAG: ${{ steps.get_tag.outputs.tag }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          BUILD_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' \
+            "$COMMIT_SHA" "$TAG" "$REPO_OWNER" "$REPO_NAME" "$BUILD_URL" > version.json
+      - name: Build the Docker image
+        run: |
+          docker build . -t us-docker.pkg.dev/moz-fx-data-artifacts-prod/mozilla-schema-generator/mozilla-schema-generator:${{ steps.get_tag.outputs.tag }}
+      - name: Push Docker image to GAR
+        uses: mozilla-it/deploy-actions/docker-push@v4.3.2
+        with:
+          project_id: moz-fx-data-artifacts-prod
+          image_tags: us-docker.pkg.dev/moz-fx-data-artifacts-prod/mozilla-schema-generator/mozilla-schema-generator:${{ steps.get_tag.outputs.tag }}
+          workload_identity_pool_project_number: ${{ vars.GCPV2_WORKLOAD_IDENTITY_POOL_PROJECT_NUMBER }}
+          service_account_name: mozilla-schema-generator
