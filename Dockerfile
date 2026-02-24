@@ -1,4 +1,4 @@
-FROM python:3.14
+FROM python:3.14-trixie
 
 # Guidelines here: https://github.com/mozilla-services/Dockerflow/blob/main/docs/building-container.md
 ARG RUST_SPEC=stable
@@ -20,7 +20,7 @@ RUN apt-get update && \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain=${RUST_SPEC}
 
 ENV CARGO_INSTALL_ROOT=${HOME}/.cargo
-ENV PATH ${PATH}:${HOME}/.cargo/bin
+ENV PATH=${PATH}:${HOME}/.cargo/bin
 
 # Install a tagged version of jsonschema-transpiler
 RUN cargo install jsonschema-transpiler --version 2.0.0
@@ -39,7 +39,7 @@ RUN pip install -r requirements/requirements.txt
 RUN pip install -r requirements/test_requirements.txt
 
 COPY --chown=${USER_ID}:${GROUP_ID} . ${HOME}/mozilla-schema-generator
-ENV PATH $PATH:${HOME}/mozilla-schema-generator/bin
+ENV PATH=$PATH:${HOME}/mozilla-schema-generator/bin
 
 RUN pip install --no-dependencies -e ${HOME}/mozilla-schema-generator
 

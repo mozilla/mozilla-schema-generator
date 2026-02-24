@@ -139,7 +139,7 @@ to [gcp-ingestion](https://github.com/mozilla/gcp-ingestion) and BigQuery.
 ## directory tree
 
 \`\`\`bash
-$(tree -d schemas)
+$(tree -A -d schemas)
 \`\`\`
 
 EOF
