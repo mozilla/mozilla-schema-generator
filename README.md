@@ -1,6 +1,3 @@
-[![CircleCI](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/main.svg?style=svg)](https://circleci.com/gh/mozilla/mozilla-schema-generator/tree/main)
-[![Latest Version](https://img.shields.io/pypi/v/mozilla-schema-generator.svg)](https://pypi.python.org/pypi/mozilla-schema-generator/)
-
 # Mozilla Schema Generator
 
 A library for generating full representations of Mozilla telemetry pings.
