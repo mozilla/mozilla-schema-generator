@@ -8,6 +8,7 @@ import copy
 import logging
 from collections import defaultdict
 from datetime import datetime
+from functools import cache
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
@@ -98,6 +99,7 @@ class GleanPing(GenericPing):
 
         return schema
 
+    @cache
     def get_dependencies(self):
         # Get all of the library dependencies for the application that
         # are also known about in the repositories file.
@@ -407,7 +409,12 @@ class GleanPing(GenericPing):
                 schema_type="glean", version=self.version
             )
 
-    def generate_schema(self, config, generic_schema=False) -> Dict[str, Schema]:
+    def generate_schema(
+        self,
+        config,
+        generic_schema=False,
+        blocked_distribution_pings=("events", "baseline"),
+    ) -> Dict[str, Schema]:
         pings = self.get_pings_and_pipeline_metadata()
         schemas = {}
 
@@ -435,6 +442,16 @@ class GleanPing(GenericPing):
 
             for matcher in matchers.values():
                 matcher.matcher["send_in_pings"]["contains"] = ping
+
+                # temporarily block distributions from being added to events and baseline pings
+                # https://mozilla-hub.atlassian.net/browse/DENG-10606
+                if (
+                    blocked_distribution_pings
+                    and ping in blocked_distribution_pings
+                    and matcher.type.endswith("_distribution")
+                ):
+                    matcher.matcher["send_in_pings"]["not_contains"] = ping
+
             new_config = Config(ping, matchers=matchers)
 
             defaults = {"mozPipelineMetadata": pipeline_meta}

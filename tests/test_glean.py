@@ -286,6 +286,50 @@ class GleanPingWithMetadataOverrides(GleanPingStub):
         ]
 
 
+class GleanPingWithProbes(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping_v1",
+        "include_info_sections": True,
+        "include_client_id": True,
+    }
+
+    def get_pings_and_pipeline_metadata(self) -> Dict[str, Dict]:
+        return {
+            "metrics": self.ping_metadata,
+            "baseline": self.ping_metadata,
+            "events": self.ping_metadata,
+        }
+
+    def get_probes(self):
+        def create_probe(name: str, metric_type: str):
+            return GleanProbe(
+                "bool",
+                {
+                    "history": [
+                        {
+                            "dates": {
+                                "first": "2026-01-01 10:00:00",
+                                "last": "2026-02-01 10:00:00",
+                            },
+                            "send_in_pings": {"metrics", "baseline", "events"},
+                        }
+                    ],
+                    "in-source": True,
+                    "name": name,
+                    "type": metric_type,
+                },
+            )
+
+        return [
+            create_probe("bool", "boolean"),
+            create_probe("counter", "counter"),
+            create_probe("label_custom_dist", "labeled_custom_distribution"),
+            create_probe("timing_dist", "timing_distribution"),
+        ]
+
+
 class TestGleanPing(object):
     def test_env_size(self, glean):
         assert glean.get_env().get_size() > 0
@@ -870,6 +914,33 @@ class TestGleanPing(object):
                     == "seconds"
                 )
 
+    def test_distribution_block(self, config):
+        glean = GleanPingWithProbes(
+            {
+                "name": "app",
+                "in-source": True,
+                "app_id": "app1",
+            }
+        )
+        schemas = glean.generate_schema(config, generic_schema=False)
+
+        final_schemas = {k: schemas[k].schema for k in schemas}
+
+        assert final_schemas["metrics"]["properties"]["metrics"][
+            "properties"
+        ].keys() == {
+            "boolean",
+            "counter",
+            "labeled_custom_distribution",
+            "timing_distribution",
+        }
+        assert final_schemas["events"]["properties"]["metrics"][
+            "properties"
+        ].keys() == {"boolean", "counter"}
+        assert final_schemas["baseline"]["properties"]["metrics"][
+            "properties"
+        ].keys() == {"boolean", "counter"}
+
     # Integration test relies on ping, repositories and dependencies endpoints.
     def test_bug_1737656_unaffected(self, config):
         glean = glean_ping.GleanPing(
@@ -1261,3 +1332,18 @@ class TestGleanGeneration:
         mock_glean_ping.assert_any_call(
             repo, mps_branch="", version=1, use_metrics_blocklist=False
         )
+
+    def test_check_blocked_distribution_metrics(self):
+        """Should detect when distributions are blocked.
+
+        This test uses the probeinfo service."""
+        with pytest.raises(RuntimeError):
+            msg_main.check_blocked_distribution_metrics(
+                [
+                    "--repo",
+                    "org-mozilla-fenix-nightly",
+                    "--blocked-distribution-pings",
+                    "metrics",
+                ],
+                standalone_mode=False,
+            )

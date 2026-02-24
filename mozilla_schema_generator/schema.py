@@ -34,6 +34,9 @@ class Schema(object):
     def __init__(self, schema: dict):
         self.schema = schema
 
+    def __eq__(self, other):
+        return isinstance(other, Schema) and self.schema == other.schema
+
     def set_schema_elem(self, key: Iterable[str], elem: Any, *, propagate=True) -> dict:
         """
         @param key: The key set

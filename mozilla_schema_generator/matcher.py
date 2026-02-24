@@ -4,6 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from copy import deepcopy
 from typing import Any
 
 from .probes import Probe
@@ -13,10 +14,18 @@ class Matcher(object):
     table_group_key = "table_group"
     type_key = "type"
     contains_key = "contains"
+    not_contains_key = "not_contains"
     not_key = "not"
     any_key = "any"
 
-    keywords = {contains_key, not_key, type_key, table_group_key, any_key}
+    keywords = {
+        contains_key,
+        not_key,
+        type_key,
+        table_group_key,
+        any_key,
+        not_contains_key,
+    }
 
     def __init__(self, match_obj: dict, *, _type=None, table_group=None):
         """
@@ -35,6 +44,9 @@ class Matcher(object):
             for k, v in match_obj.items()
             if k not in {self.table_group_key, self.type_key}
         }
+
+    def __repr__(self):
+        return str(self.matcher)
 
     def get_table_group(self):
         return self.table_group
@@ -66,7 +78,9 @@ class Matcher(object):
         if new_type is None:
             new_type = self.type
 
-        return Matcher(self.matcher, _type=new_type, table_group=new_table_group)
+        return Matcher(
+            deepcopy(self.matcher), _type=new_type, table_group=new_table_group
+        )
 
     @staticmethod
     def _matches(match_v: Any, probe_v: Any) -> bool:
@@ -86,6 +100,11 @@ class Matcher(object):
             # Not a match if probe_v doesn't contain expected value
             if Matcher.contains_key in match_v:
                 if match_v[Matcher.contains_key] not in probe_v:
+                    return False
+
+            # Not a match if probe_v contain value
+            if Matcher.not_contains_key in match_v:
+                if match_v[Matcher.not_contains_key] in probe_v:
                     return False
 
             # Not a match if matches the "not" value
