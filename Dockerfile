@@ -23,7 +23,7 @@ ENV CARGO_INSTALL_ROOT=${HOME}/.cargo
 ENV PATH=${PATH}:${HOME}/.cargo/bin
 
 # Install a tagged version of jsonschema-transpiler
-RUN cargo install jsonschema-transpiler --version 2.0.0
+RUN cargo install jsonschema-transpiler --version 2.0.1
 
 # Upgrade pip
 RUN pip install --upgrade pip
