@@ -13,12 +13,22 @@ from json.decoder import JSONDecodeError
 from typing import Dict, List
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .config import Config
 from .probes import Probe
 from .schema import Schema, SchemaException
 
 logger = logging.getLogger(__name__)
+
+_http_session = requests.Session()
+_http_session.mount(
+    "https://",
+    HTTPAdapter(
+        max_retries=Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504])
+    ),
+)
 
 
 class GenericPing(object):
@@ -153,19 +163,10 @@ class GenericPing(object):
             # google cloud cdn to bypass the cache
             headers["Cache-Control"] = "no-cache"
 
-        r = requests.get(url, headers=headers, stream=True)
+        r = _http_session.get(url, headers=headers)
         r.raise_for_status()
 
-        json_bytes = b""
-
-        try:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    json_bytes += chunk
-        except ValueError as e:
-            raise ValueError("Could not parse " + url) from e
-
-        final_json = json_bytes.decode(r.encoding or GenericPing.default_encoding)
+        final_json = r.content.decode(r.encoding or GenericPing.default_encoding)
         GenericPing._add_to_cache(url, final_json)
 
         return final_json
