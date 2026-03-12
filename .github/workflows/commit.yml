@@ -2,7 +2,10 @@ name: Build, Test, and Deploy
 on:
   push:
     branches:
+      - main
     tags:
+  # only run if there's an open PR for the branch
+  # includes forks which require approval from a maintainer
   pull_request:
 
 jobs:
