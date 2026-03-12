@@ -12,7 +12,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           # this action doesn't fetch the generated schemas branch of the submodule so
           # manually update submodule
@@ -27,7 +27,7 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git submodule update --init --recursive
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: '3.14'
           cache: 'pip'
@@ -43,12 +43,12 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           submodules: "recursive"
           persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: '3.14'
           cache: 'pip'
@@ -58,7 +58,7 @@ jobs:
           pip install pdoc
           pdoc -o /tmp/_html ./mozilla_schema_generator
       - name: Upload docs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: docs-html
           path: /tmp/_html/
@@ -71,11 +71,11 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
       - name: Download docs artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: docs-html
           path: /tmp/_html/
@@ -84,7 +84,7 @@ jobs:
           ls -al /tmp/
           ls -al /tmp/_html/
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
           node-version: '24'
       - name: Install and configure dependencies
@@ -109,14 +109,14 @@ jobs:
       id-token: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
       - name: Set up tag
         id: get_tag
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
           else
             echo "tag=latest" >> $GITHUB_OUTPUT
           fi
@@ -131,10 +131,12 @@ jobs:
           printf '{"commit":"%s","version":"%s","source":"https://github.com/%s/%s","build":"%s"}\n' \
             "$COMMIT_SHA" "$TAG" "$REPO_OWNER" "$REPO_NAME" "$BUILD_URL" > version.json
       - name: Build the Docker image
+        env:
+          STEPS_GET_TAG_OUTPUTS_TAG: ${{ steps.get_tag.outputs.tag }}
         run: |
-          docker build . -t us-docker.pkg.dev/moz-fx-data-artifacts-prod/mozilla-schema-generator/mozilla-schema-generator:${{ steps.get_tag.outputs.tag }}
+          docker build . -t us-docker.pkg.dev/moz-fx-data-artifacts-prod/mozilla-schema-generator/mozilla-schema-generator:${STEPS_GET_TAG_OUTPUTS_TAG}
       - name: Push Docker image to GAR
-        uses: mozilla-it/deploy-actions/docker-push@v4.3.2
+        uses: mozilla-it/deploy-actions/docker-push@4784cb70739a4f32ce010921f60fb1ebbc791a38
         with:
           project_id: moz-fx-data-artifacts-prod
           image_tags: us-docker.pkg.dev/moz-fx-data-artifacts-prod/mozilla-schema-generator/mozilla-schema-generator:${{ steps.get_tag.outputs.tag }}
