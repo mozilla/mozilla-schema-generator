@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    environment: test
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -101,7 +102,7 @@ jobs:
         # package.json needed for https://github.com/tschaub/gh-pages/issues/354
         run: |
           touch package.json
-          gh-pages --message "[skip ci] updates" --dist /tmp/_html --repo https://x-access-token:$GITHUB_TOKEN@github.com/${{ github.repository }}.git
+          gh-pages --message "[skip ci] updates" --dist /tmp/_html --repo https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
 
   deploy:
     runs-on: ubuntu-latest
