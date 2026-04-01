@@ -1286,7 +1286,7 @@ class TestGleanGeneration:
         glean_v2_allowlist,
         glean_v1_overwrite_allowlist,
     ):
-        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        """Should write v1 with v2 schema and metrics blocklist when in v1_overwrite allowlist."""
         repo = {"app_id": "firefox-desktop"}
 
         msg_main.write_schema(
@@ -1302,7 +1302,7 @@ class TestGleanGeneration:
 
         assert mock_glean_ping.call_count == 1
         mock_glean_ping.assert_any_call(
-            repo, mps_branch="", version=1, use_metrics_blocklist=True
+            repo, mps_branch="", version=2, use_metrics_blocklist=True
         )
 
     @patch("mozilla_schema_generator.__main__.dump_schema")
