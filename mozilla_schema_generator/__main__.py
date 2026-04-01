@@ -238,11 +238,12 @@ def write_schema(
             continue
 
         use_metrics_blocklist = version == 2 or repo["app_id"] in v1_overwrite_allowlist
+        schema_version = 2 if repo["app_id"] in v1_overwrite_allowlist else version
 
         schema_generator = GleanPing(
             repo,
             mps_branch=mps_branch,
-            version=version,
+            version=schema_version,
             use_metrics_blocklist=use_metrics_blocklist,
         )
         schemas = schema_generator.generate_schema(

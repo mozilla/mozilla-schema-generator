@@ -19,8 +19,8 @@
 #- net-thunderbird-android-daily
 #- org-mozilla-connect-firefox
 #- org-mozilla-fenix
-#- org-mozilla-fenix-nightly
-#- org-mozilla-fennec-aurora
+- org-mozilla-fenix-nightly
+- org-mozilla-fennec-aurora
 #- org-mozilla-firefox
 #- org-mozilla-firefox-beta
 #- org-mozilla-firefox-vpn
