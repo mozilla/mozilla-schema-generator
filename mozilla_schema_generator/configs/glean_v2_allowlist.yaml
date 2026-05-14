@@ -11,8 +11,8 @@
 # firefox-crashreporter:
 # - metrics
 # - health
-# firefox-desktop:
-# - metrics
+firefox-desktop:
+- metrics
 # - health
 # - sync
 # - captcha-detection
@@ -63,8 +63,8 @@
 # org-mozilla-connect-firefox:
 # - metrics
 # - health
-# org-mozilla-fenix:
-# - metrics
+org-mozilla-fenix:
+- metrics
 # - sync
 # - health
 # - first-session
@@ -84,15 +84,15 @@ org-mozilla-fennec-aurora:
 - first-session
 - health
 - adjust-attribution
-# org-mozilla-firefox:
-# - metrics
+org-mozilla-firefox:
+- metrics
 # - health
 # - sync
 # - first-session
 # - captcha-detection
 # - adjust-attribution
-# org-mozilla-firefox-beta:
-# - metrics
+org-mozilla-firefox-beta:
+- metrics
 # - health
 # - sync
 # - first-session

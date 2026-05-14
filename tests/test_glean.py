@@ -2,7 +2,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+from collections import defaultdict
 from typing import Dict, List
 from unittest.mock import patch
 
@@ -1225,10 +1225,33 @@ class TestGleanPing(object):
 
 
 class TestGleanGeneration:
+    # pings to use for all apps
+    PING_TYPES = ("metrics", "health", "baseline")
+
     @pytest.fixture
     def mock_glean_ping(self):
+        """Return a GleanPing object that mock generates schemas for each ping in PING_TYPES."""
+
+        def make_instance(repo, *, mps_branch, version, use_metrics_blocklist):
+            instance = mock.MagicMock()
+            instance.generate_schema.return_value = {
+                ping: f"{ping}-v{version}" for ping in self.PING_TYPES
+            }
+            return instance
+
         with mock.patch("mozilla_schema_generator.__main__.GleanPing") as mock_glean:
+            mock_glean.side_effect = make_instance
             yield mock_glean
+
+    @staticmethod
+    def dump_calls_by_version(dump_schema_mock):
+        """Return {version: [schemas_dict, ...]} for each dump_schema call."""
+        by_version = defaultdict(list)
+        for call in dump_schema_mock.call_args_list:
+            schemas = call.args[0]
+            version = call.kwargs["version"]
+            by_version[version].append(schemas)
+        return by_version
 
     @pytest.fixture
     def glean_v2_allowlist(self):
@@ -1240,11 +1263,18 @@ class TestGleanGeneration:
             "org-mozilla-firefox": [
                 "metrics",
             ],
+            "partial-overwrite-app": [
+                "metrics",
+                "health",
+            ],
         }
 
     @pytest.fixture
     def glean_v1_overwrite_allowlist(self):
-        return ["firefox-desktop"]
+        return {
+            "firefox-desktop": ["metrics", "health"],
+            "partial-overwrite-app": ["metrics"],
+        }
 
     @patch("mozilla_schema_generator.__main__.dump_schema")
     def test_v2_allowlist_write_v1_v2(
@@ -1255,7 +1285,7 @@ class TestGleanGeneration:
         glean_v2_allowlist,
         glean_v1_overwrite_allowlist,
     ):
-        """Should write both v1 and v2 when in v2 allowlist but not v1_overwrite."""
+        """Pings in v2 allowlist but not v1_overwrite should write both v1 and v2 schemas."""
         repo = {"app_id": "org-mozilla-firefox"}
 
         msg_main.write_schema(
@@ -1277,6 +1307,12 @@ class TestGleanGeneration:
             repo, mps_branch="", version=2, use_metrics_blocklist=True
         )
 
+        by_version = self.dump_calls_by_version(dump_schema)
+        # write every v1 ping
+        assert by_version[1] == [{ping: f"{ping}-v1" for ping in self.PING_TYPES}]
+        # only the v2 allowlisted ping
+        assert by_version[2] == [{"metrics": "metrics-v2"}]
+
     @patch("mozilla_schema_generator.__main__.dump_schema")
     def test_v2_allowlist_overwrite_v1(
         self,
@@ -1286,7 +1322,7 @@ class TestGleanGeneration:
         glean_v2_allowlist,
         glean_v1_overwrite_allowlist,
     ):
-        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        """Pings in v2 allowlist and v1_overwrite should only write v1 files with the v2 schema."""
         repo = {"app_id": "firefox-desktop"}
 
         msg_main.write_schema(
@@ -1300,10 +1336,76 @@ class TestGleanGeneration:
             v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
         )
 
-        assert mock_glean_ping.call_count == 1
-        mock_glean_ping.assert_any_call(
-            repo, mps_branch="", version=1, use_metrics_blocklist=True
+        assert mock_glean_ping.call_count == 2
+
+        by_version = self.dump_calls_by_version(dump_schema)
+        # v2 schemas are written to .1.schema.json, non-allowlisted v1 schemas unchanged
+        assert sorted(by_version[1], key=lambda d: sorted(d)) == [
+            {"baseline": "baseline-v1"},
+            {"health": "health-v2", "metrics": "metrics-v2"},
+        ]
+        assert 2 not in by_version
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v2_allowlist_partial_overwrite(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+        glean_v1_overwrite_allowlist,
+    ):
+        """Only v1_overwrite pings for an app should write to v1 files."""
+        repo = {"app_id": "partial-overwrite-app"}
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
         )
+
+        assert mock_glean_ping.call_count == 2
+
+        by_version = self.dump_calls_by_version(dump_schema)
+        # only metrics is v1_overwrite allowlisted while health continues to write to v2 and v1
+        assert sorted(by_version[1], key=lambda d: sorted(d)) == [
+            {"health": "health-v1", "baseline": "baseline-v1"},
+            {"metrics": "metrics-v2"},
+        ]
+        assert by_version[2] == [{"health": "health-v2"}]
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v2_allowlist_overwrite_entry_with_no_pings_is_noop(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+    ):
+        """An app in v1_overwrite with an empty/null ping list should be a no-op."""
+        repo = {"app_id": "org-mozilla-firefox"}
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_allowlist={"org-mozilla-firefox": None},
+        )
+
+        assert mock_glean_ping.call_count == 2
+
+        by_version = self.dump_calls_by_version(dump_schema)
+        assert by_version[1] == [{ping: f"{ping}-v1" for ping in self.PING_TYPES}]
+        assert by_version[2] == [{"metrics": "metrics-v2"}]
 
     @patch("mozilla_schema_generator.__main__.dump_schema")
     def test_v2_allowlist_write_v1_only(
@@ -1314,7 +1416,7 @@ class TestGleanGeneration:
         glean_v2_allowlist,
         glean_v1_overwrite_allowlist,
     ):
-        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        """An app in neither allowlist should be generated as v1 only."""
         repo = {"app_id": "other-app"}
 
         msg_main.write_schema(
@@ -1332,6 +1434,10 @@ class TestGleanGeneration:
         mock_glean_ping.assert_any_call(
             repo, mps_branch="", version=1, use_metrics_blocklist=False
         )
+
+        by_version = self.dump_calls_by_version(dump_schema)
+        assert by_version[1] == [{ping: f"{ping}-v1" for ping in self.PING_TYPES}]
+        assert 2 not in by_version
 
     def test_check_blocked_distribution_metrics(self):
         """Should detect when distributions are blocked.

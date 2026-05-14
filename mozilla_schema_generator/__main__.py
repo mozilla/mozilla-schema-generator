@@ -188,7 +188,7 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
         v2_allowlist = yaml.safe_load(f)
 
     with open(CONFIGS_DIR / "glean_v1_overwrite_allowlist.yaml", "r") as f:
-        v1_overwrite_allowlist = yaml.safe_load(f) or []
+        v1_overwrite_allowlist = yaml.safe_load(f) or {}
 
     # validate that the config has mappings for every single metric type specified in the
     # Glean schema (see: https://bugzilla.mozilla.org/show_bug.cgi?id=1739239)
@@ -230,31 +230,49 @@ def write_schema(
     v2_allowlist,
     v1_overwrite_allowlist,
 ):
-    for version in (1, 2):
-        if version == 2 and (
-            repo["app_id"] in v1_overwrite_allowlist
-            or repo["app_id"] not in v2_allowlist
-        ):
-            continue
+    v2_pings = set(v2_allowlist.get(repo["app_id"], []))
+    overwrite_pings = set(v1_overwrite_allowlist.get(repo["app_id"]) or [])
 
-        use_metrics_blocklist = version == 2 or repo["app_id"] in v1_overwrite_allowlist
+    for version in (1, 2):
+        if version == 2 and not v2_pings:
+            continue
 
         schema_generator = GleanPing(
             repo,
             mps_branch=mps_branch,
             version=version,
-            use_metrics_blocklist=use_metrics_blocklist,
+            use_metrics_blocklist=version == 2,
         )
         schemas = schema_generator.generate_schema(
             config, generic_schema=generic_schema
         )
 
-        # only keep pings that are in the allowlist
+        # for v1_overwrite pings, the v2 schema gets written to .1.schema.json
         if version == 2:
+            overwrites = {
+                name: schema
+                for name, schema in schemas.items()
+                if name in overwrite_pings
+            }
             schemas = {
                 name: schema
                 for name, schema in schemas.items()
-                if name in v2_allowlist[repo["app_id"]]
+                if name in v2_pings - overwrite_pings
+            }
+            if overwrites:
+                dump_schema(
+                    overwrites,
+                    out_dir and out_dir.joinpath(repo["app_id"]),
+                    pretty,
+                    version=1,
+                )
+            if not schemas:
+                continue
+        elif overwrite_pings:
+            schemas = {
+                name: schema
+                for name, schema in schemas.items()
+                if name not in overwrite_pings
             }
 
         dump_schema(
