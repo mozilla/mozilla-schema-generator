@@ -1216,12 +1216,58 @@ class TestGleanPing(object):
             probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
         ]
 
-        assert len(active_probes) == 4
+        assert len(active_probes) == 3
         assert set(active_probes) == {
             "active",
             "expired_old",
             "expired_old_2",
         }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_duplicate_metric_keeps_most_recent_definition(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """When the same metric exists in both the app and a dependency,
+        get_probes should keep only the definition with the most recent history."""
+        mock_get_dependencies.return_value = ["glean-core"]
+
+        # App has the stale copy (last update 2024-01-01); dependency has the
+        # active copy (last update 2026-05-01). The dependency definition should win.
+        app_defn = self.metric_def(
+            "media.audio.init_failure", "2023-01-01", "2024-01-01", True
+        )
+        dep_defn = self.metric_def(
+            "media.audio.init_failure", "2025-01-01", "2026-05-01", True
+        )
+        dep2_defn = self.metric_def(
+            "media.audio.init_failure", "2024-01-01", "2025-05-01", True
+        )
+        app_defn["media.audio.init_failure"]["history"][0]["description"] = "stale"
+        dep_defn["media.audio.init_failure"]["history"][0]["description"] = "active"
+        dep2_defn["media.audio.init_failure"]["history"][0]["description"] = "stale"
+
+        def responses():
+            yield dep_defn
+            yield app_defn
+            yield dep2_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [p for p in probes if p.id == "media.audio.init_failure"]
+        assert len(matches) == 1
+        assert matches[0].definition["description"] == "active"
 
 
 class TestGleanGeneration:

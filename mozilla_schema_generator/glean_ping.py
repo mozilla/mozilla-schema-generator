@@ -198,6 +198,25 @@ class GleanPing(GenericPing):
                 for name, defn in dependency_probes.items()
             ]
 
+        # A metric can be moved between an app and its dependencies or between
+        # dependencies while probe scraper keeps the history in each location, so
+        # both definitions are returned. Keep the one with the most recent
+        # `dates.last` to avoid non-deterministic selection
+        def _latest_history_date(defn):
+            return max(
+                datetime.fromisoformat(h["dates"]["last"])
+                for h in defn[GleanProbe.history_key]
+            )
+
+        deduped: Dict[str, Any] = {}
+        for name, defn in probes:
+            existing = deduped.get(name)
+            if existing is None or _latest_history_date(defn) > _latest_history_date(
+                existing
+            ):
+                deduped[name] = defn
+        probes = list(deduped.items())
+
         pings = self.get_pings()
 
         processed = []
