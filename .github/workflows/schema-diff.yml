@@ -155,8 +155,8 @@ jobs:
           DIFF_COMMIT_SHA=$(git rev-parse HEAD)
           echo "diff_commit_sha=$DIFF_COMMIT_SHA" >> "$GITHUB_OUTPUT"
           {
-            echo '## Generated Schema Diff Branch'
-            echo ''
+            echo "## Generated Schema Diff Branch"
+            echo ""
             echo "Pushed to [\`$DIFF_BRANCH\`](https://github.com/${GITHUB_REPOSITORY}/tree/${DIFF_BRANCH})."
             echo ""
             echo "View this PR's schema changes: [commit ${DIFF_COMMIT_SHA:0:7}](https://github.com/${GITHUB_REPOSITORY}/commit/${DIFF_COMMIT_SHA})"
