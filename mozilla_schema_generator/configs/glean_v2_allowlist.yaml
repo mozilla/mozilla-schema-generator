@@ -60,9 +60,9 @@
 # net-thunderbird-android-daily:
 # - metrics
 # - health
-org-mozilla-connect-firefox:
-- metrics
-- health
+#org-mozilla-connect-firefox:
+#- metrics
+#- health
 # org-mozilla-fenix:
 # - metrics
 # - sync
