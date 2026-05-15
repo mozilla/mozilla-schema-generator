@@ -4,7 +4,7 @@ on:
     paths:
     - 'mozilla_schema_generator/__main__.py'
     - 'mozilla_schema_generator/glean_ping.py'
-    - 'mozilla_schema_generator/configs/'
+    - 'mozilla_schema_generator/configs/**'
 
 jobs:
   generate-main:
