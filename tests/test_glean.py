@@ -1338,6 +1338,73 @@ class TestGleanPing(object):
         types = sorted(p.type for p in matches)
         assert types == ["labeled_counter", "quantity"]
 
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="firefox-ios")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_same_name_different_pings_kept_separate(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """Metrics sharing a name but sent in different pings should be kept as separate probes."""
+        mock_get_dependencies.return_value = ["sync"]
+
+        # App has a labeled_counter going to temp-history-sync only
+        app_defn = {
+            "history_sync.failure_reason": {
+                "history": [
+                    {
+                        "dates": {"first": "2025-01-01", "last": "2026-01-01"},
+                        "description": "ios",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["temp-history-sync"],
+                    }
+                ],
+                "in-source": True,
+                "name": "history_sync.failure_reason",
+                "type": "labeled_counter",
+            }
+        }
+        # Dependency has a labeled_string going to history-sync only
+        dep_defn = {
+            "history_sync.failure_reason": {
+                "history": [
+                    {
+                        "dates": {"first": "2025-01-01", "last": "2026-01-01"},
+                        "description": "sync",
+                        "type": "labeled_string",
+                        "send_in_pings": ["history-sync"],
+                    }
+                ],
+                "in-source": True,
+                "name": "history_sync.failure_reason",
+                "type": "labeled_string",
+            }
+        }
+
+        def responses():
+            yield app_defn
+            yield dep_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-ios-release",
+                "app_id": "org-mozilla-ios-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [p for p in probes if p.id == "history_sync.failure_reason"]
+
+        assert len(matches) == 2
+        types_to_pings = {p.type: p.definition.get("send_in_pings") for p in matches}
+        assert types_to_pings == {
+            "labeled_counter": {"temp-history-sync"},
+            "labeled_string": {"history-sync"},
+        }
+
 
 class TestGleanGeneration:
     @pytest.fixture
