@@ -83,9 +83,7 @@ def test_copy_schemas(tmp_path, tmp_git):
     assert len(bq) > 0, "no bq schemas detected"
     assert len(bq) == len(txt)
     repo = Repo(tmp_git)
-    # the dst name encodes the revision, we should always be able to use the
-    # first 6 characters to find commit in the repository.
-    assert repo.rev_parse(dst.name[:6]) == repo.head.commit
+    assert repo.rev_parse(dst.name) == repo.head.commit
 
 
 def test_checkout_copy_schema_revisions(tmp_path, tmp_git):
@@ -94,8 +92,8 @@ def test_checkout_copy_schema_revisions(tmp_path, tmp_git):
     base_ref = "generated-schemas~10"
     head, base = checkout_copy_schemas_revisions(head_ref, base_ref, tmp_git, tmp_path)
     assert head and base
-    assert repo.rev_parse(head.name[:8]) == repo.rev_parse(head_ref)
-    assert repo.rev_parse(base.name[:8]) == repo.rev_parse(base_ref)
+    assert repo.rev_parse(head.name) == repo.rev_parse(head_ref)
+    assert repo.rev_parse(base.name) == repo.rev_parse(base_ref)
 
 
 def test_checkout_copy_schema_revisions_fails_dirty(tmp_path, tmp_git):

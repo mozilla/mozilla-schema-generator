@@ -59,7 +59,7 @@ def copy_schemas(head: str, repository: Path, artifact: Path) -> Path:
     evolution checks."""
     src = Path(repository)
     repo = Repo(repository)
-    dst = Path(artifact) / repo.rev_parse(head).name_rev.replace(" ", "_")
+    dst = Path(artifact) / repo.rev_parse(head).hexsha
     dst.mkdir(parents=True, exist_ok=True)
     schemas = sorted(src.glob("**/*.bq"))
     if not schemas:
