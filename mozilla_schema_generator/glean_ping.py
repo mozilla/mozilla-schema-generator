@@ -198,6 +198,57 @@ class GleanPing(GenericPing):
                 for name, defn in dependency_probes.items()
             ]
 
+        # A metric can be moved between an app and its dependencies or between dependencies while
+        # probe scraper keeps the history in each location, so both definitions are returned
+        # Merge the history per probe to take the latest definition while still being able to
+        # find metric type changes below
+        # Metrics are not merged if they are not sent in the same pings as they are disjoint
+        def _pings_in_history(defn):
+            return {
+                p
+                for h in defn[GleanProbe.history_key]
+                for p in h.get("send_in_pings", ["metrics"])
+            }
+
+        def _latest_history_date(defn):
+            return max(
+                datetime.fromisoformat(h["dates"]["last"])
+                for h in defn[GleanProbe.history_key]
+            )
+
+        # Group same name probes whose pings intersect to combine moved metrics
+        grouped_by_name: Dict[str, List[List[dict]]] = defaultdict(list)
+        for name, defn in probes:
+            defn_pings = _pings_in_history(defn)
+            existing_groups = grouped_by_name[name]
+            matches = [
+                group
+                for group in existing_groups
+                if any(_pings_in_history(defn) & defn_pings for defn in group)
+            ]
+            if not matches:
+                existing_groups.append([defn])
+            else:
+                merged_group = [defn]
+                for g in matches:
+                    merged_group.extend(g)
+                    existing_groups.remove(g)
+                existing_groups.append(merged_group)
+
+        # Take latest definition per group
+        deduped_probes: List[Any] = []
+        for name, groups in grouped_by_name.items():
+            for group in groups:
+                latest_defn = max(group, key=_latest_history_date)
+                if len(group) > 1:
+                    latest_defn = latest_defn.copy()
+                    latest_defn[GleanProbe.history_key] = sorted(
+                        (h for d in group for h in d[GleanProbe.history_key]),
+                        key=lambda h: datetime.fromisoformat(h["dates"]["first"]),
+                    )
+                deduped_probes.append((name, latest_defn))
+        probes = deduped_probes
+
         pings = self.get_pings()
 
         processed = []

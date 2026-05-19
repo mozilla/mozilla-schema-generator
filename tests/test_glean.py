@@ -1216,11 +1216,193 @@ class TestGleanPing(object):
             probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
         ]
 
-        assert len(active_probes) == 4
+        assert len(active_probes) == 3
         assert set(active_probes) == {
             "active",
             "expired_old",
             "expired_old_2",
+        }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_duplicate_metric_keeps_most_recent_definition(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """The most recent definition should be used if there are duplicates found."""
+        mock_get_dependencies.return_value = ["glean-core"]
+
+        app_defn = self.metric_def(
+            "media.audio.init_failure", "2025-01-01", "2026-05-01", True
+        )
+        dep_defn = self.metric_def(
+            "media.audio.init_failure", "2023-01-01", "2025-01-01", True
+        )
+        app_defn["media.audio.init_failure"]["history"][0]["description"] = "active"
+        dep_defn["media.audio.init_failure"]["history"][0]["description"] = "stale"
+
+        def responses():
+            yield app_defn
+            yield dep_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [p for p in probes if p.id == "media.audio.init_failure"]
+        assert len(matches) == 1
+        assert matches[0].definition["description"] == "active"
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_duplicate_metric_preserves_history_across_sources(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """Metric type changes should be preserved when a metric is moved."""
+        mock_get_dependencies.return_value = ["engine-gecko"]
+
+        # App is the current location with a labeled_counter type
+        app_defn = {
+            "avif.aom_decode_error": {
+                "history": [
+                    {
+                        "dates": {
+                            "first": "2024-02-19",
+                            "last": "2026-05-14",
+                        },
+                        "description": "current",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["metrics"],
+                    }
+                ],
+                "in-source": True,
+                "name": "avif.aom_decode_error",
+                "type": "labeled_counter",
+            }
+        }
+        # Dependency is the prior location and the metric used to be a quantity there
+        dep_defn = {
+            "avif.aom_decode_error": {
+                "history": [
+                    {
+                        "dates": {
+                            "first": "2021-02-09",
+                            "last": "2024-02-12",
+                        },
+                        "description": "old",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["metrics"],
+                    },
+                    {
+                        "dates": {
+                            "first": "2020-11-03",
+                            "last": "2021-01-18",
+                        },
+                        "description": "old",
+                        "type": "quantity",
+                        "send_in_pings": ["metrics"],
+                    },
+                ],
+                "in-source": True,
+                "name": "avif.aom_decode_error",
+                "type": "labeled_counter",
+            }
+        }
+
+        def responses():
+            yield app_defn
+            yield dep_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [p for p in probes if p.id == "avif.aom_decode_error"]
+        types = sorted(p.type for p in matches)
+        assert types == ["labeled_counter", "quantity"]
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="firefox-ios")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_same_name_different_pings_kept_separate(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """Metrics sharing a name but sent in different pings should be kept as separate probes."""
+        mock_get_dependencies.return_value = ["sync"]
+
+        # App has a labeled_counter going to temp-history-sync only
+        app_defn = {
+            "history_sync.failure_reason": {
+                "history": [
+                    {
+                        "dates": {"first": "2025-01-01", "last": "2026-01-01"},
+                        "description": "ios",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["temp-history-sync"],
+                    }
+                ],
+                "in-source": True,
+                "name": "history_sync.failure_reason",
+                "type": "labeled_counter",
+            }
+        }
+        # Dependency has a labeled_string going to history-sync only
+        dep_defn = {
+            "history_sync.failure_reason": {
+                "history": [
+                    {
+                        "dates": {"first": "2025-01-01", "last": "2026-01-01"},
+                        "description": "sync",
+                        "type": "labeled_string",
+                        "send_in_pings": ["history-sync"],
+                    }
+                ],
+                "in-source": True,
+                "name": "history_sync.failure_reason",
+                "type": "labeled_string",
+            }
+        }
+
+        def responses():
+            yield app_defn
+            yield dep_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-ios-release",
+                "app_id": "org-mozilla-ios-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [p for p in probes if p.id == "history_sync.failure_reason"]
+
+        assert len(matches) == 2
+        types_to_pings = {p.type: p.definition.get("send_in_pings") for p in matches}
+        assert types_to_pings == {
+            "labeled_counter": {"temp-history-sync"},
+            "labeled_string": {"history-sync"},
         }
 
 
