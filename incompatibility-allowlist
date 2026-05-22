@@ -122,3 +122,7 @@ telemetry.first-shutdown.4
 # Remove saved-session schemas
 telemetry.saved-session.*
 telemetry.saved-session-use-counter.*
+
+# SVCSE-4447
+# Remove coverage pings
+coverage.coverage.*
