@@ -1405,6 +1405,73 @@ class TestGleanPing(object):
             "labeled_string": {"history-sync"},
         }
 
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_duplicate_metric_differing_by_dot_or_underscore_deduped(
+        self, mock_get_json, mock_app_name, mock_get_dependencies
+    ):
+        """Metrics differing by "." and "_" that normalize to the same name should be deduped."""
+        mock_get_dependencies.return_value = ["engine-gecko"]
+
+        # Current metric, dotted name, most recent definition
+        app_defn = {
+            "media.audio.init_failure": {
+                "history": [
+                    {
+                        "dates": {"first": "2024-02-10", "last": "2026-06-15"},
+                        "description": "current",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["metrics"],
+                    }
+                ],
+                "in-source": True,
+                "name": "media.audio.init_failure",
+                "type": "labeled_counter",
+            }
+        }
+        # Stale alias left in a dependency, underscore name, older and out of source
+        dep_defn = {
+            "media.audio_init_failure": {
+                "history": [
+                    {
+                        "dates": {"first": "2020-11-05", "last": "2020-11-05"},
+                        "description": "stale",
+                        "type": "labeled_counter",
+                        "send_in_pings": ["metrics"],
+                    }
+                ],
+                "in-source": False,
+                "name": "media.audio_init_failure",
+                "type": "labeled_counter",
+            }
+        }
+
+        def responses():
+            yield app_defn
+            yield dep_defn
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "firefox-android-release",
+                "app_id": "org-mozilla-firefox",
+            },
+        )
+        probes = glean.get_probes()
+
+        matches = [
+            p
+            for p in probes
+            if p.id in ("media.audio.init_failure", "media.audio_init_failure")
+        ]
+        assert len(matches) == 1
+        assert matches[0].id == "media.audio.init_failure"
+        assert matches[0].definition["description"] == "current"
+
 
 class TestGleanGeneration:
     @pytest.fixture
