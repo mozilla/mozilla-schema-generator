@@ -203,6 +203,14 @@ class GleanPing(GenericPing):
         # Merge the history per probe to take the latest definition while still being able to
         # find metric type changes below
         # Metrics are not merged if they are not sent in the same pings as they are disjoint
+
+        # Metrics are grouped by their normalized BigQuery column name (from jsonschema-transpiler)
+        # rather than their raw name. e.g. "media.audio.init_failure" and "media.audio_init_failure"
+        # normalize to "media_audio_init_failure". The transpiler picks one of the colliding
+        # descriptions non-deterministically.
+        def _normalize_name(name):
+            return name.replace(".", "_").replace("-", "_")
+
         def _pings_in_history(defn):
             return {
                 p
@@ -216,15 +224,26 @@ class GleanPing(GenericPing):
                 for h in defn[GleanProbe.history_key]
             )
 
-        # Group same name probes whose pings intersect to combine moved metrics
+        def _dedupe_sort_key(defn):
+            """Prefer the most recent definition, breaking ties by choosing the in-source metric."""
+            return (
+                _latest_history_date(defn),
+                defn.get(GleanProbe.in_source_key, False),
+                defn["name"],
+            )
+
+        # Group probes that share a normalized name and whose pings intersect to combine
+        # moved metrics and metrics that only differ by "." vs "_"
         grouped_by_name: Dict[str, List[List[dict]]] = defaultdict(list)
         for name, defn in probes:
             defn_pings = _pings_in_history(defn)
-            existing_groups = grouped_by_name[name]
+            existing_groups = grouped_by_name[_normalize_name(name)]
             matches = [
                 group
                 for group in existing_groups
-                if any(_pings_in_history(defn) & defn_pings for defn in group)
+                if any(
+                    _pings_in_history(other_defn) & defn_pings for other_defn in group
+                )
             ]
             if not matches:
                 existing_groups.append([defn])
@@ -237,16 +256,16 @@ class GleanPing(GenericPing):
 
         # Take latest definition per group
         deduped_probes: List[Any] = []
-        for name, groups in grouped_by_name.items():
+        for groups in grouped_by_name.values():
             for group in groups:
-                latest_defn = max(group, key=_latest_history_date)
+                latest_defn = max(group, key=_dedupe_sort_key)
                 if len(group) > 1:
                     latest_defn = latest_defn.copy()
                     latest_defn[GleanProbe.history_key] = sorted(
                         (h for d in group for h in d[GleanProbe.history_key]),
                         key=lambda h: datetime.fromisoformat(h["dates"]["first"]),
                     )
-                deduped_probes.append((name, latest_defn))
+                deduped_probes.append((latest_defn["name"], latest_defn))
         probes = deduped_probes
 
         pings = self.get_pings()
