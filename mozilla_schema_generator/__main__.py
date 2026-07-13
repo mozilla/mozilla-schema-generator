@@ -187,8 +187,8 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
     with open(CONFIGS_DIR / "glean_v2_allowlist.yaml", "r") as f:
         v2_allowlist = yaml.safe_load(f)
 
-    with open(CONFIGS_DIR / "glean_v1_overwrite_allowlist.yaml", "r") as f:
-        v1_overwrite_allowlist = yaml.safe_load(f) or []
+    with open(CONFIGS_DIR / "glean_v1_overwrite_blocklist.yaml", "r") as f:
+        v1_overwrite_blocklist = yaml.safe_load(f) or {}
 
     # validate that the config has mappings for every single metric type specified in the
     # Glean schema (see: https://bugzilla.mozilla.org/show_bug.cgi?id=1739239)
@@ -216,7 +216,7 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
             generic_schema,
             mps_branch,
             v2_allowlist,
-            v1_overwrite_allowlist,
+            v1_overwrite_blocklist,
         )
 
 
@@ -228,26 +228,41 @@ def write_schema(
     generic_schema,
     mps_branch,
     v2_allowlist,
-    v1_overwrite_allowlist,
+    v1_overwrite_blocklist,
 ):
+    # Pings blocked from having their v1 schema overwritten by the v2 schema. Every other
+    # ping's v1 file is generated from the v2 schema, which is a no-op for pings without
+    # distribution columns.
+    blocked_pings = v1_overwrite_blocklist.get(repo["app_id"], [])
+
+    # Base schema for both the v1 and v2 files: generated from the v2 schema so that
+    # distribution subfields are dropped from every ping that no longer needs them. The v1
+    # and v2 files share this base, so it is generated once.
+    base_schemas = GleanPing(
+        repo,
+        mps_branch=mps_branch,
+        version=2,
+        use_metrics_blocklist=True,
+    ).generate_schema(config, generic_schema=generic_schema)
+
     for version in (1, 2):
-        if version == 2 and (
-            repo["app_id"] in v1_overwrite_allowlist
-            or repo["app_id"] not in v2_allowlist
-        ):
+        if version == 2 and repo["app_id"] not in v2_allowlist:
             continue
 
-        use_metrics_blocklist = version == 2 or repo["app_id"] in v1_overwrite_allowlist
+        schemas = dict(base_schemas)
 
-        schema_generator = GleanPing(
-            repo,
-            mps_branch=mps_branch,
-            version=version,
-            use_metrics_blocklist=use_metrics_blocklist,
-        )
-        schemas = schema_generator.generate_schema(
-            config, generic_schema=generic_schema
-        )
+        # The v1 files reuse the v2-schema base (with v1 filenames), except for blocked
+        # pings, which are regenerated from the v1 schema to keep their distribution columns.
+        if version == 1 and blocked_pings:
+            blocked_schemas = GleanPing(
+                repo,
+                mps_branch=mps_branch,
+                version=1,
+                use_metrics_blocklist=False,
+            ).generate_schema(config, generic_schema=generic_schema)
+            for name in blocked_pings:
+                if name in blocked_schemas:
+                    schemas[name] = blocked_schemas[name]
 
         # only keep pings that are in the allowlist
         if version == 2:
@@ -262,87 +277,6 @@ def write_schema(
             out_dir and out_dir.joinpath(repo["app_id"]),
             pretty,
             version=version,
-        )
-
-
-@click.command(
-    help="""Determine if any distribution fields are blocked.
-See https://mozilla-hub.atlassian.net/browse/DENG-10606 for details.
-"""
-)
-@click.argument(
-    "config",
-    type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
-    default=CONFIGS_DIR / "glean.yaml",
-)
-@click.option(
-    "--mps-branch",
-    help=(
-        "If specified, the source branch of " "mozilla-pipeline-schemas to reference"
-    ),
-    required=False,
-    type=str,
-    default="main",
-)
-@click.option(
-    "--repo",
-    help=(
-        "The glean repository id to check, defaults to all apps. e.g. org-mozilla-firefox"
-    ),
-    required=False,
-    type=str,
-)
-@click.option(
-    "--blocked-distribution-pings",
-    help="Pings that should have distributions blocked, used for testing. "
-    "Should default to events and baseline.",
-    multiple=True,
-    required=False,
-)
-def check_blocked_distribution_metrics(
-    config, mps_branch, repo, blocked_distribution_pings
-):
-    repos = GleanPing.get_repos()
-
-    if repo is not None:
-        repos = [r for r in repos if r["app_id"] == repo]
-
-    with open(config, "r") as f:
-        config_data = yaml.safe_load(f)
-    glean_config = Config("glean", config_data)
-
-    failed = False
-
-    for repo in repos:
-        ping = GleanPing(
-            repo,
-            mps_branch=mps_branch,
-        )
-        schemas = ping.generate_schema(
-            glean_config, generic_schema=False, blocked_distribution_pings=None
-        )
-        if blocked_distribution_pings:
-            schemas_with_block = ping.generate_schema(
-                glean_config,
-                generic_schema=False,
-                blocked_distribution_pings=blocked_distribution_pings,
-            )
-        else:
-            schemas_with_block = ping.generate_schema(
-                glean_config, generic_schema=False
-            )
-
-        if schemas != schemas_with_block:
-            failed = True
-            for ping_name in schemas.keys():
-                if schemas[ping_name] != schemas_with_block[ping_name]:
-                    print(
-                        f"{repo['app_id']}: {ping_name} has blocked distribution metrics"
-                    )
-
-    if failed:
-        raise RuntimeError(
-            "Found blocked distribution metrics, see above logs for details."
         )
 
 
@@ -413,7 +347,6 @@ main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
 main.add_command(generate_subset_pings)
-main.add_command(check_blocked_distribution_metrics)
 
 
 if __name__ == "__main__":
