@@ -126,3 +126,18 @@ telemetry.saved-session-use-counter.*
 # SVCSE-4447
 # Remove coverage pings
 coverage.coverage.*
+
+# DENG-10877
+# removal of nested distribution fields
+org-mozilla-fenix-nightly.adjust-attribution.*
+org-mozilla-fenix-nightly.captcha-detection.*
+org-mozilla-fenix-nightly.first-session.*
+org-mozilla-fenix-nightly.health.*
+org-mozilla-fenix-nightly.metrics.*
+org-mozilla-fenix-nightly.sync.*
+org-mozilla-fennec-aurora.adjust-attribution.*
+org-mozilla-fennec-aurora.captcha-detection.*
+org-mozilla-fennec-aurora.first-session.*
+org-mozilla-fennec-aurora.health.*
+org-mozilla-fennec-aurora.metrics.*
+org-mozilla-fennec-aurora.sync.*
