@@ -141,7 +141,7 @@ jobs:
           mkdir -p schema_out
           cp -r /tmp/main-schemas/. schema_out/
           git add schema_out
-          git commit --allow-empty -m "PR #${PR_NUMBER}: generated schemas from main (${MAIN_SHA:0:8})"
+          git commit --allow-empty -m "generated schemas from main (${MAIN_SHA:0:8})"
 
           # Commit 2: schemas generated from PR head
           rm -rf schema_out
