@@ -1,0 +1,60 @@
+# Pings blocked from having their glean v1 schema overwritten by the glean v2 schema.
+#
+# By default every ping's v1 schema is generated from the glean v2 schema, which drops the
+# unused distribution subfields. For pings with no distribution metrics this is a no-op, so
+# they switch over automatically. Pings that currently have distribution columns would lose
+# columns under glean v2, so they are blocked here and stay on glean v1 until their tables
+# have been backfilled and swapped (https://mozilla-hub.atlassian.net/browse/DENG-8494).
+# Remove a ping from this list once its table swap is done.
+#
+# Maps app id to the list of pings to keep on glean v1.
+#
+# This list is the set of stable tables that currently have distribution columns, from:
+#   SELECT DISTINCT table_schema, table_name
+#   FROM `moz-fx-data-shared-prod.region-us.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
+#   WHERE table_schema LIKE '%_stable' AND field_path LIKE 'metrics.%_distribution'
+accounts-cirrus: ["health", "metrics"]
+burnham: ["health", "metrics"]
+experimenter-cirrus: ["health", "metrics"]
+firefox-crashreporter: ["health", "metrics"]
+firefox-desktop: ["captcha-detection", "health", "metrics", "new-metric-capture-emulation", "newtab", "pseudo-main", "sync", "usage-reporting"]
+firefox-desktop-background-defaultagent: ["health", "metrics"]
+firefox-desktop-background-tasks: ["health", "metrics"]
+firefox-desktop-background-update: ["captcha-detection", "health", "metrics"]
+monitor-cirrus: ["health", "metrics"]
+mozilla-lockbox: ["health", "metrics"]
+mozilla-mach: ["health", "metrics", "usage"]
+mozillavpn: ["daemonsession", "health", "main", "metrics", "vpnsession"]
+mozillavpn-backend-cirrus: ["health", "metrics"]
+mozphab: ["health", "metrics", "usage"]
+net-thunderbird-android: ["health", "metrics"]
+net-thunderbird-android-beta: ["health", "metrics"]
+net-thunderbird-android-daily: ["health", "metrics"]
+org-mozilla-connect-firefox: ["health", "metrics"]
+org-mozilla-fenix: ["adjust-attribution", "captcha-detection", "first-session", "health", "metrics", "play-store-attribution", "sync"]
+org-mozilla-fenix-nightly: ["adjust-attribution", "captcha-detection", "first-session", "health", "metrics", "play-store-attribution", "sync"]
+org-mozilla-fennec-aurora: ["adjust-attribution", "captcha-detection", "first-session", "health", "metrics", "play-store-attribution", "sync"]
+org-mozilla-firefox: ["adjust-attribution", "captcha-detection", "first-session", "health", "metrics", "play-store-attribution", "sync"]
+org-mozilla-firefox-beta: ["adjust-attribution", "captcha-detection", "first-session", "health", "metrics", "play-store-attribution", "sync"]
+org-mozilla-firefox-vpn: ["daemonsession", "health", "main", "metrics", "vpnsession"]
+org-mozilla-firefoxreality: ["health", "metrics"]
+org-mozilla-focus: ["captcha-detection", "health", "metrics"]
+org-mozilla-focus-beta: ["captcha-detection", "health", "metrics"]
+org-mozilla-focus-nightly: ["captcha-detection", "health", "metrics"]
+org-mozilla-ios-fennec: ["health", "metrics", "usage-reporting"]
+org-mozilla-ios-firefox: ["health", "metrics", "usage-reporting"]
+org-mozilla-ios-firefoxbeta: ["health", "metrics", "usage-reporting"]
+org-mozilla-ios-firefoxvpn: ["daemonsession", "health", "main", "metrics", "vpnsession"]
+org-mozilla-ios-firefoxvpn-network-extension: ["daemonsession", "health", "metrics", "vpnsession"]
+org-mozilla-ios-focus: ["health", "metrics"]
+org-mozilla-ios-klar: ["health", "metrics"]
+org-mozilla-ios-lockbox: ["health", "metrics"]
+org-mozilla-klar: ["captcha-detection", "health", "metrics"]
+org-mozilla-mozregression: ["health", "metrics"]
+org-mozilla-reference-browser: ["health", "metrics"]
+org-mozilla-social-nightly: ["health", "metrics"]
+org-mozilla-tv-firefox: ["health", "metrics"]
+org-mozilla-vrbrowser: ["health", "metrics", "session-end"]
+pine: ["captcha-detection", "health", "metrics", "new-metric-capture-emulation", "newtab", "pseudo-main", "usage-reporting"]
+thunderbird-crashreporter: ["health", "metrics"]
+thunderbird-desktop: ["captcha-detection", "health", "metrics"]

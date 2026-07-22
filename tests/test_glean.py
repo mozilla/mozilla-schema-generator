@@ -286,50 +286,6 @@ class GleanPingWithMetadataOverrides(GleanPingStub):
         ]
 
 
-class GleanPingWithProbes(GleanPingStub):
-    ping_metadata = {
-        "bq_dataset_family": "app1",
-        "bq_metadata_format": "structured",
-        "bq_table": "ping_v1",
-        "include_info_sections": True,
-        "include_client_id": True,
-    }
-
-    def get_pings_and_pipeline_metadata(self) -> Dict[str, Dict]:
-        return {
-            "metrics": self.ping_metadata,
-            "baseline": self.ping_metadata,
-            "events": self.ping_metadata,
-        }
-
-    def get_probes(self):
-        def create_probe(name: str, metric_type: str):
-            return GleanProbe(
-                "bool",
-                {
-                    "history": [
-                        {
-                            "dates": {
-                                "first": "2026-01-01 10:00:00",
-                                "last": "2026-02-01 10:00:00",
-                            },
-                            "send_in_pings": {"metrics", "baseline", "events"},
-                        }
-                    ],
-                    "in-source": True,
-                    "name": name,
-                    "type": metric_type,
-                },
-            )
-
-        return [
-            create_probe("bool", "boolean"),
-            create_probe("counter", "counter"),
-            create_probe("label_custom_dist", "labeled_custom_distribution"),
-            create_probe("timing_dist", "timing_distribution"),
-        ]
-
-
 class TestGleanPing(object):
     def test_env_size(self, glean):
         assert glean.get_env().get_size() > 0
@@ -914,33 +870,6 @@ class TestGleanPing(object):
                     == "seconds"
                 )
 
-    def test_distribution_block(self, config):
-        glean = GleanPingWithProbes(
-            {
-                "name": "app",
-                "in-source": True,
-                "app_id": "app1",
-            }
-        )
-        schemas = glean.generate_schema(config, generic_schema=False)
-
-        final_schemas = {k: schemas[k].schema for k in schemas}
-
-        assert final_schemas["metrics"]["properties"]["metrics"][
-            "properties"
-        ].keys() == {
-            "boolean",
-            "counter",
-            "labeled_custom_distribution",
-            "timing_distribution",
-        }
-        assert final_schemas["events"]["properties"]["metrics"][
-            "properties"
-        ].keys() == {"boolean", "counter"}
-        assert final_schemas["baseline"]["properties"]["metrics"][
-            "properties"
-        ].keys() == {"boolean", "counter"}
-
     # Integration test relies on ping, repositories and dependencies endpoints.
     def test_bug_1737656_unaffected(self, config):
         glean = glean_ping.GleanPing(
@@ -1492,19 +1421,22 @@ class TestGleanGeneration:
         }
 
     @pytest.fixture
-    def glean_v1_overwrite_allowlist(self):
-        return ["firefox-desktop"]
+    def glean_v1_overwrite_blocklist(self):
+        return {
+            "firefox-desktop": ["metrics", "health"],
+            "org-mozilla-firefox": ["metrics"],
+        }
 
     @patch("mozilla_schema_generator.__main__.dump_schema")
-    def test_v2_allowlist_write_v1_v2(
+    def test_v1_block_ping_level_and_v2(
         self,
         dump_schema,
         mock_glean_ping,
         config,
         glean_v2_allowlist,
-        glean_v1_overwrite_allowlist,
+        glean_v1_overwrite_blocklist,
     ):
-        """Should write both v1 and v2 when in v2 allowlist but not v1_overwrite."""
+        """Should regenerate blocked pings from v1 and also write v2 when in v2 allowlist."""
         repo = {"app_id": "org-mozilla-firefox"}
 
         msg_main.write_schema(
@@ -1515,9 +1447,11 @@ class TestGleanGeneration:
             generic_schema=False,
             mps_branch="",
             v2_allowlist=glean_v2_allowlist,
-            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
+            v1_overwrite_blocklist=glean_v1_overwrite_blocklist,
         )
 
+        # The v2-schema base is generated once and shared by the v1 and v2 files; the
+        # blocked pings add a single v1-schema regen.
         assert mock_glean_ping.call_count == 2
         mock_glean_ping.assert_any_call(
             repo, mps_branch="", version=1, use_metrics_blocklist=False
@@ -1527,43 +1461,14 @@ class TestGleanGeneration:
         )
 
     @patch("mozilla_schema_generator.__main__.dump_schema")
-    def test_v2_allowlist_overwrite_v1(
+    def test_v1_switch_all_to_v2_schema(
         self,
         dump_schema,
         mock_glean_ping,
         config,
         glean_v2_allowlist,
-        glean_v1_overwrite_allowlist,
     ):
-        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
-        repo = {"app_id": "firefox-desktop"}
-
-        msg_main.write_schema(
-            repo,
-            config,
-            out_dir=None,
-            pretty=True,
-            generic_schema=False,
-            mps_branch="",
-            v2_allowlist=glean_v2_allowlist,
-            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
-        )
-
-        assert mock_glean_ping.call_count == 1
-        mock_glean_ping.assert_any_call(
-            repo, mps_branch="", version=1, use_metrics_blocklist=True
-        )
-
-    @patch("mozilla_schema_generator.__main__.dump_schema")
-    def test_v2_allowlist_write_v1_only(
-        self,
-        dump_schema,
-        mock_glean_ping,
-        config,
-        glean_v2_allowlist,
-        glean_v1_overwrite_allowlist,
-    ):
-        """Should write only v1 with metrics blocklist when in v1_overwrite allowlist."""
+        """An app with no blocked pings has its whole v1 generated from the v2 schema."""
         repo = {"app_id": "other-app"}
 
         msg_main.write_schema(
@@ -1574,25 +1479,64 @@ class TestGleanGeneration:
             generic_schema=False,
             mps_branch="",
             v2_allowlist=glean_v2_allowlist,
-            v1_overwrite_allowlist=glean_v1_overwrite_allowlist,
+            v1_overwrite_blocklist={},
         )
 
+        # Not in v2 allowlist, so only the single v1 pass runs, from the v2 schema.
         assert mock_glean_ping.call_count == 1
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=2, use_metrics_blocklist=True
+        )
+
+    @patch("mozilla_schema_generator.__main__.dump_schema")
+    def test_v1_block_ping_level(
+        self,
+        dump_schema,
+        mock_glean_ping,
+        config,
+        glean_v2_allowlist,
+    ):
+        """Should keep only the blocked pings on the v1 schema and switch the rest to v2."""
+        repo = {"app_id": "other-app"}
+        v1_overwrite_blocklist = {"other-app": ["metrics", "health"]}
+
+        # Distinguish the v2-schema base pass from the v1-schema blocked pass by return value.
+        def generate_schema(*args, **kwargs):
+            if mock_glean_ping.call_args.kwargs["version"] == 1:
+                return {"metrics": "v1-metrics", "health": "v1-health"}
+            return {
+                "events": "v2-events",
+                "metrics": "v2-metrics",
+                "health": "v2-health",
+            }
+
+        mock_glean_ping.return_value.generate_schema.side_effect = generate_schema
+
+        msg_main.write_schema(
+            repo,
+            config,
+            out_dir=None,
+            pretty=True,
+            generic_schema=False,
+            mps_branch="",
+            v2_allowlist=glean_v2_allowlist,
+            v1_overwrite_blocklist=v1_overwrite_blocklist,
+        )
+
+        # Not in v2 allowlist, so only the v2-schema base pass and the v1-schema blocked pass run.
+        assert mock_glean_ping.call_count == 2
+        mock_glean_ping.assert_any_call(
+            repo, mps_branch="", version=2, use_metrics_blocklist=True
+        )
         mock_glean_ping.assert_any_call(
             repo, mps_branch="", version=1, use_metrics_blocklist=False
         )
 
-    def test_check_blocked_distribution_metrics(self):
-        """Should detect when distributions are blocked.
-
-        This test uses the probeinfo service."""
-        with pytest.raises(RuntimeError):
-            msg_main.check_blocked_distribution_metrics(
-                [
-                    "--repo",
-                    "org-mozilla-fenix-nightly",
-                    "--blocked-distribution-pings",
-                    "metrics",
-                ],
-                standalone_mode=False,
-            )
+        # Single dump for the v1 files: blocked pings from the v1 schema, others from v2.
+        dump_schema.assert_called_once()
+        written = dump_schema.call_args.args[0]
+        assert written == {
+            "events": "v2-events",
+            "metrics": "v1-metrics",
+            "health": "v1-health",
+        }
