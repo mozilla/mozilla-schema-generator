@@ -123,20 +123,6 @@ telemetry.first-shutdown.4
 telemetry.saved-session.*
 telemetry.saved-session-use-counter.*
 
-# DENG-10876
-org-mozilla-fenix-nightly.metrics.1
-org-mozilla-fenix-nightly.sync.1
-org-mozilla-fenix-nightly.first_session.1
-org-mozilla-fenix-nightly.adjust_attribution.1
-org-mozilla-fenix-nightly.health.1
-org-mozilla-fenix-nightly.captcha_detection.1
-org-mozilla-fennec-aurora.metrics.1
-org-mozilla-fennec-aurora.sync.1
-org-mozilla-fennec-aurora.captcha_detection.1
-org-mozilla-fennec-aurora.first_session.1
-org-mozilla-fennec-aurora.health.1
-org-mozilla-fennec-aurora.adjust_attribution.1
-
 # SVCSE-4447
 # Remove coverage pings
 coverage.coverage.*
