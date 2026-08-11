@@ -185,7 +185,7 @@ def generate_glean_pings(config, out_dir, pretty, mps_branch, repo, generic_sche
     glean_config = Config("glean", config_data)
 
     with open(CONFIGS_DIR / "glean_v2_allowlist.yaml", "r") as f:
-        v2_allowlist = yaml.safe_load(f)
+        v2_allowlist = yaml.safe_load(f) or {}
 
     with open(CONFIGS_DIR / "glean_v1_overwrite_blocklist.yaml", "r") as f:
         v1_overwrite_blocklist = yaml.safe_load(f) or {}

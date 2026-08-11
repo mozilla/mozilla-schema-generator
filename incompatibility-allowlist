@@ -124,20 +124,18 @@ telemetry.saved-session.*
 telemetry.saved-session-use-counter.*
 
 # DENG-10877
-org-mozilla-fenix-nightly.metrics.1
-org-mozilla-fenix-nightly.sync.1
-org-mozilla-fenix-nightly.first-session.1
-org-mozilla-fenix-nightly.adjust-attribution.1
-org-mozilla-fenix-nightly.health.1
-org-mozilla-fenix-nightly.captcha-detection.1
-org-mozilla-fenix-nightly.play-store-attribution.1
-org-mozilla-fennec-aurora.metrics.1
-org-mozilla-fennec-aurora.sync.1
-org-mozilla-fennec-aurora.captcha-detection.1
-org-mozilla-fennec-aurora.first-session.1
-org-mozilla-fennec-aurora.health.1
-org-mozilla-fennec-aurora.adjust-attribution.1
-org-mozilla-fennec-aurora.play-store-attribution.1
+org-mozilla-fenix-nightly.metrics.2
+org-mozilla-fenix-nightly.sync.2
+org-mozilla-fenix-nightly.first-session.2
+org-mozilla-fenix-nightly.adjust-attribution.2
+org-mozilla-fenix-nightly.health.2
+org-mozilla-fenix-nightly.captcha-detection.2
+org-mozilla-fennec-aurora.metrics.2
+org-mozilla-fennec-aurora.sync.2
+org-mozilla-fennec-aurora.captcha-detection.2
+org-mozilla-fennec-aurora.first-session.2
+org-mozilla-fennec-aurora.health.2
+org-mozilla-fennec-aurora.adjust-attribution.2
 
 # SVCSE-4447
 # Remove coverage pings
