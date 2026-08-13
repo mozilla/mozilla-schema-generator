@@ -191,6 +191,7 @@ fenix:
   - engine_tab.kills
   - events.total_uri_count
   - experiments.metrics.active_experiment
+  - first_session.adjust_attribution_timespan
   - metrics.activity_state_provider_error
   - metrics.credit_cards_autofill_count
   - metrics.credit_cards_deleted_count
@@ -200,6 +201,7 @@ fenix:
   - metrics.syncing_items
   - metrics.toolbar_position
   - metrics.total_uri_count
+  - navigation_bar.os_navigation_uses_gestures
   - perf.startup.app_on_create_to_glean_init
   - perf.startup.app_on_create_to_megazord_init
   - perf.startup.app_on_create_to_setup_in_main
@@ -233,6 +235,11 @@ fenix:
   - recent_bookmarks.show_all_bookmarks
   - search.default_engine.submission_url
   - search_terms.group_size_distribution
+  - shopping.product_page_visits
+  - shopping.settings.component_opted_out
+  - shopping.settings.disabled_ads
+  - shopping.settings.nimbus_disabled_shopping
+  - shopping.settings.user_has_onboarded
   - wallpapers.discovered_wallpaper_feature
 firefox_desktop:
   metrics:
@@ -250,6 +257,11 @@ firefox_desktop:
   - extensions.startup_cache_load_time
   - gecko.build_id
   - gecko.version
+  - mozstorage.sqlitejsm_transaction_timeout
+  - networking.doh_heuristic_ever_tripped
+  - networking.doh_heuristics_attempts
+  - networking.doh_heuristics_pass_count
+  - networking.doh_heuristics_result
   - ping.centre.send_failures
   - ping.centre.send_failures_by_namespace
   - ping.centre.send_successes_by_namespace
@@ -257,10 +269,88 @@ firefox_desktop:
   - private_attribution.measure_conversion
   - private_attribution.save_impression
   - private_browsing.window_open_during_teardown
+  - region.fetch_result
+  - region.fetch_time
+  - search.engine.default.verified
+  - search.engine.private.verified
+  - shopping.product_page_visits
+  - shopping.settings.auto_close_user_disabled
+  - shopping.settings.auto_open_user_disabled
+  - shopping.settings.component_opted_out
+  - shopping.settings.disabled_ads
+  - shopping.settings.has_onboarded
+  - shopping.settings.nimbus_disabled_shopping
   - startup.is_restored_by_macos
   - startup.run_from_dmg_install_outcome
+  - telemetry.clamping_time_hgrams
+  - update.skip_startup_update_reason
+  - urlbar.abandonment_count
+  - urlbar.engagement_count
+  - urlbar.impression.autofill_about
+  - urlbar.impression.autofill_adaptive
+  - urlbar.impression.autofill_origin
+  - urlbar.impression.autofill_other
+  - urlbar.impression.autofill_url
+  - urlbar.picked.autofill_about
+  - urlbar.picked.autofill_adaptive
+  - urlbar.picked.autofill_origin
+  - urlbar.picked.autofill_other
+  - urlbar.picked.autofill_url
+  - urlbar.picked.bookmark
+  - urlbar.picked.bookmark_adaptive
+  - urlbar.picked.clipboard
+  - urlbar.picked.dynamic
+  - urlbar.picked.dynamic_wikipedia
+  - urlbar.picked.extension
+  - urlbar.picked.formhistory
+  - urlbar.picked.history
+  - urlbar.picked.history_adaptive
+  - urlbar.picked.keyword
+  - urlbar.picked.navigational
+  - urlbar.picked.quickaction
+  - urlbar.picked.quicksuggest
+  - urlbar.picked.recent_search
+  - urlbar.picked.remotetab
+  - urlbar.picked.restrict_keyword_actions
+  - urlbar.picked.restrict_keyword_bookmarks
+  - urlbar.picked.restrict_keyword_history
+  - urlbar.picked.restrict_keyword_tabs
+  - urlbar.picked.searchengine
+  - urlbar.picked.searchmode.bookmarkmenu
+  - urlbar.picked.searchmode.handoff
+  - urlbar.picked.searchmode.historymenu
+  - urlbar.picked.searchmode.keywordoffer
+  - urlbar.picked.searchmode.oneoff
+  - urlbar.picked.searchmode.other
+  - urlbar.picked.searchmode.searchbutton
+  - urlbar.picked.searchmode.shortcut
+  - urlbar.picked.searchmode.tabmenu
+  - urlbar.picked.searchmode.tabtosearch
+  - urlbar.picked.searchmode.tabtosearch_onboard
+  - urlbar.picked.searchmode.topsites_newtab
+  - urlbar.picked.searchmode.topsites_urlbar
+  - urlbar.picked.searchmode.touchbar
+  - urlbar.picked.searchmode.typed
+  - urlbar.picked.searchsuggestion
+  - urlbar.picked.searchsuggestion_rich
+  - urlbar.picked.switchtab
+  - urlbar.picked.tabtosearch
+  - urlbar.picked.tip
+  - urlbar.picked.topsite
+  - urlbar.picked.trending
+  - urlbar.picked.trending_rich
+  - urlbar.picked.unknown
+  - urlbar.picked.visiturl
+  - urlbar.picked.weather
+  - urlbar.quick_suggest_ingest_time
+  - urlbar.tabtosearch.impressions
+  - urlbar.tabtosearch.impressions_onboarding
+  - urlbar.tips
   - widget.dark_mode
   - widget.pointing_devices
+firefox_desktop_background_update:
+  metrics:
+  - update.skip_startup_update_reason
 firefox_ios:
   metrics:
   - app_menu.library
@@ -268,11 +358,16 @@ firefox_ios:
   - application_services.pocket_stories_visible
   - application_services.recent_highlights_visible
   - firefox_home_page.cycle_wallpaper_button
+  - firefox_home_page.history_highlights_show_all
   - firefox_home_page.history_highlights_view
   - firefox_home_page.jump_back_in_section_view
   - firefox_home_page.your_library
+  - history.group_list
+  - history.num_visits
   - inactive_tabs_tray.open_recently_closed_list
   - inactive_tabs_tray.open_recently_closed_tab
+  - library.panel_pressed
+  - migration.image_sd_cache_cleanup
   - onboarding.sync_screen
   - onboarding.sync_screen_browse
   - onboarding.sync_screen_sign_up
@@ -282,12 +377,38 @@ firefox_ios:
   - onboarding.welcome_screen_sign_in
   - onboarding.welcome_screen_sign_up
   - page_action_menu.add_to_reading_list
+  - places_history_migration.duration
+  - places_history_migration.migration_ended_rate
+  - places_history_migration.migration_error_rate
+  - places_history_migration.num_migrated
+  - places_history_migration.num_to_migrate
   - pocket.open_story
   - preferences.block_popups
+  - preferences.jump_back_in
   - preferences.mail_client
+  - preferences.new_tab_experience
+  - preferences.pocket
+  - preferences.recently_saved
+  - preferences.recently_visited
+  - preferences.show_clipboard_bar
   - reading_list.mark_read
   - reading_list.mark_unread
+  - shopping.product_page_visits
+  - shopping.settings.component_opted_out
+  - shopping.settings.disabled_ads
+  - shopping.settings.nimbus_disabled_shopping
+  - shopping.settings.user_has_onboarded
   - sync.open_sync_home_shortcut
+  - tabs.close
+  - tabs.close_all
+  - tabs.cumulative_count
+  - tabs.grouped_tab_closed
+  - tabs.grouped_tab_search
+  - tabs.inactive_tabs_count
+  - tabs.new_tab_pressed
+  - tabs.normal_tabs_quantity
+  - tabs.open
+  - tabs.private_tabs_quantity
   - theme.automatic_mode
   - theme.automatic_slider_value
   - theme.name
@@ -307,9 +428,67 @@ firefox_reality:
   - windows.duration
 focus_android:
   metrics:
+  - autocomplete.domain_added
+  - autocomplete.domain_removed
+  - autocomplete.list_order_changed
+  - browser.default_search_engine
+  - browser.install_source
+  - browser.locale_override
+  - browser.report_site_issue_counter
+  - browser.search.ad_clicks
+  - browser.search.in_content
+  - browser.search.search_count
+  - browser.search.with_ads
+  - browser.total_uri_count
+  - metrics.search_widget_installed
+  - metrics.start_reason_activity_error
+  - metrics.start_reason_process_error
+  - mozilla_products.has_fenix_installed
+  - mozilla_products.is_fenix_default_browser
   - nimbus_experiments.nimbus_initial_fetch
+  - notifications.permission_granted
+  - perf.startup.startup_type
+  - preferences.user_theme
   - settings_screen.autocomplete_domain_added
   - settings_screen.whats_new_tapped
+  - shortcuts.shortcut_added_counter
+  - shortcuts.shortcut_opened_counter
+  - shortcuts.shortcut_removed_counter
+  - shortcuts.shortcuts_on_home_number
+  - tab_count.app_backgrounded
+  - tracking_protection.has_advertising_blocked
+  - tracking_protection.has_analytics_blocked
+  - tracking_protection.has_content_blocked
+  - tracking_protection.has_ever_changed_etp
+  - tracking_protection.has_social_blocked
+  - tracking_protection.toolbar_shield_clicked
+focus_ios:
+  metrics:
+  - app.keyboard_type
+  - app.opened_as_default_browser
+  - browser.pdf_viewer_used
+  - browser.total_uri_count
+  - browser_search.ad_clicks
+  - browser_search.in_content
+  - browser_search.search_count
+  - browser_search.with_ads
+  - default_browser_onboarding.dismiss_pressed
+  - default_browser_onboarding.go_to_settings_pressed
+  - mozilla_products.has_firefox_installed
+  - preferences.user_theme
+  - search.default_engine
+  - settings_screen.autocomplete_domain_added
+  - settings_screen.set_as_default_browser_pressed
+  - shortcuts.shortcut_added_counter
+  - shortcuts.shortcut_opened_counter
+  - shortcuts.shortcut_removed_counter
+  - shortcuts.shortcuts_on_home_number
+  - tracking_protection.has_advertising_blocked
+  - tracking_protection.has_analytics_blocked
+  - tracking_protection.has_content_blocked
+  - tracking_protection.has_ever_changed_etp
+  - tracking_protection.has_social_blocked
+  - tracking_protection.toolbar_shield_clicked
 gecko:
   metrics:
   - apz.scrollwheel_overshoot
@@ -317,11 +496,14 @@ gecko:
   - bounce.tracking.protection.enabled_at_startup
   - bounce.tracking.protection.enabled_dry_run_mode_at_startup
   - browser.ui.proton_enabled
+  - cert.validation_success_by_ca
   - cert_compression.brotli_saved_bytes
   - cert_compression.used
   - cert_compression.zlib_saved_bytes
   - cert_compression.zstd_saved_bytes
+  - cert_pinning.failures_by_ca
   - cert_verifier.cert_trust_evaluation_time
+  - cert_verifier.trust_obj_count
   - cookie.banners.click.handle_duration
   - cookie.banners.click.query_selector_run_count_per_window_frame
   - cookie.banners.click.query_selector_run_count_per_window_top_level
@@ -354,14 +536,20 @@ gecko:
   - fog.validation.gvsv_primary_height
   - fog.validation.gvsv_primary_width
   - fog.validation.some_object
+  - fontlist.gdi_init_total
   - formautofill.addresses.detected_sections_count
   - formautofill.addresses.submitted_sections_count
   - formautofill.credit_cards.detected_sections_count
   - formautofill.credit_cards.submitted_sections_count
+  - geckoview.content_process_lifetime
+  - geckoview.startup_runtime
   - geckoview.validation.build_id
   - geckoview.validation.version
   - gfx.tmp_writable
   - gifft.validation.main_ping_assembling
+  - glam_experiment.async_sheet_load
+  - glam_experiment.time
+  - http.proxy_type
   - ipc.received_messages.content_background
   - ipc.received_messages.content_foreground
   - ipc.received_messages.gpu_process
@@ -372,6 +560,18 @@ gecko:
   - ipc.sent_messages.gpu_process
   - ipc.sent_messages.parent_active
   - ipc.sent_messages.parent_inactive
+  - javascript.pageload.baseline_compile_time
+  - javascript.pageload.delazification_time
+  - javascript.pageload.execution_time
+  - javascript.pageload.gc_time
+  - javascript.pageload.parse_time
+  - javascript.pageload.protect_time
+  - javascript.pageload.xdr_encode_time
+  - ls.preparedatastore.processing_time
+  - ls.preparelsdatabase.processing_time
+  - ls.request.recv_cancellation
+  - ls.request.send_cancellation
+  - mathml.doc_count
   - media.decode_error_per_mime_type
   - netwerk.early_hints
   - netwerk.eh_link_type
@@ -381,13 +581,19 @@ gecko:
   - netwerk.http3_ech_outcome_real
   - network.data_size_pb_per_type
   - network.data_size_per_type
+  - network.http3_avg_read_interval
   - network.open_to_transaction_pending
   - networking.http_3_ecn_ce_ect0_ratio
   - networking.http_content_html5parser_ondatafinished_to_onstop_delay_negative
   - networking.http_content_ondatafinished_to_onstop_delay_negative
   - networking.https_upgrade_with_https_rr
+  - networking.set_cookie_expired_without_server_time
   - networking.speculative_connection_outcome
   - oskeystore.self_test
+  - performance.clone.deserialize.items
+  - performance.clone.deserialize.size
+  - performance.clone.deserialize.time
+  - performance.pageload.async_sheet_load
   - performance.pageload.eh_fcp_preconnect
   - performance.pageload.eh_fcp_preconnect_preload_with_eh
   - performance.pageload.eh_fcp_preconnect_preload_without_eh
@@ -397,12 +603,19 @@ gecko:
   - performance.responsiveness.req_anim_frame_callback
   - pkcs11.built_in_roots_module
   - pkcs11.nss_cert_db
+  - privacy.sanitize.load_time
+  - process.lifetime
   - rtcrtpsender.setparameters.blame_length_changed
   - rtcrtpsender.setparameters.blame_no_getparameters
   - rtcrtpsender.setparameters.blame_no_transactionid
   - rtcrtpsender.setparameters.blame_stale_transactionid
   - rtcrtpsender.setparameters.warn_rid_changed
   - rtcrtpsender.setparameters.warn_stale_transactionid
+  - ssl.ct_policy_non_compliant_connections_by_ca
+  - timestamps.global_startup_timeline
+  - timestamps.startup_timeline
+  - translations.error_rate
+  - translations.requests_count
 glean-android:
   metrics:
   - glean.core.migration.successful
@@ -417,9 +630,67 @@ glean-core:
   - ping_reason
 klar_android:
   metrics:
+  - autocomplete.domain_added
+  - autocomplete.domain_removed
+  - autocomplete.list_order_changed
+  - browser.default_search_engine
+  - browser.install_source
+  - browser.locale_override
+  - browser.report_site_issue_counter
+  - browser.search.ad_clicks
+  - browser.search.in_content
+  - browser.search.search_count
+  - browser.search.with_ads
+  - browser.total_uri_count
+  - metrics.search_widget_installed
+  - metrics.start_reason_activity_error
+  - metrics.start_reason_process_error
+  - mozilla_products.has_fenix_installed
+  - mozilla_products.is_fenix_default_browser
   - nimbus_experiments.nimbus_initial_fetch
+  - notifications.permission_granted
+  - perf.startup.startup_type
+  - preferences.user_theme
   - settings_screen.autocomplete_domain_added
   - settings_screen.whats_new_tapped
+  - shortcuts.shortcut_added_counter
+  - shortcuts.shortcut_opened_counter
+  - shortcuts.shortcut_removed_counter
+  - shortcuts.shortcuts_on_home_number
+  - tab_count.app_backgrounded
+  - tracking_protection.has_advertising_blocked
+  - tracking_protection.has_analytics_blocked
+  - tracking_protection.has_content_blocked
+  - tracking_protection.has_ever_changed_etp
+  - tracking_protection.has_social_blocked
+  - tracking_protection.toolbar_shield_clicked
+klar_ios:
+  metrics:
+  - app.keyboard_type
+  - app.opened_as_default_browser
+  - browser.pdf_viewer_used
+  - browser.total_uri_count
+  - browser_search.ad_clicks
+  - browser_search.in_content
+  - browser_search.search_count
+  - browser_search.with_ads
+  - default_browser_onboarding.dismiss_pressed
+  - default_browser_onboarding.go_to_settings_pressed
+  - mozilla_products.has_firefox_installed
+  - preferences.user_theme
+  - search.default_engine
+  - settings_screen.autocomplete_domain_added
+  - settings_screen.set_as_default_browser_pressed
+  - shortcuts.shortcut_added_counter
+  - shortcuts.shortcut_opened_counter
+  - shortcuts.shortcut_removed_counter
+  - shortcuts.shortcuts_on_home_number
+  - tracking_protection.has_advertising_blocked
+  - tracking_protection.has_analytics_blocked
+  - tracking_protection.has_content_blocked
+  - tracking_protection.has_ever_changed_etp
+  - tracking_protection.has_social_blocked
+  - tracking_protection.toolbar_shield_clicked
 logins-store:
   metrics:
   - logins_store.migration_errors
@@ -446,13 +717,19 @@ pine:
   - extensions.startup_cache_load_time
   - gecko.build_id
   - gecko.version
+  - messaging_system.glean_ping_for_ping_failures
   - ping.centre.send_failures
   - ping.centre.send_failures_by_namespace
   - ping.centre.send_successes_by_namespace
+  - search.engine.default.verified
+  - search.engine.private.verified
   - startup.run_from_dmg_install_outcome
+  - telemetry.clamping_time_hgrams
 reference_browser:
   metrics:
   - experiments.metrics.active_experiment
 thunderbird_desktop:
   metrics:
   - calendar.google_token_type
+  - mail.compact_bytes_recovered
+  - mail.mbox_write_errors

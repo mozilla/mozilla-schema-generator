@@ -38,6 +38,15 @@ DEFAULT_SCHEMA_URL = SCHEMA_URL_TEMPLATE + SCHEMA_VERSION_TEMPLATE.format(
     schema_type="glean", version=1
 )
 
+# App ids with v2 schemas already deployed. Applying the metric blocklist to these would drop
+# columns that already exist in their tables, which isn't allowed, so they keep every metric.
+METRIC_BLOCKLIST_EXEMPT_APP_IDS = frozenset(
+    {
+        "org-mozilla-fenix-nightly",
+        "org-mozilla-fennec-aurora",
+    }
+)
+
 
 class GleanPing(GenericPing):
     probes_url_template = GenericPing.probe_info_base_url + "/glean/{}/metrics"
@@ -63,7 +72,7 @@ class GleanPing(GenericPing):
         self.app_id = repo["app_id"]
         self.version = version
 
-        if use_metrics_blocklist:
+        if use_metrics_blocklist and self.app_id not in METRIC_BLOCKLIST_EXEMPT_APP_IDS:
             self.metric_blocklist = self.get_metric_blocklist()
         else:
             self.metric_blocklist = {}
@@ -147,7 +156,7 @@ class GleanPing(GenericPing):
             metric["in-source"]
             or len(blocked_pings) == 0
             or datetime.fromisoformat(metric["history"][-1]["dates"]["last"])
-            >= datetime(year=2025, month=1, day=1)
+            >= datetime(year=2025, month=8, day=1)
         ):
             return metric
 

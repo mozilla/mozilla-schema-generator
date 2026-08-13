@@ -11,13 +11,15 @@
 # firefox-crashreporter:
 # - metrics
 # - health
-# firefox-desktop:
-# - metrics
-# - health
-# - sync
-# - captcha-detection
-# - new-metric-capture-emulation
-# - pseudo-main
+firefox-desktop:
+- metrics
+- health
+- sync
+- captcha-detection
+- new-metric-capture-emulation
+- pseudo-main
+- usage-reporting
+- newtab
 # firefox-desktop-background-defaultagent:
 # - metrics
 # - health
@@ -60,30 +62,33 @@
 # net-thunderbird-android-daily:
 # - metrics
 # - health
-#org-mozilla-connect-firefox:
-#- metrics
-#- health
-# org-mozilla-fenix:
-# - metrics
-# - sync
-# - health
-# - first-session
-# - captcha-detection
-# - adjust-attribution
-# org-mozilla-firefox:
+# org-mozilla-connect-firefox:
 # - metrics
 # - health
-# - sync
-# - first-session
-# - captcha-detection
-# - adjust-attribution
-# org-mozilla-firefox-beta:
-# - metrics
-# - health
-# - sync
-# - first-session
-# - captcha-detection
-# - adjust-attribution
+org-mozilla-fenix:
+- metrics
+- sync
+- health
+- first-session
+- captcha-detection
+- adjust-attribution
+- play-store-attribution
+org-mozilla-firefox:
+- metrics
+- health
+- sync
+- first-session
+- captcha-detection
+- adjust-attribution
+- play-store-attribution
+org-mozilla-firefox-beta:
+- metrics
+- health
+- sync
+- first-session
+- captcha-detection
+- adjust-attribution
+- play-store-attribution
 # org-mozilla-firefox-vpn:
 # - daemonsession
 # - vpnsession

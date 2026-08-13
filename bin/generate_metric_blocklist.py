@@ -47,7 +47,7 @@ while apps:
     for name, info in metrics.items():
         if (
             datetime.datetime.fromisoformat(info["history"][-1]["dates"]["last"])
-            < datetime.datetime(2025, 1, 1)
+            < datetime.datetime(2025, 8, 1)
             and info["in-source"] is False
             and info["type"] != "event"
         ):
