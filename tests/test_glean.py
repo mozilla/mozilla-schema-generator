@@ -1153,6 +1153,60 @@ class TestGleanPing(object):
         }
 
     @patch.object(glean_ping.GleanPing, "get_dependencies")
+    @patch.object(glean_ping.GleanPing, "get_metric_blocklist")
+    @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
+    @patch.object(glean_ping.GleanPing, "_get_json")
+    def test_metric_blocklist_exempt_app_id(
+        self, mock_get_json, mock_app_name, mock_metric_blocklist, mock_get_dependencies
+    ):
+        """Apps with v2 schemas already deployed should keep blocklisted metrics.
+
+        The blocklist is keyed on app name, which every fenix channel shares, so an already
+        migrated channel would otherwise lose columns that exist in its tables.
+        """
+        mock_metric_blocklist.return_value = {
+            "fenix": {"metrics": ["expired_in_source_old"]},
+            "glean-core": {"metrics": ["expired_old_dependency"]},
+        }
+        glean = glean_ping.GleanPing(
+            repo={
+                "name": "fenix-nightly",
+                "app_id": "org-mozilla-fenix-nightly",
+            },
+            use_metrics_blocklist=True,
+        )
+        mock_get_dependencies.return_value = ["glean-core"]
+
+        def responses():
+            yield {
+                **self.metric_def("active", "2024-01-01", "2026-01-01", True),
+                **self.metric_def(
+                    "expired_in_source_old", "2024-01-01", "2024-01-01", False
+                ),
+            }
+            # metrics for dependency
+            yield {
+                **self.metric_def(
+                    "expired_old_dependency", "2024-01-01", "2024-01-01", False
+                ),
+            }
+            # /pings
+            while True:
+                yield {}
+
+        mock_get_json.side_effect = responses()
+
+        probes = glean.get_probes()
+
+        assert {
+            probe.id for probe in probes if len(probe.definition["send_in_pings"]) > 0
+        } == {
+            "active",
+            "expired_in_source_old",
+            "expired_old_dependency",
+        }
+
+    @patch.object(glean_ping.GleanPing, "get_dependencies")
     @patch.object(glean_ping.GleanPing, "get_app_name", return_value="fenix")
     @patch.object(glean_ping.GleanPing, "_get_json")
     def test_duplicate_metric_keeps_most_recent_definition(
