@@ -147,7 +147,7 @@ class GleanPing(GenericPing):
             metric["in-source"]
             or len(blocked_pings) == 0
             or datetime.fromisoformat(metric["history"][-1]["dates"]["last"])
-            >= datetime(year=2025, month=1, day=1)
+            >= datetime(year=2025, month=8, day=1)
         ):
             return metric
 
