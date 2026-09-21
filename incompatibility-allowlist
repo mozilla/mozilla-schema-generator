@@ -140,20 +140,3 @@ org-mozilla-fennec-aurora.adjust-attribution.2
 # SVCSE-4447
 # Remove coverage pings
 coverage.coverage.*
-
-# Bug 2074110
-# Remove client_info (and ping_info) from the page-extractor ping
-firefox-desktop.page-extractor.1
-firefox-desktop-background-update.page-extractor.1
-firefox-enterprise-desktop.page-extractor.1
-org-mozilla-fenix.page-extractor.1
-org-mozilla-fenix-nightly.page-extractor.1
-org-mozilla-fennec-aurora.page-extractor.1
-org-mozilla-firefox.page-extractor.1
-org-mozilla-firefox-beta.page-extractor.1
-org-mozilla-focus.page-extractor.1
-org-mozilla-focus-beta.page-extractor.1
-org-mozilla-focus-nightly.page-extractor.1
-org-mozilla-klar.page-extractor.1
-pine.page-extractor.1
-thunderbird-desktop.page-extractor.1
