@@ -141,6 +141,24 @@ org-mozilla-fennec-aurora.adjust-attribution.2
 # Remove coverage pings
 coverage.coverage.*
 
+# Bug 2074273
+# Remove client_info (and ping_info) from the quick-suggest,
+# urlbar-keyword-exposure, fx-suggest and fx-suggest-api pings, which have
+# moved to OHTTP submission.
+# Companion to https://github.com/mozilla/gcp-ingestion/pull/2980
+firefox-desktop.quick-suggest.1
+firefox-desktop.urlbar-keyword-exposure.1
+org-mozilla-fenix.fx-suggest.1
+org-mozilla-fenix.fx-suggest-api.1
+org-mozilla-fenix-nightly.fx-suggest.1
+org-mozilla-fenix-nightly.fx-suggest-api.1
+org-mozilla-fennec-aurora.fx-suggest.1
+org-mozilla-fennec-aurora.fx-suggest-api.1
+org-mozilla-firefox.fx-suggest.1
+org-mozilla-firefox.fx-suggest-api.1
+org-mozilla-firefox-beta.fx-suggest.1
+org-mozilla-firefox-beta.fx-suggest-api.1
+
 # Bug 2074511
 # iOS fx-suggest to OHTTP
 org-mozilla-ios-firefox.fx-suggest.*
