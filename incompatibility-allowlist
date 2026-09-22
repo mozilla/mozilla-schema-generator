@@ -144,3 +144,4 @@ coverage.coverage.*
 # Bug 2074511
 # iOS fx-suggest to OHTTP
 org-mozilla-ios-firefox.fx-suggest.*
+org-mozilla-ios-firefoxbeta.fx-suggest.*
