@@ -71,9 +71,17 @@ def test_compute_compact_columns():
 
 
 def test_check_evolution():
-    assert check_evolution(["a", "b"], ["a", "b"]) == 0
-    assert check_evolution(["a"], ["a", "b"]) == 0
-    assert check_evolution(["a", "b"], ["a"]) == 1
+    err_code, errors = check_evolution(["a", "b"], ["a", "b"])
+    assert err_code == 0
+    assert errors == []
+    
+    err_code, errors = check_evolution(["a"], ["a", "b"])
+    assert err_code == 0
+    assert errors == []
+    
+    err_code, errors = check_evolution(["a", "b"], ["a"])
+    assert err_code == 1
+    assert "Removed: b" in errors
 
 
 def test_copy_schemas(tmp_path, tmp_git):
