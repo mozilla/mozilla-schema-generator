@@ -140,3 +140,10 @@ org-mozilla-fennec-aurora.adjust-attribution.2
 # SVCSE-4447
 # Remove coverage pings
 coverage.coverage.*
+
+# Bug 2074273
+# Remove client_info (and ping_info) from the quick-suggest and
+# urlbar-keyword-exposure pings, which have moved to OHTTP submission.
+# Companion to https://github.com/mozilla/gcp-ingestion/pull/2980
+firefox-desktop.quick-suggest.1
+firefox-desktop.urlbar-keyword-exposure.1
