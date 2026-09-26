@@ -148,6 +148,8 @@ coverage.coverage.*
 # Companion to https://github.com/mozilla/gcp-ingestion/pull/2980
 firefox-desktop.quick-suggest.1
 firefox-desktop.urlbar-keyword-exposure.1
+firefox-enterprise-desktop.quick-suggest.1
+firefox-enterprise-desktop.urlbar-keyword-exposure.1
 org-mozilla-fenix.fx-suggest.1
 org-mozilla-fenix.fx-suggest-api.1
 org-mozilla-fenix-nightly.fx-suggest.1
