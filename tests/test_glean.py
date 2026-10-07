@@ -183,6 +183,20 @@ class GleanPingNoInfoSectionWithHistory(GleanPingStub):
         return [{"include_info_sections": True}, {"include_info_sections": False}]
 
 
+class GleanPingWithUploaderCapabilities(GleanPingStub):
+    ping_metadata = {
+        "bq_dataset_family": "app1",
+        "bq_metadata_format": "structured",
+        "bq_table": "ping1_v1",
+    }
+
+    def _get_history(self):
+        return [
+            {"uploader_capabilities": []},
+            {"uploader_capabilities": ["ohttp"], "include_info_sections": False},
+        ]
+
+
 class GleanPingWithMultiplePings(GleanPingStub):
     ping1_metadata = {
         "bq_dataset_family": "app1",
@@ -781,6 +795,32 @@ class TestGleanPing(object):
                     schema["mozPipelineMetadata"]
                     == GleanPingNoInfoSection.ping_metadata
                 )
+
+    @patch.object(glean_ping.GleanPing, "get_repos")
+    def test_uploader_capabilities(self, mock_get_repos):
+        mock_get_repos.return_value = [
+            {
+                "app_id": "app1",
+                "dependencies": ["glean-core"],
+                "moz_pipeline_metadata": {},
+                "moz_pipeline_metadata_defaults": {},
+                "name": "app1",
+            }
+        ]
+
+        glean = GleanPingWithUploaderCapabilities({"name": "app1", "app_id": "app1"})
+        pings = glean.get_pings_and_pipeline_metadata()
+
+        assert pings["ping1"] == {
+            "bq_dataset_family": "app1",
+            "bq_table": "ping1_v1",
+            "bq_metadata_format": "structured",
+            "include_info_sections": False,
+            "uploader_capabilities": ["ohttp"],
+            "include_client_id": True,
+        }
+        # omitted for pings without uploader capabilities
+        assert "uploader_capabilities" not in pings["dependency_ping"]
 
     @patch.object(glean_ping.GleanPing, "get_repos")
     def test_ping_no_info_sections_history(self, mock_get_repos, config):

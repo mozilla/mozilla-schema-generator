@@ -389,6 +389,7 @@ class GleanPing(GenericPing):
             "bq_table",
             "bq_metadata_format",
             "include_info_sections",
+            "uploader_capabilities",
             "submission_timestamp_granularity",
             "expiration_policy",
             "override_attributes",
@@ -427,11 +428,22 @@ class GleanPing(GenericPing):
             metadata["include_client_id"] = self._is_field_included(
                 ping_data, "include_client_id"
             )
+            # Omitted when empty to avoid touching the schemas of every ping without
+            # uploader capabilities.
+            uploader_capabilities = self._get_uploader_capabilities(ping_data)
+            if uploader_capabilities:
+                metadata["uploader_capabilities"] = uploader_capabilities
 
             # While technically unnecessary, the dictionary elements are re-ordered to match the
             # currently deployed order and used to verify no difference in output.
             pings[ping_name] = GleanPing.reorder_metadata(metadata)
         return pings
+
+    @staticmethod
+    def _get_uploader_capabilities(ping_data) -> List[str]:
+        """Return the uploader capabilities from the latest history entry, e.g. ["ohttp"]."""
+        history = ping_data.get("history") or [{}]
+        return history[-1].get("uploader_capabilities") or []
 
     def get_ping_descriptions(self) -> Dict[str, str]:
         return {
