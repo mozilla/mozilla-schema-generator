@@ -445,6 +445,22 @@ class GleanPing(GenericPing):
         history = ping_data.get("history") or [{}]
         return history[-1].get("uploader_capabilities") or []
 
+    def get_ohttp_pings_with_info_sections(self) -> List[str]:
+        """Return pings that declare the `ohttp` uploader capability but still
+        include info sections.
+        """
+        pings = self._get_ping_data_and_dependencies_with_default_metadata()
+        return sorted(
+            ping_name
+            for ping_name, ping_data in pings.items()
+            # pings without pipeline metadata don't get a schema
+            if ping_data.get("moz_pipeline_metadata")
+            and "ohttp" in self._get_uploader_capabilities(ping_data)
+            and self._is_field_included(
+                ping_data, "include_info_sections", consider_all_history=False
+            )
+        )
+
     def get_ping_descriptions(self) -> Dict[str, str]:
         return {
             k: v["history"][-1]["description"] for k, v in self._get_ping_data().items()

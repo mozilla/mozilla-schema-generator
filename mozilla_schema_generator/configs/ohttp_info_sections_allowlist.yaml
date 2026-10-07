@@ -1,0 +1,12 @@
+# Glean pings that declare the `ohttp` uploader capability but still set
+# `metadata.include_info_sections: true` (the default).
+#
+# OHTTP pings are meant to be de-identified, so they should not include
+# client_info/ping_info. Including them is tolerated while a ping transitions,
+# but every such ping must be listed here, keyed by `{namespace}.{doctype}`,
+# with a reason:
+#
+#   org-mozilla-firefox.my-ping:
+#     reason: Bug 1234567 - client_info removal is waiting on downstream consumers
+#
+# `check-ohttp-info-sections` fails for pings that aren't listed here.

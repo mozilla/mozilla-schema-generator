@@ -395,6 +395,57 @@ class TestGleanPing(object):
         )
         assert actual is True
 
+    def test_ohttp_pings_with_info_sections(self, glean):
+        metadata = {"bq_dataset_family": "glean"}
+        pings = {
+            # flagged: ohttp with the default include_info_sections
+            "ohttp-default": {
+                "history": [{"uploader_capabilities": ["ohttp"]}],
+                "moz_pipeline_metadata": metadata,
+            },
+            # flagged: only the latest history entry counts
+            "ohttp-reverted": {
+                "history": [
+                    {
+                        "uploader_capabilities": ["ohttp"],
+                        "include_info_sections": False,
+                    },
+                    {"uploader_capabilities": ["ohttp"], "include_info_sections": True},
+                ],
+                "moz_pipeline_metadata": metadata,
+            },
+            "ohttp-no-info-sections": {
+                "history": [
+                    {"uploader_capabilities": ["ohttp"], "include_info_sections": True},
+                    {
+                        "uploader_capabilities": ["ohttp"],
+                        "include_info_sections": False,
+                    },
+                ],
+                "moz_pipeline_metadata": metadata,
+            },
+            "no-ohttp": {
+                "history": [{"uploader_capabilities": []}],
+                "moz_pipeline_metadata": metadata,
+            },
+            "no-capabilities": {
+                "history": [{}],
+                "moz_pipeline_metadata": metadata,
+            },
+            "ohttp-no-metadata": {
+                "history": [{"uploader_capabilities": ["ohttp"]}],
+            },
+        }
+        with patch.object(
+            glean_ping.GleanPing,
+            "_get_ping_data_and_dependencies_with_default_metadata",
+            return_value=pings,
+        ):
+            assert glean.get_ohttp_pings_with_info_sections() == [
+                "ohttp-default",
+                "ohttp-reverted",
+            ]
+
     def test_dependencies(self, glean):
         RETURN_VALUES = {"glean-core": {"name": "glean-core", "type": "dependency"}}
         with patch.object(
