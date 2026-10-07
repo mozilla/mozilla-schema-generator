@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import json
+import logging
 import re
 import sys
 from pathlib import Path
@@ -310,6 +311,56 @@ def generate_subset_pings(config, out_dir, pretty, mps_branch):
                 )
 
 
+@click.command()
+@click.option(
+    "--allowlist",
+    type=click.Path(dir_okay=False, file_okay=True, writable=False, exists=True),
+    default=CONFIGS_DIR / "ohttp_info_sections_allowlist.yaml",
+    help="YAML file of allowlisted `{namespace}.{doctype}` entries.",
+)
+def check_ohttp_info_sections(allowlist):
+    """Check for Glean pings that declare the `ohttp` uploader capability
+    but still include info sections.
+    """
+    with open(allowlist, "r") as f:
+        allowed = yaml.safe_load(f) or {}
+
+    flagged = {
+        f"{repo['app_id']}.{ping.replace('_', '-')}"
+        for repo in GleanPing.get_repos()
+        for ping in GleanPing(repo).get_ohttp_pings_with_info_sections()
+    }
+
+    errors = []
+    for key in sorted(flagged):
+        entry = allowed.get(key)
+        if entry is None:
+            errors.append(
+                f"{key}: declares the ohttp uploader capability but includes info "
+                f"sections. Set `metadata.include_info_sections: false` on the ping, "
+                f"or add it to {allowlist} if it is transitioning."
+            )
+            continue
+        if not isinstance(entry, dict) or "reason" not in entry:
+            errors.append(f"{key}: allowlist entry must have a `reason`.")
+            continue
+
+        logging.warning("%s: allowlisted. Reason: %s", key, entry["reason"])
+
+    for key in sorted(set(allowed) - flagged):
+        logging.warning(
+            "%s: no longer includes info sections with ohttp (or no longer exists); "
+            "remove it from %s",
+            key,
+            allowlist,
+        )
+
+    if errors:
+        raise click.ClickException(
+            "OHTTP pings with info sections:\n" + "\n".join(errors)
+        )
+
+
 def dump_schema(schemas, out_dir, pretty, *, version=1):
     json_dump_args = {"cls": SchemaEncoder}
     if pretty:
@@ -337,8 +388,6 @@ def dump_schema(schemas, out_dir, pretty, *, version=1):
 @click.group()
 def main(args=None):
     """Command line utility for mozilla-schema-generator."""
-    import logging
-
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 
@@ -347,6 +396,7 @@ main.add_command(generate_bhr_ping)
 main.add_command(generate_glean_pings)
 main.add_command(generate_common_pings)
 main.add_command(generate_subset_pings)
+main.add_command(check_ohttp_info_sections)
 
 
 if __name__ == "__main__":
