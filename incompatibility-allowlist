@@ -166,3 +166,8 @@ org-mozilla-firefox-beta.fx-suggest-api.1
 org-mozilla-ios-firefox.fx-suggest.*
 org-mozilla-ios-firefoxbeta.fx-suggest.*
 org-mozilla-ios-fennec.fx-suggest.*
+
+# DENG-11585
+# Remove eng-workflow bmobugs schema
+# Companion to https://github.com/mozilla-services/mozilla-pipeline-schemas/commit/12cd5d385
+eng-workflow.bmobugs.*
